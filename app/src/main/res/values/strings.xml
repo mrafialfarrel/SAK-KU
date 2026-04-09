@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">SAKKU</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="title_activity_utama">UtamaActivity</string>
+    <string name="title_activity_profile">ProfileActivity</string>
+</resources>
