@@ -52,7 +52,7 @@ fun HalamanProfile(onNavigateBack: () -> Unit, onLogout: () -> Unit) {
         Anggota("Jesayas Hutasoit", "L0124101", "https://github.com/JesayasHutasoit"),
         Anggota("Muhammad Raditya Boy Wiratama", "L0124109", "https://github.com/RadityaBoy"),
         Anggota("Muhammad Rafi Al-Farrel", "L0124110", "https://github.com/mrafialfarrel"),
-        Anggota("Muhammad Rafian Surya Muqsith", "L0124111", "https://github.com/rafianmuqsith"),
+        Anggota("Muhammad Rafian Surya Muqsith", "L0124111", "https://github.com/rafianmuqisth"),
         Anggota("Musyaffa Falih Suryono", "L0124113", "https://github.com/Master-FroSt")
     )
 
