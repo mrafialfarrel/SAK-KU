@@ -57,7 +57,7 @@ fun HalamanProfile(onNavigateBack: () -> Unit, onLogout: () -> Unit) {
     )
 
     Column(
-        modifier = Modifier.padding(24.dp)
+        modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFF9F9F9))
             .padding(24.dp),
