@@ -1,4 +1,4 @@
-package UNS.sakku
+package uns.sakku
 
 import android.content.Intent
 import android.net.Uri
