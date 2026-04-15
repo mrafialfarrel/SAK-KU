@@ -93,7 +93,27 @@ fun PocketSavingScreen(onBackClick: () -> Unit = {}) {
                 .verticalScroll(rememberScrollState())
         ) {
             // --- BAGIAN 1: TABUNGAN ---
-            Text(text = "Progres Tabungan", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Color.DarkGray)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(text = "Progres Tabungan", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Color.DarkGray)
+                TextButton(onClick = { /* TODO: Aksi lihat semua tabungan */ }) {
+                    Text(text = ">", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                }
+            }
+
+            OutlinedButton(
+                onClick = { /* TODO: Aksi tambah tabungan */ },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Icon(imageVector = Icons.Default.Add, contentDescription = "Tambah Tabungan", modifier = Modifier.size(18.dp))
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(text = "Tambah Tabungan")
+            }
+
             Spacer(modifier = Modifier.height(16.dp))
 
             savings.forEach { saving ->
@@ -102,12 +122,36 @@ fun PocketSavingScreen(onBackClick: () -> Unit = {}) {
             }
 
             Spacer(modifier = Modifier.height(24.dp))
-            Divider(color = Color.LightGray.copy(alpha = 0.5f), thickness = 1.dp)
+            HorizontalDivider(color = Color.LightGray.copy(alpha = 0.5f), thickness = 1.dp)
             Spacer(modifier = Modifier.height(24.dp))
 
             // --- BAGIAN 2: KANTONG KEUANGAN ---
-            Text(text = "Batas Pengeluaran (Kantong)", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Color.DarkGray)
-            Text(text = "Pantau batas pengeluaran kategori Anda bulan ini.", fontSize = 12.sp, color = Color.Gray)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(text = "Batas Pengeluaran", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Color.DarkGray)
+                    Text(text = "Pantau batas pengeluaran kategori Anda.", fontSize = 12.sp, color = Color.Gray)
+                }
+                TextButton(onClick = { /* TODO: Aksi lihat semua kantong */ }) {
+                    Text(text = ">", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            OutlinedButton(
+                onClick = { /* TODO: Aksi tambah kantong */ },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Icon(imageVector = Icons.Default.Add, contentDescription = "Tambah Kantong", modifier = Modifier.size(18.dp))
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(text = "Tambah Kantong")
+            }
+
             Spacer(modifier = Modifier.height(16.dp))
 
             pockets.forEach { pocket ->
@@ -115,7 +159,7 @@ fun PocketSavingScreen(onBackClick: () -> Unit = {}) {
                 Spacer(modifier = Modifier.height(12.dp))
             }
 
-            Spacer(modifier = Modifier.height(64.dp)) // Ruang ekstra di bawah untuk FAB
+            Spacer(modifier = Modifier.height(32.dp))
         }
     }
 }
