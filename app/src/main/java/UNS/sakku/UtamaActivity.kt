@@ -124,7 +124,7 @@ fun HalamanUtama(onNavigateToProfile: () -> Unit) {
     }
 }
 
-@Preview(showBackground = true, showSystemUi = true)
+@Preview
 @Composable
 fun PreviewHalamanUtama() {
     MaterialTheme {

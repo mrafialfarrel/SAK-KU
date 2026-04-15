@@ -1,4 +1,4 @@
-package UNS.sakku.ui.theme
+package uns.sakku.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

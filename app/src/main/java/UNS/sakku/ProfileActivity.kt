@@ -23,6 +23,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import uns.sakku.app.MainActivity
 
 data class Anggota(val nama: String, val nim: String, val githubUrl: String)
 
@@ -146,7 +147,7 @@ fun HalamanProfile(onNavigateBack: () -> Unit, onLogout: () -> Unit) {
     }
 }
 
-@Preview(showBackground = true, showSystemUi = true)
+@Preview
 @Composable
 fun PreviewHalamanProfile() {
     MaterialTheme {
