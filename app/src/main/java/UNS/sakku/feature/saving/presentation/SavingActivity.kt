@@ -1,9 +1,9 @@
 package uns.sakku.feature.saving.presentation
 
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.ComponentActivity
 
-class SavingActivity : AppCompatActivity() {
+class SavingActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }

@@ -1,9 +1,9 @@
 package uns.sakku.feature.dashboard.presentation
 
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.ComponentActivity
 
-class DashboardActivity : AppCompatActivity() {
+class DashboardActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }

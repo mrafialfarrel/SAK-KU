@@ -1,9 +1,9 @@
 package uns.sakku.feature.export.presentation
 
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.ComponentActivity
 
-class ExportActivity : AppCompatActivity() {
+class ExportActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
