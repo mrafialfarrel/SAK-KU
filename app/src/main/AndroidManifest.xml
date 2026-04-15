@@ -24,7 +24,7 @@
             android:name="uns.sakku.feature.notification.presentation.NotificationActivity"
             android:exported="false" />
         <activity
-            android:name="uns.sakku.feature.pocket.presentation.NotificationActivity"
+            android:name="uns.sakku.feature.pocket.presentation.PocketActivity"
             android:exported="false" />
         <activity
             android:name="uns.sakku.feature.export.presentation.ExportActivity"
