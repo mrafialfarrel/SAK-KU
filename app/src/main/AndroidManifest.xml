@@ -12,6 +12,30 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SAKKU">
         <activity
+            android:name="uns.sakku.feature.transaction.presentation.TransactionActivity"
+            android:exported="false" />
+        <activity
+            android:name="uns.sakku.feature.saving.presentation.SavingActivity"
+            android:exported="false" />
+        <activity
+            android:name="uns.sakku.feature.report.presentation.ReportActivity"
+            android:exported="false" />
+        <activity
+            android:name="uns.sakku.feature.notification.presentation.NotificationActivity"
+            android:exported="false" />
+        <activity
+            android:name="uns.sakku.feature.pocket.presentation.NotificationActivity"
+            android:exported="false" />
+        <activity
+            android:name="uns.sakku.feature.export.presentation.ExportActivity"
+            android:exported="false" />
+        <activity
+            android:name="uns.sakku.feature.dashboard.presentation.DashboardActivity"
+            android:exported="false" />
+        <activity
+            android:name="uns.sakku.feature.auth.presentation.LoginActivity"
+            android:exported="false" />
+        <activity
             android:name="uns.sakku.UtamaActivity"
             android:exported="false"
             android:label="@string/title_activity_utama"
