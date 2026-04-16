@@ -290,3 +290,17 @@ fun DashboardPreview() {
         DashboardScreen(isLogin = false)
     }
 }
+@Preview(showBackground = true)
+@Composable
+fun DashboardPreviewLogin() {
+    val sakkuColors = lightColorScheme(
+        primary = Color(0xFF6200EA),
+        secondary = Color(0xFFBB86FC),
+        background = Color(0xFFF9F9F9),
+        surface = Color.White
+    )
+    MaterialTheme(colorScheme = sakkuColors) {
+        // Menguji tampilan guest mode dengan isLogin = true
+        DashboardScreen(isLogin = true)
+    }
+}

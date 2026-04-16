@@ -39,8 +39,8 @@ class LoginActivity : ComponentActivity() {
 }
 
 @Composable
-fun HalamanAuth(onAuthSuccess: () -> Unit) {
-    var isLoginMode by remember { mutableStateOf(true) }
+fun HalamanAuth(onAuthSuccess: () -> Unit, isLoginMode: Boolean = true) {
+    var isLoginMode by remember { mutableStateOf(isLoginMode) }
     var namaLengkap by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -90,5 +90,13 @@ fun HalamanAuth(onAuthSuccess: () -> Unit) {
 fun PreviewAuthScreen() {
     MaterialTheme {
         HalamanAuth(onAuthSuccess = {})
+    }
+}
+@Preview
+@Composable
+fun PreviewAuthScreenRegister() {
+    MaterialTheme() {
+        // Menguji tampilan guest mode dengan isLogin = false
+        HalamanAuth(isLoginMode = false, onAuthSuccess = {});
     }
 }
