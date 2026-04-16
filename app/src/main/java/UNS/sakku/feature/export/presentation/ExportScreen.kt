@@ -1,10 +1,6 @@
 package uns.sakku.feature.export.presentation
 
-import android.os.Bundle
 import android.widget.Toast
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -15,34 +11,28 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import uns.sakku.ui.theme.FinanceAppTheme
+import uns.sakku.core.LocalBackStack
+@Composable
+fun ExportScreen() {
+    val backStack = LocalBackStack.current
+    val context = LocalContext.current // Pengganti 'this' untuk Toast
 
-class ExportActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            FinanceAppTheme {
-                HalamanExport(
-                    onNavigateBack = {
-                        finish()
-                    },
-                    onExportClicked = { format, rentangWaktu ->
-                        Toast.makeText(
-                            this,
-                            "Mengekspor data ke $format untuk $rentangWaktu...",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                )
-            }
+    HalamanExport(
+        onNavigateBack = { backStack.removeLastOrNull() }, // Pengganti finish()
+        onExportClicked = { format, rentangWaktu ->
+            Toast.makeText(
+                context,
+                "Mengekspor data ke $format untuk $rentangWaktu...",
+                Toast.LENGTH_SHORT
+            ).show()
         }
-    }
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

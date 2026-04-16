@@ -1,10 +1,6 @@
 package uns.sakku.feature.transaction.presentation
 
-import android.os.Bundle
 import android.widget.Toast
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -19,7 +15,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -31,7 +26,7 @@ import java.util.Locale
 import uns.sakku.ui.theme.FinanceAppTheme
 import uns.sakku.ui.theme.IncomeGreen
 import uns.sakku.ui.theme.ExpenseRed
-
+import uns.sakku.core.LocalBackStack
 // Data Class diperbarui untuk menampung Kategori dan Alokasi (Tabungan/Kantong)
 data class TransactionItem(
     val id: String,
@@ -42,17 +37,13 @@ data class TransactionItem(
     val alokasi: String
 )
 
-class TransactionActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            FinanceAppTheme {
-                HalamanTransaction(
-                    onNavigateBack = { finish() }
-                )
-            }
-        }
-    }
+@Composable
+fun TransactionScreen() {
+    val backStack = LocalBackStack.current
+
+    HalamanTransaction(
+        onNavigateBack = { backStack.removeLastOrNull() }
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

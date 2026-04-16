@@ -1,8 +1,5 @@
 package uns.sakku.feature.report.presentation
 
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -29,21 +26,20 @@ import androidx.compose.foundation.verticalScroll
 import uns.sakku.ui.theme.FinanceAppTheme
 import uns.sakku.ui.theme.IncomeGreen
 import uns.sakku.ui.theme.ExpenseRed
+import uns.sakku.core.LocalBackStack
+@Composable
+fun ReportScreen() {
+    val backStack = LocalBackStack.current
 
-class ReportActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            FinanceAppTheme {
-                ReportScreen(onBackClick = { finish() })
-            }
-        }
-    }
+    // Pastikan UI aslimu diganti namanya dari ReportScreen menjadi HalamanReport
+    HalamanReport(
+        onBackClick = { backStack.removeLastOrNull() }
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ReportScreen(onBackClick: () -> Unit = {}) {
+fun HalamanReport(onBackClick: () -> Unit = {}) {
     var selectedFilter by remember { mutableStateOf("1 Bulan") }
     val filters = listOf("1 Minggu", "1 Bulan", "3 Bulan", "6 Bulan", "1 Tahun")
 
@@ -303,7 +299,7 @@ fun ExpenseCategoryBreakdown(selectedFilter: String) {
 @Composable
 fun ReportPreviewLight() {
     FinanceAppTheme(darkTheme = false) {
-        ReportScreen()
+        HalamanReport()
     }
 }
 
@@ -311,6 +307,6 @@ fun ReportPreviewLight() {
 @Composable
 fun ReportPreviewDark() {
     FinanceAppTheme(darkTheme = true) {
-        ReportScreen()
+        HalamanReport()
     }
 }

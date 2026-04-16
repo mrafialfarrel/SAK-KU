@@ -1,8 +1,5 @@
 package uns.sakku.feature.dashboard.presentation
 
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -28,23 +25,19 @@ import androidx.compose.ui.unit.sp
 import uns.sakku.ui.theme.FinanceAppTheme
 import uns.sakku.ui.theme.IncomeGreen
 import uns.sakku.ui.theme.ExpenseRed
+import uns.sakku.core.LocalBackStack
+@Composable
+fun DashboardScreen() {
+    val backStack = LocalBackStack.current
 
-// Mengingat arsitektur Anda, Activity ini bertugas sebagai penampung (host) untuk UI Dasbor
-class DashboardActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            FinanceAppTheme {
-                // Di aplikasi asli, nilai isLogin didapatkan dari AuthRepository/Sesi
-                DashboardScreen(isLogin = false)
-            }
-        }
-    }
+    HalamanDashboard(
+        isLogin = false // Nilai ini akan kita ubah nanti
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DashboardScreen(isLogin: Boolean = false) {
+fun HalamanDashboard(isLogin: Boolean = false) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -275,7 +268,7 @@ fun RecentTransactionsList() {
 @Composable
 fun DashboardPreviewLight() {
     FinanceAppTheme(darkTheme = false) {
-        DashboardScreen(isLogin = false)
+        HalamanDashboard(isLogin = false)
     }
 }
 
@@ -283,7 +276,7 @@ fun DashboardPreviewLight() {
 @Composable
 fun DashboardPreviewDark() {
     FinanceAppTheme(darkTheme = true) {
-        DashboardScreen(isLogin = false)
+        HalamanDashboard(isLogin = false)
     }
 }
 
@@ -291,7 +284,7 @@ fun DashboardPreviewDark() {
 @Composable
 fun DashboardPreviewLoginLight() {
     FinanceAppTheme(darkTheme = false) {
-        DashboardScreen(isLogin = true)
+        HalamanDashboard(isLogin = true)
     }
 }
 
@@ -299,6 +292,6 @@ fun DashboardPreviewLoginLight() {
 @Composable
 fun DashboardPreviewLoginDark() {
     FinanceAppTheme(darkTheme = true) {
-        DashboardScreen(isLogin = true)
+        HalamanDashboard(isLogin = true)
     }
 }

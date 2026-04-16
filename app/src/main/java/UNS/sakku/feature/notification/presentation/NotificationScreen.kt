@@ -1,8 +1,5 @@
 package uns.sakku.feature.notification.presentation
 
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -29,16 +26,15 @@ import androidx.compose.ui.unit.sp
 import uns.sakku.ui.theme.FinanceAppTheme
 import uns.sakku.ui.theme.IncomeGreen
 import uns.sakku.ui.theme.ExpenseRed
+import uns.sakku.core.LocalBackStack
+@Composable
+fun NotificationScreen() {
+    val backStack = LocalBackStack.current
 
-class NotificationActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            FinanceAppTheme {
-                NotificationScreen(onBackClick = { finish() })
-            }
-        }
-    }
+    // Pastikan UI aslimu diganti namanya dari NotificationScreen menjadi HalamanNotification
+    HalamanNotification(
+        onBackClick = { backStack.removeLastOrNull() }
+    )
 }
 
 enum class NotificationType {
@@ -58,7 +54,7 @@ data class NotificationItem(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NotificationScreen(onBackClick: () -> Unit = {}) {
+fun HalamanNotification(onBackClick: () -> Unit = {}) {
     val notifications = listOf(
         NotificationItem(
             id = "1",
@@ -217,7 +213,7 @@ fun NotificationCard(notification: NotificationItem) {
 @Composable
 fun NotificationPreviewLight() {
     FinanceAppTheme(darkTheme = false) {
-        NotificationScreen()
+        HalamanNotification()
     }
 }
 
@@ -225,6 +221,6 @@ fun NotificationPreviewLight() {
 @Composable
 fun NotificationPreviewDark() {
     FinanceAppTheme(darkTheme = true) {
-        NotificationScreen()
+        HalamanNotification()
     }
 }

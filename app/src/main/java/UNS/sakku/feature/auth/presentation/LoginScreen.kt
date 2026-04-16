@@ -1,9 +1,5 @@
 package uns.sakku.feature.auth.presentation
 
-import android.content.Intent
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -12,36 +8,33 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import uns.sakku.UtamaActivity
 import uns.sakku.ui.theme.FinanceAppTheme
+import uns.sakku.core.Routes
+import uns.sakku.core.LocalBackStack
 
-class LoginActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            FinanceAppTheme {
-                HalamanAuth(
-                    onAuthSuccess = {
-                        val intent = Intent(this, UtamaActivity::class.java)
-                        startActivity(intent)
-                        finish()
-                    }
-                )
-            }
+@Composable
+fun LoginScreen() {
+    // 1. Ambil akses navigasi dari CompositionLocal
+    val backStack = LocalBackStack.current
+
+    // 2. Panggil fungsi UI kamu
+    HalamanAuth(
+        onAuthSuccess = {
+            backStack.add(Routes.DashboardRoute)
         }
-    }
+    )
 }
 
 @Composable
 fun HalamanAuth(onAuthSuccess: () -> Unit, isLoginMode: Boolean = true) {
-    var isLoginMode by remember { mutableStateOf(isLoginMode) }
+
+    var currentIsLoginMode by remember { mutableStateOf(isLoginMode) }
     var namaLengkap by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -81,7 +74,7 @@ fun HalamanAuth(onAuthSuccess: () -> Unit, isLoginMode: Boolean = true) {
         Spacer(modifier = Modifier.height(24.dp))
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
             Text(text = if (isLoginMode) "Belum punya akun? " else "Sudah punya akun? ", color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f), fontSize = 14.sp)
-            Text(text = if (isLoginMode) "Daftar di sini" else "Login di sini", color = MaterialTheme.colorScheme.primary, fontSize = 14.sp, fontWeight = FontWeight.Bold, modifier = Modifier.clickable { isLoginMode = !isLoginMode; email = ""; password = ""; namaLengkap = "" })
+            Text(text = if (isLoginMode) "Daftar di sini" else "Login di sini", color = MaterialTheme.colorScheme.primary, fontSize = 14.sp, fontWeight = FontWeight.Bold, modifier = Modifier.clickable { currentIsLoginMode = !isLoginMode; email = ""; password = ""; namaLengkap = "" })
         }
     }
 }

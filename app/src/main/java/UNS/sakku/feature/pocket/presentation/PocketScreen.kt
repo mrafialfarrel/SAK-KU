@@ -1,8 +1,5 @@
 package uns.sakku.feature.pocket.presentation
 
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -24,16 +21,15 @@ import androidx.compose.ui.unit.sp
 import uns.sakku.ui.theme.FinanceAppTheme
 import uns.sakku.ui.theme.IncomeGreen
 import uns.sakku.ui.theme.ExpenseRed
+import uns.sakku.core.LocalBackStack
+@Composable
+fun PocketScreen() {
+    val backStack = LocalBackStack.current
 
-class PocketActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            FinanceAppTheme {
-                PocketScreen(onBackClick = { finish() })
-            }
-        }
-    }
+    // Pastikan UI aslimu diganti namanya dari PocketScreen menjadi HalamanPocket
+    HalamanPocket(
+        onBackClick = { backStack.removeLastOrNull() }
+    )
 }
 
 data class SavingGoal(val name: String, val target: Float, val currentAmount: Float)
@@ -41,7 +37,7 @@ data class PocketBudget(val category: String, val limit: Float, val spentAmount:
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PocketScreen(onBackClick: () -> Unit = {}) {
+fun HalamanPocket(onBackClick: () -> Unit = {}) {
     val savings = listOf(
         SavingGoal("Dana Darurat", 10000000f, 4500000f),
         SavingGoal("Beli Laptop Baru", 15000000f, 2000000f)
@@ -278,7 +274,7 @@ fun PocketCard(pocket: PocketBudget) {
 @Composable
 fun PocketPreviewLight() {
     FinanceAppTheme(darkTheme = false) {
-        PocketScreen()
+        HalamanPocket()
     }
 }
 
@@ -286,6 +282,6 @@ fun PocketPreviewLight() {
 @Composable
 fun PocketPreviewDark() {
     FinanceAppTheme(darkTheme = true) {
-        PocketScreen()
+        HalamanPocket()
     }
 }
