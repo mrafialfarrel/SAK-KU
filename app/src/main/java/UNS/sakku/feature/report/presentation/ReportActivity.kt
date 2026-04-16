@@ -98,6 +98,12 @@ fun ReportScreen(onBackClick: () -> Unit = {}) {
             ExpenseCategoryBreakdown(selectedFilter = selectedFilter)
 
             Spacer(modifier = Modifier.height(24.dp))
+
+            Text(text = "Kategori Pemasukan", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = MaterialTheme.colorScheme.onBackground)
+            Spacer(modifier = Modifier.height(16.dp))
+            ExpenseCategoryBreakdown(selectedFilter = selectedFilter)
+
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }

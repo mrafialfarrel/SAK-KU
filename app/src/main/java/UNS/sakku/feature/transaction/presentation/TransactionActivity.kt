@@ -32,11 +32,14 @@ import uns.sakku.ui.theme.FinanceAppTheme
 import uns.sakku.ui.theme.IncomeGreen
 import uns.sakku.ui.theme.ExpenseRed
 
+// Data Class diperbarui untuk menampung Kategori dan Alokasi (Tabungan/Kantong)
 data class TransactionItem(
     val id: String,
     val keterangan: String,
     val nominal: Double,
-    val isPemasukan: Boolean
+    val isPemasukan: Boolean,
+    val kategori: String,
+    val alokasi: String
 )
 
 class TransactionActivity : ComponentActivity() {
@@ -54,17 +57,37 @@ class TransactionActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HalamanTransaction(onNavigateBack: () -> Unit) {
+fun HalamanTransaction(initialIsPemasukan: Boolean = false,
+                       onNavigateBack: () -> Unit) {
     val context = LocalContext.current
 
     val transaksiList = remember { mutableStateListOf<TransactionItem>() }
 
     var keterangan by remember { mutableStateOf("") }
     var nominal by remember { mutableStateOf("") }
-    var isPemasukan by remember { mutableStateOf(false) }
+    var isPemasukan by remember { mutableStateOf(initialIsPemasukan) }
+
+    // State baru untuk Dropdown Menu
+    var selectedKategori by remember { mutableStateOf("") }
+    var selectedAlokasi by remember { mutableStateOf("") }
+
+    var expandedKategori by remember { mutableStateOf(false) }
+    var expandedAlokasi by remember { mutableStateOf(false) }
 
     var isEditMode by remember { mutableStateOf(false) }
     var editId by remember { mutableStateOf<String?>(null) }
+
+    // Data Hardcode untuk Dropdown
+    val listKategoriPemasukan = listOf("Gaji", "Hadiah", "Bonus")
+    val listKategoriPengeluaran = listOf("Konsumsi", "Transportasi", "Darurat")
+
+    val listTabungan = listOf("Beli Laptop", "Tabungan Dana Darurat")
+    val listKantong = listOf("Konsumsi", "Transportasi", "Darurat") // Sesuai permintaan, isinya sama dengan pengeluaran
+
+    // Logika Dinamis: Menentukan list mana yang dipakai berdasarkan isPemasukan
+    val currentKategoriList = if (isPemasukan) listKategoriPemasukan else listKategoriPengeluaran
+    val currentAlokasiList = if (isPemasukan) listTabungan else listKantong
+    val alokasiLabel = if (isPemasukan) "Pilih Tabungan" else "Pilih Kantong"
 
     Scaffold(
         topBar = {
@@ -106,7 +129,7 @@ fun HalamanTransaction(onNavigateBack: () -> Unit) {
                     OutlinedTextField(
                         value = keterangan,
                         onValueChange = { keterangan = it },
-                        label = { Text("Keterangan (Contoh: Gaji, Makan)") },
+                        label = { Text("Keterangan (Contoh: Makan Siang)") },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
                     )
@@ -124,17 +147,30 @@ fun HalamanTransaction(onNavigateBack: () -> Unit) {
 
                     Spacer(modifier = Modifier.height(8.dp))
 
+                    // RADIO BUTTONS
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier.selectable(
                                 selected = isPemasukan,
-                                onClick = { isPemasukan = true }
+                                onClick = {
+                                    if (!isPemasukan) {
+                                        isPemasukan = true
+                                        selectedKategori = "" // Reset pilihan saat pindah tipe
+                                        selectedAlokasi = ""
+                                    }
+                                }
                             )
                         ) {
                             RadioButton(
                                 selected = isPemasukan,
-                                onClick = { isPemasukan = true },
+                                onClick = {
+                                    if (!isPemasukan) {
+                                        isPemasukan = true
+                                        selectedKategori = ""
+                                        selectedAlokasi = ""
+                                    }
+                                },
                                 colors = RadioButtonDefaults.colors(selectedColor = MaterialTheme.colorScheme.primary)
                             )
                             Text("Pemasukan", modifier = Modifier.padding(start = 4.dp, end = 16.dp), color = MaterialTheme.colorScheme.onSurface)
@@ -144,12 +180,24 @@ fun HalamanTransaction(onNavigateBack: () -> Unit) {
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier.selectable(
                                 selected = !isPemasukan,
-                                onClick = { isPemasukan = false }
+                                onClick = {
+                                    if (isPemasukan) {
+                                        isPemasukan = false
+                                        selectedKategori = "" // Reset pilihan saat pindah tipe
+                                        selectedAlokasi = ""
+                                    }
+                                }
                             )
                         ) {
                             RadioButton(
                                 selected = !isPemasukan,
-                                onClick = { isPemasukan = false },
+                                onClick = {
+                                    if (isPemasukan) {
+                                        isPemasukan = false
+                                        selectedKategori = ""
+                                        selectedAlokasi = ""
+                                    }
+                                },
                                 colors = RadioButtonDefaults.colors(selectedColor = MaterialTheme.colorScheme.primary)
                             )
                             Text("Pengeluaran", modifier = Modifier.padding(start = 4.dp), color = MaterialTheme.colorScheme.onSurface)
@@ -158,15 +206,80 @@ fun HalamanTransaction(onNavigateBack: () -> Unit) {
 
                     Spacer(modifier = Modifier.height(16.dp))
 
+                    // DROPDOWN 1: KATEGORI
+                    ExposedDropdownMenuBox(
+                        expanded = expandedKategori,
+                        onExpandedChange = { expandedKategori = !expandedKategori }
+                    ) {
+                        OutlinedTextField(
+                            value = selectedKategori,
+                            onValueChange = {},
+                            readOnly = true, // Read-only agar berfungsi seperti dropdown/spinner
+                            label = { Text(if (isPemasukan) "Kategori Pemasukan" else "Kategori Pengeluaran") },
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedKategori) },
+                            modifier = Modifier.menuAnchor().fillMaxWidth()
+                        )
+                        ExposedDropdownMenu(
+                            expanded = expandedKategori,
+                            onDismissRequest = { expandedKategori = false }
+                        ) {
+                            currentKategoriList.forEach { kategori ->
+                                DropdownMenuItem(
+                                    text = { Text(kategori) },
+                                    onClick = {
+                                        selectedKategori = kategori
+                                        expandedKategori = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // DROPDOWN 2: ALOKASI (Tabungan / Kantong)
+                    ExposedDropdownMenuBox(
+                        expanded = expandedAlokasi,
+                        onExpandedChange = { expandedAlokasi = !expandedAlokasi }
+                    ) {
+                        OutlinedTextField(
+                            value = selectedAlokasi,
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text(alokasiLabel) },
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedAlokasi) },
+                            modifier = Modifier.menuAnchor().fillMaxWidth()
+                        )
+                        ExposedDropdownMenu(
+                            expanded = expandedAlokasi,
+                            onDismissRequest = { expandedAlokasi = false }
+                        ) {
+                            currentAlokasiList.forEach { alokasi ->
+                                DropdownMenuItem(
+                                    text = { Text(alokasi) },
+                                    onClick = {
+                                        selectedAlokasi = alokasi
+                                        expandedAlokasi = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    // TOMBOL SIMPAN
                     Button(
                         onClick = {
-                            if (keterangan.isNotBlank() && nominal.isNotBlank()) {
+                            if (keterangan.isNotBlank() && nominal.isNotBlank() && selectedKategori.isNotBlank() && selectedAlokasi.isNotBlank()) {
                                 val nominalDouble = nominal.toDoubleOrNull() ?: 0.0
 
                                 if (isEditMode && editId != null) {
                                     val index = transaksiList.indexOfFirst { it.id == editId }
                                     if (index != -1) {
-                                        transaksiList[index] = TransactionItem(editId!!, keterangan, nominalDouble, isPemasukan)
+                                        transaksiList[index] = TransactionItem(
+                                            editId!!, keterangan, nominalDouble, isPemasukan, selectedKategori, selectedAlokasi
+                                        )
                                     }
                                     isEditMode = false
                                     editId = null
@@ -176,17 +289,22 @@ fun HalamanTransaction(onNavigateBack: () -> Unit) {
                                         id = System.currentTimeMillis().toString(),
                                         keterangan = keterangan,
                                         nominal = nominalDouble,
-                                        isPemasukan = isPemasukan
+                                        isPemasukan = isPemasukan,
+                                        kategori = selectedKategori,
+                                        alokasi = selectedAlokasi
                                     )
                                     transaksiList.add(newItem)
                                     Toast.makeText(context, "Transaksi ditambahkan", Toast.LENGTH_SHORT).show()
                                 }
 
+                                // Reset form setelah simpan
                                 keterangan = ""
                                 nominal = ""
                                 isPemasukan = false
+                                selectedKategori = ""
+                                selectedAlokasi = ""
                             } else {
-                                Toast.makeText(context, "Harap isi semua kolom", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, "Harap isi semua kolom dan pilihan", Toast.LENGTH_SHORT).show()
                             }
                         },
                         modifier = Modifier.fillMaxWidth().height(50.dp),
@@ -204,6 +322,8 @@ fun HalamanTransaction(onNavigateBack: () -> Unit) {
                                 editId = null
                                 keterangan = ""
                                 nominal = ""
+                                selectedKategori = ""
+                                selectedAlokasi = ""
                             },
                             modifier = Modifier.fillMaxWidth().height(50.dp),
                             shape = RoundedCornerShape(12.dp)
@@ -243,6 +363,13 @@ fun HalamanTransaction(onNavigateBack: () -> Unit) {
                             ) {
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(text = item.keterangan, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                                    // Menampilkan Kategori sebagai teks kecil di bawah keterangan
+                                    Text(
+                                        text = "${item.kategori} • ${item.alokasi}",
+                                        fontSize = 12.sp,
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                        modifier = Modifier.padding(bottom = 4.dp)
+                                    )
                                     Text(
                                         text = if (item.isPemasukan) "+ ${formatRupiah(item.nominal)}" else "- ${formatRupiah(item.nominal)}",
                                         color = if (item.isPemasukan) IncomeGreen else ExpenseRed,
@@ -255,6 +382,8 @@ fun HalamanTransaction(onNavigateBack: () -> Unit) {
                                     keterangan = item.keterangan
                                     nominal = item.nominal.toLong().toString()
                                     isPemasukan = item.isPemasukan
+                                    selectedKategori = item.kategori
+                                    selectedAlokasi = item.alokasi
                                     isEditMode = true
                                     editId = item.id
                                 }) {
@@ -268,6 +397,8 @@ fun HalamanTransaction(onNavigateBack: () -> Unit) {
                                         editId = null
                                         keterangan = ""
                                         nominal = ""
+                                        selectedKategori = ""
+                                        selectedAlokasi = ""
                                     }
                                     Toast.makeText(context, "Transaksi dihapus", Toast.LENGTH_SHORT).show()
                                 }) {
@@ -301,5 +432,27 @@ fun PreviewTransactionScreenLight() {
 fun PreviewTransactionScreenDark() {
     FinanceAppTheme(darkTheme = true) {
         HalamanTransaction(onNavigateBack = {})
+    }
+}
+
+@Preview(showBackground = true, name = "Light Mode (Pemasukan)")
+@Composable
+fun PreviewTransactionPemasukanScreenLight() {
+    FinanceAppTheme(darkTheme = false) { // Pastikan false untuk Light Mode
+        HalamanTransaction(
+            initialIsPemasukan = true, // Ini akan membuat radio button Pemasukan terpilih
+            onNavigateBack = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Dark Mode (Pemasukan)")
+@Composable
+fun PreviewTransactionPemasukanScreenDark() {
+    FinanceAppTheme(darkTheme = true) {
+        HalamanTransaction(
+            initialIsPemasukan = true, // Ini akan membuat radio button Pemasukan terpilih
+            onNavigateBack = {}
+        )
     }
 }

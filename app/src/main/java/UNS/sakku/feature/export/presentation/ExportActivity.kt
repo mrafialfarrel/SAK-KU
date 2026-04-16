@@ -55,7 +55,7 @@ fun HalamanExport(
     var rentangTerpilih by remember { mutableStateOf("1 Bulan Terakhir") }
 
     val opsiFormat = listOf("PDF", "CSV")
-    val opsiRentang = listOf("1 Minggu Terakhir", "1 Bulan Terakhir", "3 Bulan Terakhir", "1 Tahun Terakhir")
+    val opsiRentang = listOf("1 Minggu Terakhir", "1 Bulan Terakhir", "3 Bulan Terakhir", "6 Bulan Terakhir")
 
     Scaffold(
         topBar = {

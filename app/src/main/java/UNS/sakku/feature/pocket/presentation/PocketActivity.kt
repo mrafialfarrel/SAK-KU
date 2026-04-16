@@ -82,7 +82,40 @@ fun PocketScreen(onBackClick: () -> Unit = {}) {
                 .padding(16.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-            Text(text = "Progres Tabungan", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = MaterialTheme.colorScheme.onBackground)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Progres Tabungan",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+                TextButton(onClick = { /* TODO: Aksi lihat semua tabungan */ }) {
+                    Text(
+                        text = ">",
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+            Text(
+                text = "Pantau tujuan pemasukan Anda bulan ini.",
+                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+            )
+
+            OutlinedButton(
+                onClick = { /* TODO: Aksi tambah tabungan */ },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Icon(imageVector = Icons.Default.Add, contentDescription = "Tambah Tabungan", modifier = Modifier.size(18.dp))
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(text = "Tambah Tabungan")
+            }
             Spacer(modifier = Modifier.height(16.dp))
 
             savings.forEach { saving ->
@@ -94,8 +127,37 @@ fun PocketScreen(onBackClick: () -> Unit = {}) {
             HorizontalDivider(color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.2f), thickness = 1.dp)
             Spacer(modifier = Modifier.height(24.dp))
 
-            Text(text = "Batas Pengeluaran (Kantong)", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = MaterialTheme.colorScheme.onBackground)
-            Text(text = "Pantau batas pengeluaran kategori Anda bulan ini.", fontSize = 12.sp, color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Batas Pengeluaran (Kantong)",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+                TextButton(onClick = { /* TODO: Aksi lihat semua tabungan */ }) {
+                    Text(text = ">", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                }
+            }
+            Text(
+                    text = "Pantau batas pengeluaran kategori Anda bulan ini.",
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+
+            OutlinedButton(
+                onClick = { /* TODO: Aksi tambah tabungan */ },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Icon(imageVector = Icons.Default.Add, contentDescription = "Tambah Tabungan", modifier = Modifier.size(18.dp))
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(text = "Tambah Tabungan")
+            }
             Spacer(modifier = Modifier.height(16.dp))
 
             pockets.forEach { pocket ->

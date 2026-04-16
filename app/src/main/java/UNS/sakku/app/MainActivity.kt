@@ -20,7 +20,7 @@ class MainActivity : ComponentActivity() {
         // if (isLoggedIn) { go to UtamaActivity } else { go to LoginActivity }
 
         // Untuk saat ini, langsung arahkan ke LoginActivity
-        val intent = Intent(this, DashboardActivity::class.java)
+        val intent = Intent(this, ReportActivity::class.java)
         startActivity(intent)
 
         // Panggil finish() agar MainActivity mati.
