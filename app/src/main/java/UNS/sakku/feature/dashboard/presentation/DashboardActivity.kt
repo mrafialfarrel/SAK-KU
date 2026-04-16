@@ -9,8 +9,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material.icons.filled.Assessment
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -82,43 +84,68 @@ fun DashboardScreen(isLogin: Boolean = false) {
                 .padding(paddingValues)
                 .padding(16.dp)
         ) {
-            // 1. Kartu Saldo Utama
-            BalanceCard()
-
-            // Kanan: Pemasukan (Atas) & Pengeluaran (Bawah) (Mengambil 45% ruang)
-            Column(
-                modifier = Modifier.weight(1f).fillMaxHeight(),
-                verticalArrangement = Arrangement.SpaceBetween
+            // 1. Kartu Saldo & Ringkasan (Disusun berdampingan Kiri-Kanan)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(IntrinsicSize.Max), // Tinggi row mengikuti konten tertinggi di dalamnya
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                SummaryCard(
-                    modifier = Modifier.weight(1f).fillMaxWidth(),
-                    title = "Pemasukan",
-                    amount = "Rp 5.2 Jt", // Disingkat agar tidak terpotong di layar kecil
-                    icon = Icons.Default.ArrowDownward,
-                    iconColor = IncomeGreen
+                // Kiri: Saldo (Mengambil 55% ruang)
+                BalanceCard(modifier = Modifier.weight(1.2f).fillMaxHeight())
+
+                // Kanan: Pemasukan (Atas) & Pengeluaran (Bawah) (Mengambil 45% ruang)
+                Column(
+                    modifier = Modifier.weight(1f).fillMaxHeight(),
+                    verticalArrangement = Arrangement.SpaceBetween
+                ) {
+                    SummaryCard(
+                        modifier = Modifier.weight(1f).fillMaxWidth(),
+                        title = "Pemasukan",
+                        amount = "Rp 5.2 Jt", // Disingkat agar tidak terpotong di layar kecil
+                        icon = Icons.Default.ArrowDownward,
+                        iconColor = IncomeGreen
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    SummaryCard(
+                        modifier = Modifier.weight(1f).fillMaxWidth(),
+                        title = "Pengeluaran",
+                        amount = "Rp 3.1 Jt", // Disingkat
+                        icon = Icons.Default.ArrowUpward,
+                        iconColor = ExpenseRed
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // 2. Menu Lain (Kantong & Laporan)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                QuickMenuButton(
+                    icon = Icons.Default.AccountBalanceWallet,
+                    title = "Kantong"
                 )
-                Spacer(modifier = Modifier.height(8.dp))
-                SummaryCard(
-                    modifier = Modifier.weight(1f).fillMaxWidth(),
-                    title = "Pengeluaran",
-                    amount = "Rp 3.1 Jt", // Disingkat
-                    icon = Icons.Default.ArrowUpward,
-                    iconColor = ExpenseRed
+                QuickMenuButton(
+                    icon = Icons.Default.Assessment,
+                    title = "Laporan"
                 )
             }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // 3. Daftar Transaksi Terakhir (Placeholder)
+            Text(
+                text = "Transaksi Terakhir",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            RecentTransactionsList()
         }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // 3. Daftar Transaksi Terakhir (Placeholder)
-        Text(
-            text = "Transaksi Terakhir",
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onBackground
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        RecentTransactionsList()
     }
 }
 
@@ -209,6 +236,7 @@ fun QuickMenuButton(icon: ImageVector, title: String) {
 
 @Composable
 fun RecentTransactionsList() {
+    // Data Dummy (Di arsitektur asli, ini akan didapat dari ViewModel -> Repository)
     val dummyData = listOf(
         Pair("Makan Siang", "- Rp 45.000"),
         Pair("Gaji Bulanan", "+ Rp 5.000.000"),

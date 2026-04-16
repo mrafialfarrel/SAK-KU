@@ -1,4 +1,4 @@
-package uns.sakku.feature.planner.presentation
+package uns.sakku.feature.pocket.presentation
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
