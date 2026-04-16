@@ -1,6 +1,7 @@
 package uns.sakku.feature.pocket.presentation
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -22,12 +23,16 @@ import uns.sakku.ui.theme.FinanceAppTheme
 import uns.sakku.ui.theme.IncomeGreen
 import uns.sakku.ui.theme.ExpenseRed
 import uns.sakku.core.LocalBackStack
+import uns.sakku.core.Routes
+
 @Composable
 fun PocketScreen() {
     val backStack = LocalBackStack.current
 
     // Pastikan UI aslimu diganti namanya dari PocketScreen menjadi HalamanPocket
     HalamanPocket(
+        // Alur: Pocket > Transaction
+        onNavigateToTransaction = { backStack.add(Routes.TransactionRoute) },
         onBackClick = { backStack.removeLastOrNull() }
     )
 }
@@ -37,7 +42,9 @@ data class PocketBudget(val category: String, val limit: Float, val spentAmount:
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HalamanPocket(onBackClick: () -> Unit = {}) {
+fun HalamanPocket(
+    onNavigateToTransaction: () -> Unit,
+    onBackClick: () -> Unit = {}) {
     val savings = listOf(
         SavingGoal("Dana Darurat", 10000000f, 4500000f),
         SavingGoal("Beli Laptop Baru", 15000000f, 2000000f)
@@ -63,8 +70,10 @@ fun HalamanPocket(onBackClick: () -> Unit = {}) {
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { /* TODO: Aksi tambah tabungan atau kantong baru */ },
-                containerColor = MaterialTheme.colorScheme.secondary
+                onClick = onNavigateToTransaction,
+                containerColor = MaterialTheme.colorScheme.primary,
+                modifier = Modifier
+                    .clickable(onClick = onNavigateToTransaction)
             ) {
                 Icon(imageVector = Icons.Default.Add, contentDescription = "Tambah", tint = MaterialTheme.colorScheme.onSecondary)
             }
@@ -274,7 +283,10 @@ fun PocketCard(pocket: PocketBudget) {
 @Composable
 fun PocketPreviewLight() {
     FinanceAppTheme(darkTheme = false) {
-        HalamanPocket()
+        HalamanPocket(
+            onNavigateToTransaction = { },
+            onBackClick = { }
+        )
     }
 }
 
@@ -282,6 +294,9 @@ fun PocketPreviewLight() {
 @Composable
 fun PocketPreviewDark() {
     FinanceAppTheme(darkTheme = true) {
-        HalamanPocket()
+        HalamanPocket(
+            onNavigateToTransaction = { },
+            onBackClick = { }
+        )
     }
 }

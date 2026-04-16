@@ -32,9 +32,9 @@ fun LoginScreen() {
 }
 
 @Composable
-fun HalamanAuth(onAuthSuccess: () -> Unit, isLoginMode: Boolean = true) {
+fun HalamanAuth(onAuthSuccess: () -> Unit, ComposeIsLoginMode: Boolean = true) {
 
-    var currentIsLoginMode by remember { mutableStateOf(isLoginMode) }
+    var isLoginMode  by remember { mutableStateOf(ComposeIsLoginMode) }
     var namaLengkap by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -74,7 +74,7 @@ fun HalamanAuth(onAuthSuccess: () -> Unit, isLoginMode: Boolean = true) {
         Spacer(modifier = Modifier.height(24.dp))
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
             Text(text = if (isLoginMode) "Belum punya akun? " else "Sudah punya akun? ", color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f), fontSize = 14.sp)
-            Text(text = if (isLoginMode) "Daftar di sini" else "Login di sini", color = MaterialTheme.colorScheme.primary, fontSize = 14.sp, fontWeight = FontWeight.Bold, modifier = Modifier.clickable { currentIsLoginMode = !isLoginMode; email = ""; password = ""; namaLengkap = "" })
+            Text(text = if (isLoginMode) "Daftar di sini" else "Login di sini", color = MaterialTheme.colorScheme.primary, fontSize = 14.sp, fontWeight = FontWeight.Bold, modifier = Modifier.clickable { isLoginMode = !isLoginMode; email = ""; password = ""; namaLengkap = "" })
         }
     }
 }
@@ -99,7 +99,7 @@ fun PreviewAuthScreenDark() {
 @Composable
 fun PreviewAuthScreenRegisterLight() {
     FinanceAppTheme(darkTheme = false) {
-        HalamanAuth(isLoginMode = false, onAuthSuccess = {})
+        HalamanAuth(ComposeIsLoginMode = false, onAuthSuccess = {})
     }
 }
 
@@ -107,6 +107,6 @@ fun PreviewAuthScreenRegisterLight() {
 @Composable
 fun PreviewAuthScreenRegisterDark() {
     FinanceAppTheme(darkTheme = true) {
-        HalamanAuth(isLoginMode = false, onAuthSuccess = {})
+        HalamanAuth(ComposeIsLoginMode = false, onAuthSuccess = {})
     }
 }

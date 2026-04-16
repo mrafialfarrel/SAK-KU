@@ -1,6 +1,7 @@
 package uns.sakku.core
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
@@ -20,29 +21,31 @@ fun ComposeApp() {
     // Inisialisasi rute pertama kali saat aplikasi dibuka
     val backStack = rememberNavBackStack(Routes.DashboardRoute)
 
-    FinanceAppTheme {
-        NavDisplay(
-            backStack = backStack,
-            entryDecorators = listOf(
-                // Tambahkan decorator default untuk manajemen state
-                rememberSaveableStateHolderNavEntryDecorator(),
-                // Tambahkan view model store decorator
-                rememberViewModelStoreNavEntryDecorator()
-            ),
-            entryProvider = entryProvider {
-                // --- Auth ---
-                entry<Routes.AuthRoute> { LoginScreen() }
+    CompositionLocalProvider(LocalBackStack provides backStack) {
+        FinanceAppTheme {
+            NavDisplay(
+                backStack = backStack,
+                entryDecorators = listOf(
+                    // Tambahkan decorator default untuk manajemen state
+                    rememberSaveableStateHolderNavEntryDecorator(),
+                    // Tambahkan view model store decorator
+                    rememberViewModelStoreNavEntryDecorator()
+                ),
+                entryProvider = entryProvider {
+                    // --- Auth ---
+                    entry<Routes.AuthRoute> { LoginScreen() }
 
-                // --- Dashboard ---
-                entry<Routes.DashboardRoute> { DashboardScreen() }
+                    // --- Dashboard ---
+                    entry<Routes.DashboardRoute> { DashboardScreen() }
 
-                // --- Features ---
-                entry<Routes.TransactionRoute> { TransactionScreen() }
-                entry<Routes.ReportRoute> { ReportScreen() }
-                entry<Routes.NotificationRoute> { NotificationScreen() }
-                entry<Routes.PocketRoute> { PocketScreen() }
-                entry<Routes.ExportRoute> { ExportScreen() }
-            }
-        )
+                    // --- Features ---
+                    entry<Routes.TransactionRoute> { TransactionScreen() }
+                    entry<Routes.ReportRoute> { ReportScreen() }
+                    entry<Routes.NotificationRoute> { NotificationScreen() }
+                    entry<Routes.PocketRoute> { PocketScreen() }
+                    entry<Routes.ExportRoute> { ExportScreen() }
+                }
+            )
+        }
     }
 }

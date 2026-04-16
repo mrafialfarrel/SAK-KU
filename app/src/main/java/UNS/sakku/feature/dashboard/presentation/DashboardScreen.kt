@@ -1,6 +1,8 @@
 package uns.sakku.feature.dashboard.presentation
 
+import android.R.attr.onClick
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -25,19 +27,33 @@ import androidx.compose.ui.unit.sp
 import uns.sakku.ui.theme.FinanceAppTheme
 import uns.sakku.ui.theme.IncomeGreen
 import uns.sakku.ui.theme.ExpenseRed
+import uns.sakku.core.Routes
 import uns.sakku.core.LocalBackStack
 @Composable
 fun DashboardScreen() {
     val backStack = LocalBackStack.current
 
     HalamanDashboard(
-        isLogin = false // Nilai ini akan kita ubah nanti
+        isLogin = false,
+        // Alur: Dashboard > Login (Mungkin untuk logout atau sesi habis)
+        onNavigateToLogin = { backStack.add(Routes.AuthRoute) },
+        // Alur: Dashboard > Notification
+        onNavigateToNotification = { backStack.add(Routes.NotificationRoute) },
+        // Alur: Dashboard > Pocket
+        onNavigateToPocket = { backStack.add(Routes.PocketRoute) },
+        // Alur: Dashboard > Report
+        onNavigateToReport = { backStack.add(Routes.ReportRoute) }
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HalamanDashboard(isLogin: Boolean = false) {
+fun HalamanDashboard(
+    isLogin: Boolean = false,
+    onNavigateToLogin: () -> Unit,
+    onNavigateToNotification: () -> Unit,
+    onNavigateToPocket: () -> Unit,
+    onNavigateToReport: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -49,9 +65,12 @@ fun HalamanDashboard(isLogin: Boolean = false) {
                     )
                 },
                 actions = {
-                    // Logika penggantian tombol berdasarkan Guest Mode / Logged In
                     if (isLogin) {
-                        IconButton(onClick = { /* TODO: Buka Notifikasi */ }) {
+                        // PERBAIKAN: Gunakan pemanggilan fungsi yang benar
+                        IconButton(onClick = onNavigateToNotification,
+                                modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                            .clickable(onClick = onNavigateToNotification)) {
                             Icon(
                                 imageVector = Icons.Default.Notifications,
                                 contentDescription = "Notifikasi",
@@ -59,9 +78,15 @@ fun HalamanDashboard(isLogin: Boolean = false) {
                             )
                         }
                     } else {
-                        TextButton(onClick = { /* TODO: Arahkan ke LoginActivity */ }) {
-                            Text("Login", color = MaterialTheme.colorScheme.onPrimary, fontWeight = FontWeight.Bold)
-                        }
+                        // PERBAIKAN: Gunakan pemanggilan fungsi yang benar
+                        Text(
+                            text = "Login",
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier
+                                .padding(end = 16.dp) // Berikan sedikit jarak dari tepi kanan
+                                .clickable { onNavigateToLogin() }
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -76,6 +101,7 @@ fun HalamanDashboard(isLogin: Boolean = false) {
                 .background(MaterialTheme.colorScheme.background)
                 .padding(paddingValues)
                 .padding(16.dp)
+                .clickable(onClick = onNavigateToLogin)
         ) {
             // 1. Kartu Saldo & Ringkasan (Disusun berdampingan Kiri-Kanan)
             Row(
@@ -85,15 +111,21 @@ fun HalamanDashboard(isLogin: Boolean = false) {
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 // Kiri: Saldo (Mengambil 55% ruang)
-                BalanceCard(modifier = Modifier.weight(1.2f).fillMaxHeight())
+                BalanceCard(modifier = Modifier
+                    .weight(1.2f)
+                    .fillMaxHeight())
 
                 // Kanan: Pemasukan (Atas) & Pengeluaran (Bawah) (Mengambil 45% ruang)
                 Column(
-                    modifier = Modifier.weight(1f).fillMaxHeight(),
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight(),
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
                     SummaryCard(
-                        modifier = Modifier.weight(1f).fillMaxWidth(),
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth(),
                         title = "Pemasukan",
                         amount = "Rp 5.2 Jt", // Disingkat agar tidak terpotong di layar kecil
                         icon = Icons.Default.ArrowDownward,
@@ -101,7 +133,9 @@ fun HalamanDashboard(isLogin: Boolean = false) {
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     SummaryCard(
-                        modifier = Modifier.weight(1f).fillMaxWidth(),
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth(),
                         title = "Pengeluaran",
                         amount = "Rp 3.1 Jt", // Disingkat
                         icon = Icons.Default.ArrowUpward,
@@ -114,16 +148,20 @@ fun HalamanDashboard(isLogin: Boolean = false) {
 
             // 2. Menu Lain (Kantong & Laporan)
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
+                // PERBAIKAN: Oper callback navigasi ke masing-masing tombol
                 QuickMenuButton(
                     icon = Icons.Default.AccountBalanceWallet,
-                    title = "Kantong"
+                    title = "Kantong",
+                    onClick = onNavigateToPocket
                 )
                 QuickMenuButton(
                     icon = Icons.Default.Assessment,
-                    title = "Laporan"
+                    title = "Laporan",
+                    onClick = onNavigateToReport
                 )
             }
 
@@ -153,7 +191,9 @@ fun BalanceCard(modifier: Modifier = Modifier) {
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
         Column(
-            modifier = Modifier.padding(16.dp).fillMaxSize(),
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxSize(),
             verticalArrangement = Arrangement.Center
         ) {
             Text(text = "Total Saldo Anda", color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f), fontSize = 12.sp)
@@ -178,7 +218,9 @@ fun SummaryCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
-            modifier = Modifier.padding(12.dp).fillMaxSize(),
+            modifier = Modifier
+                .padding(12.dp)
+                .fillMaxSize(),
             verticalArrangement = Arrangement.Center
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -198,10 +240,17 @@ fun SummaryCard(
 }
 
 @Composable
-fun QuickMenuButton(icon: ImageVector, title: String) {
+fun QuickMenuButton(
+    icon: ImageVector,
+    title: String,
+    onClick: () -> Unit
+    ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.padding(8.dp)
+        modifier = Modifier
+            .clip(RoundedCornerShape(8.dp))
+            .clickable(onClick = onClick)
+            .padding(8.dp)
     ) {
         Box(
             modifier = Modifier
@@ -268,7 +317,13 @@ fun RecentTransactionsList() {
 @Composable
 fun DashboardPreviewLight() {
     FinanceAppTheme(darkTheme = false) {
-        HalamanDashboard(isLogin = false)
+        HalamanDashboard(
+            isLogin = false,
+            onNavigateToLogin = { },
+            onNavigateToNotification = { },
+            onNavigateToPocket = { },
+            onNavigateToReport = { }
+        )
     }
 }
 
@@ -276,7 +331,13 @@ fun DashboardPreviewLight() {
 @Composable
 fun DashboardPreviewDark() {
     FinanceAppTheme(darkTheme = true) {
-        HalamanDashboard(isLogin = false)
+        HalamanDashboard(
+            isLogin = false,
+            onNavigateToLogin = { },
+            onNavigateToNotification = { },
+            onNavigateToPocket = { },
+            onNavigateToReport = { }
+        )
     }
 }
 
@@ -284,7 +345,13 @@ fun DashboardPreviewDark() {
 @Composable
 fun DashboardPreviewLoginLight() {
     FinanceAppTheme(darkTheme = false) {
-        HalamanDashboard(isLogin = true)
+        HalamanDashboard(
+            isLogin = true,
+            onNavigateToLogin = { },
+            onNavigateToNotification = { },
+            onNavigateToPocket = { },
+            onNavigateToReport = { }
+        )
     }
 }
 
@@ -292,6 +359,12 @@ fun DashboardPreviewLoginLight() {
 @Composable
 fun DashboardPreviewLoginDark() {
     FinanceAppTheme(darkTheme = true) {
-        HalamanDashboard(isLogin = true)
+        HalamanDashboard(
+            isLogin = true,
+            onNavigateToLogin = { },
+            onNavigateToNotification = { },
+            onNavigateToPocket = { },
+            onNavigateToReport = { }
+        )
     }
 }

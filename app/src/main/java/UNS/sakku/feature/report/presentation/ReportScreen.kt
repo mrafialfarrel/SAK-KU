@@ -1,5 +1,6 @@
 package uns.sakku.feature.report.presentation
 
+import android.R.attr.onClick
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -27,19 +28,25 @@ import uns.sakku.ui.theme.FinanceAppTheme
 import uns.sakku.ui.theme.IncomeGreen
 import uns.sakku.ui.theme.ExpenseRed
 import uns.sakku.core.LocalBackStack
+import uns.sakku.core.Routes
+
 @Composable
 fun ReportScreen() {
     val backStack = LocalBackStack.current
 
-    // Pastikan UI aslimu diganti namanya dari ReportScreen menjadi HalamanReport
     HalamanReport(
+        // Alur: Report > Export
+        onNavigateToExport = { backStack.add(Routes.ExportRoute) },
+        // Kembali ke Dashboard
         onBackClick = { backStack.removeLastOrNull() }
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HalamanReport(onBackClick: () -> Unit = {}) {
+fun HalamanReport(
+    onNavigateToExport: () -> Unit = {},
+    onBackClick: () -> Unit = {}) {
     var selectedFilter by remember { mutableStateOf("1 Bulan") }
     val filters = listOf("1 Minggu", "1 Bulan", "3 Bulan", "6 Bulan", "1 Tahun")
 
@@ -53,7 +60,10 @@ fun HalamanReport(onBackClick: () -> Unit = {}) {
                     }
                 },
                 actions = {
-                    IconButton(onClick = { /* TODO: Ekspor ke CSV/PDF */ }) {
+                    IconButton(onClick = onNavigateToExport,
+                        modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .clickable(onClick = onNavigateToExport)) {
                         Icon(imageVector = Icons.Default.Download, contentDescription = "Ekspor", tint = MaterialTheme.colorScheme.onPrimary)
                     }
                 },
