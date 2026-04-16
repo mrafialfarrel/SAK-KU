@@ -26,31 +26,25 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import uns.sakku.ui.theme.FinanceAppTheme
+import uns.sakku.ui.theme.IncomeGreen
+import uns.sakku.ui.theme.ExpenseRed
 
 class NotificationActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            // Tema warna ungu Sakku
-            val sakkuColors = lightColorScheme(
-                primary = Color(0xFF6200EA),
-                secondary = Color(0xFFBB86FC),
-                background = Color(0xFFF9F9F9),
-                surface = Color.White
-            )
-
-            MaterialTheme(colorScheme = sakkuColors) {
+            FinanceAppTheme {
                 NotificationScreen(onBackClick = { finish() })
             }
         }
     }
 }
 
-// --- ENUM & DATA CLASS ---
 enum class NotificationType {
-    WARNING, // Peringatan (misal: Overbudget)
-    INFO,    // Informasi (misal: Laporan bulanan siap)
-    SUCCESS  // Keberhasilan (misal: Target tabungan tercapai)
+    WARNING,
+    INFO,
+    SUCCESS
 }
 
 data class NotificationItem(
@@ -65,7 +59,6 @@ data class NotificationItem(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotificationScreen(onBackClick: () -> Unit = {}) {
-    // Dummy Data Notifikasi (Mewakili user story Anda)
     val notifications = listOf(
         NotificationItem(
             id = "1",
@@ -104,10 +97,10 @@ fun NotificationScreen(onBackClick: () -> Unit = {}) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Notifikasi", fontWeight = FontWeight.Bold, color = Color.White) },
+                title = { Text("Notifikasi", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimary) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali", tint = Color.White)
+                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali", tint = MaterialTheme.colorScheme.onPrimary)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primary)
@@ -121,12 +114,10 @@ fun NotificationScreen(onBackClick: () -> Unit = {}) {
                 .padding(paddingValues)
         ) {
             if (notifications.isEmpty()) {
-                // UI Jika tidak ada notifikasi
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Belum ada notifikasi saat ini.", color = Color.Gray)
+                    Text("Belum ada notifikasi saat ini.", color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f))
                 }
             } else {
-                // LazyColumn = Versi Compose dari RecyclerView / For Loop untuk UI
                 LazyColumn(
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -142,15 +133,13 @@ fun NotificationScreen(onBackClick: () -> Unit = {}) {
 
 @Composable
 fun NotificationCard(notification: NotificationItem) {
-    // Menentukan ikon dan warna berdasarkan tipe notifikasi (mirip switch-case di C/Java)
     val (icon: ImageVector, iconColor: Color) = when (notification.type) {
-        NotificationType.WARNING -> Pair(Icons.Default.Warning, Color(0xFFF44336)) // Merah
-        NotificationType.INFO -> Pair(Icons.Default.Info, Color(0xFF03A9F4)) // Biru
-        NotificationType.SUCCESS -> Pair(Icons.Default.CheckCircle, Color(0xFF4CAF50)) // Hijau
+        NotificationType.WARNING -> Pair(Icons.Default.Warning, ExpenseRed)
+        NotificationType.INFO -> Pair(Icons.Default.Info, Color(0xFF03A9F4)) // Tetap biru untuk info
+        NotificationType.SUCCESS -> Pair(Icons.Default.CheckCircle, IncomeGreen)
     }
 
-    // Latar belakang kartu sedikit berbeda jika belum dibaca (isRead == false)
-    val cardBackgroundColor = if (notification.isRead) MaterialTheme.colorScheme.surface else Color(0xFFF3E5F5)
+    val cardBackgroundColor = if (notification.isRead) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f)
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -164,7 +153,6 @@ fun NotificationCard(notification: NotificationItem) {
                 .padding(16.dp),
             verticalAlignment = Alignment.Top
         ) {
-            // Ikon Notifikasi
             Box(
                 modifier = Modifier
                     .size(40.dp)
@@ -177,7 +165,6 @@ fun NotificationCard(notification: NotificationItem) {
 
             Spacer(modifier = Modifier.width(16.dp))
 
-            // Konten Teks
             Column(modifier = Modifier.weight(1f)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -188,13 +175,12 @@ fun NotificationCard(notification: NotificationItem) {
                         text = notification.title,
                         fontWeight = if (notification.isRead) FontWeight.Medium else FontWeight.Bold,
                         fontSize = 16.sp,
-                        color = Color.DarkGray,
+                        color = MaterialTheme.colorScheme.onSurface,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f)
                     )
 
-                    // Titik penanda belum dibaca
                     if (!notification.isRead) {
                         Spacer(modifier = Modifier.width(8.dp))
                         Box(
@@ -211,7 +197,7 @@ fun NotificationCard(notification: NotificationItem) {
                 Text(
                     text = notification.message,
                     fontSize = 14.sp,
-                    color = Color.Gray,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                     lineHeight = 20.sp
                 )
 
@@ -220,23 +206,25 @@ fun NotificationCard(notification: NotificationItem) {
                 Text(
                     text = notification.timestamp,
                     fontSize = 12.sp,
-                    color = Color.LightGray
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                 )
             }
         }
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, name = "Light Mode")
 @Composable
-fun NotificationPreview() {
-    val sakkuColors = lightColorScheme(
-        primary = Color(0xFF6200EA),
-        secondary = Color(0xFFBB86FC),
-        background = Color(0xFFF9F9F9),
-        surface = Color.White
-    )
-    MaterialTheme(colorScheme = sakkuColors) {
+fun NotificationPreviewLight() {
+    FinanceAppTheme(darkTheme = false) {
+        NotificationScreen()
+    }
+}
+
+@Preview(showBackground = true, name = "Dark Mode")
+@Composable
+fun NotificationPreviewDark() {
+    FinanceAppTheme(darkTheme = true) {
         NotificationScreen()
     }
 }

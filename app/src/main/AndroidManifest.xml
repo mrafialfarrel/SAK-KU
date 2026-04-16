@@ -15,9 +15,6 @@
             android:name="uns.sakku.feature.transaction.presentation.TransactionActivity"
             android:exported="false" />
         <activity
-            android:name="uns.sakku.feature.saving.presentation.SavingActivity"
-            android:exported="false" />
-        <activity
             android:name="uns.sakku.feature.report.presentation.ReportActivity"
             android:exported="false" />
         <activity

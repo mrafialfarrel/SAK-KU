@@ -9,10 +9,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
-import androidx.compose.material.icons.filled.Assessment
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -25,21 +23,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import uns.sakku.ui.theme.FinanceAppTheme
+import uns.sakku.ui.theme.IncomeGreen
+import uns.sakku.ui.theme.ExpenseRed
 
 // Mengingat arsitektur Anda, Activity ini bertugas sebagai penampung (host) untuk UI Dasbor
 class DashboardActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            // Tema warna ungu khusus untuk aplikasi Sakku
-            val sakkuColors = lightColorScheme(
-                primary = Color(0xFF6200EA), // Ungu Tua
-                secondary = Color(0xFFBB86FC), // Ungu Muda
-                background = Color(0xFFF9F9F9),
-                surface = Color.White
-            )
-
-            MaterialTheme(colorScheme = sakkuColors) {
+            FinanceAppTheme {
                 // Di aplikasi asli, nilai isLogin didapatkan dari AuthRepository/Sesi
                 DashboardScreen(isLogin = false)
             }
@@ -57,7 +50,7 @@ fun DashboardScreen(isLogin: Boolean = false) {
                     Text(
                         "Dasbor Keuangan",
                         fontWeight = FontWeight.Bold,
-                        color = Color.White
+                        color = MaterialTheme.colorScheme.onPrimary
                     )
                 },
                 actions = {
@@ -67,12 +60,12 @@ fun DashboardScreen(isLogin: Boolean = false) {
                             Icon(
                                 imageVector = Icons.Default.Notifications,
                                 contentDescription = "Notifikasi",
-                                tint = Color.White
+                                tint = MaterialTheme.colorScheme.onPrimary
                             )
                         }
                     } else {
                         TextButton(onClick = { /* TODO: Arahkan ke LoginActivity */ }) {
-                            Text("Login", color = Color.White, fontWeight = FontWeight.Bold)
+                            Text("Login", color = MaterialTheme.colorScheme.onPrimary, fontWeight = FontWeight.Bold)
                         }
                     }
                 },
@@ -89,68 +82,43 @@ fun DashboardScreen(isLogin: Boolean = false) {
                 .padding(paddingValues)
                 .padding(16.dp)
         ) {
-            // 1. Kartu Saldo & Ringkasan (Disusun berdampingan Kiri-Kanan)
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(IntrinsicSize.Max), // Tinggi row mengikuti konten tertinggi di dalamnya
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            // 1. Kartu Saldo Utama
+            BalanceCard()
+
+            // Kanan: Pemasukan (Atas) & Pengeluaran (Bawah) (Mengambil 45% ruang)
+            Column(
+                modifier = Modifier.weight(1f).fillMaxHeight(),
+                verticalArrangement = Arrangement.SpaceBetween
             ) {
-                // Kiri: Saldo (Mengambil 55% ruang)
-                BalanceCard(modifier = Modifier.weight(1.2f).fillMaxHeight())
-
-                // Kanan: Pemasukan (Atas) & Pengeluaran (Bawah) (Mengambil 45% ruang)
-                Column(
-                    modifier = Modifier.weight(1f).fillMaxHeight(),
-                    verticalArrangement = Arrangement.SpaceBetween
-                ) {
-                    SummaryCard(
-                        modifier = Modifier.weight(1f).fillMaxWidth(),
-                        title = "Pemasukan",
-                        amount = "Rp 5.2 Jt", // Disingkat agar tidak terpotong di layar kecil
-                        icon = Icons.Default.ArrowDownward,
-                        iconColor = Color(0xFF4CAF50)
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    SummaryCard(
-                        modifier = Modifier.weight(1f).fillMaxWidth(),
-                        title = "Pengeluaran",
-                        amount = "Rp 3.1 Jt", // Disingkat
-                        icon = Icons.Default.ArrowUpward,
-                        iconColor = Color(0xFFF44336)
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // 2. Menu Lain (Kantong & Laporan)
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                QuickMenuButton(
-                    icon = Icons.Default.AccountBalanceWallet,
-                    title = "Kantong"
+                SummaryCard(
+                    modifier = Modifier.weight(1f).fillMaxWidth(),
+                    title = "Pemasukan",
+                    amount = "Rp 5.2 Jt", // Disingkat agar tidak terpotong di layar kecil
+                    icon = Icons.Default.ArrowDownward,
+                    iconColor = IncomeGreen
                 )
-                QuickMenuButton(
-                    icon = Icons.Default.Assessment,
-                    title = "Laporan"
+                Spacer(modifier = Modifier.height(8.dp))
+                SummaryCard(
+                    modifier = Modifier.weight(1f).fillMaxWidth(),
+                    title = "Pengeluaran",
+                    amount = "Rp 3.1 Jt", // Disingkat
+                    icon = Icons.Default.ArrowUpward,
+                    iconColor = ExpenseRed
                 )
             }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // 3. Daftar Transaksi Terakhir (Placeholder)
-            Text(
-                text = "Transaksi Terakhir",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.DarkGray
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            RecentTransactionsList()
         }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // 3. Daftar Transaksi Terakhir (Placeholder)
+        Text(
+            text = "Transaksi Terakhir",
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        RecentTransactionsList()
     }
 }
 
@@ -168,9 +136,9 @@ fun BalanceCard(modifier: Modifier = Modifier) {
             modifier = Modifier.padding(16.dp).fillMaxSize(),
             verticalArrangement = Arrangement.Center
         ) {
-            Text(text = "Total Saldo Anda", color = Color.White.copy(alpha = 0.8f), fontSize = 12.sp)
+            Text(text = "Total Saldo Anda", color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f), fontSize = 12.sp)
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = "Rp 2.050.000", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+            Text(text = "Rp 2.050.000", color = MaterialTheme.colorScheme.onPrimary, fontSize = 20.sp, fontWeight = FontWeight.Bold)
         }
     }
 }
@@ -201,10 +169,10 @@ fun SummaryCard(
                     modifier = Modifier.size(16.dp)
                 )
                 Spacer(modifier = Modifier.width(4.dp))
-                Text(text = title, color = Color.Gray, fontSize = 11.sp)
+                Text(text = title, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f), fontSize = 11.sp)
             }
             Spacer(modifier = Modifier.height(4.dp))
-            Text(text = amount, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = Color.DarkGray)
+            Text(text = amount, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface)
         }
     }
 }
@@ -234,14 +202,13 @@ fun QuickMenuButton(icon: ImageVector, title: String) {
             text = title,
             fontSize = 12.sp,
             fontWeight = FontWeight.Medium,
-            color = Color.DarkGray
+            color = MaterialTheme.colorScheme.onBackground
         )
     }
 }
 
 @Composable
 fun RecentTransactionsList() {
-    // Data Dummy (Di arsitektur asli, ini akan didapat dari ViewModel -> Repository)
     val dummyData = listOf(
         Pair("Makan Siang", "- Rp 45.000"),
         Pair("Gaji Bulanan", "+ Rp 5.000.000"),
@@ -264,10 +231,10 @@ fun RecentTransactionsList() {
                         .padding(16.dp),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(text = transaction.first, fontWeight = FontWeight.Medium)
+                    Text(text = transaction.first, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurface)
                     Text(
                         text = transaction.second,
-                        color = if (transaction.second.startsWith("+")) Color(0xFF4CAF50) else Color(0xFFF44336),
+                        color = if (transaction.second.startsWith("+")) IncomeGreen else ExpenseRed,
                         fontWeight = FontWeight.Bold
                     )
                 }
@@ -276,31 +243,34 @@ fun RecentTransactionsList() {
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, name = "Light Mode - Guest")
 @Composable
-fun DashboardPreview() {
-    val sakkuColors = lightColorScheme(
-        primary = Color(0xFF6200EA),
-        secondary = Color(0xFFBB86FC),
-        background = Color(0xFFF9F9F9),
-        surface = Color.White
-    )
-    MaterialTheme(colorScheme = sakkuColors) {
-        // Menguji tampilan guest mode dengan isLogin = false
+fun DashboardPreviewLight() {
+    FinanceAppTheme(darkTheme = false) {
         DashboardScreen(isLogin = false)
     }
 }
-@Preview(showBackground = true)
+
+@Preview(showBackground = true, name = "Dark Mode - Guest")
 @Composable
-fun DashboardPreviewLogin() {
-    val sakkuColors = lightColorScheme(
-        primary = Color(0xFF6200EA),
-        secondary = Color(0xFFBB86FC),
-        background = Color(0xFFF9F9F9),
-        surface = Color.White
-    )
-    MaterialTheme(colorScheme = sakkuColors) {
-        // Menguji tampilan guest mode dengan isLogin = true
+fun DashboardPreviewDark() {
+    FinanceAppTheme(darkTheme = true) {
+        DashboardScreen(isLogin = false)
+    }
+}
+
+@Preview(showBackground = true, name = "Light Mode - Login")
+@Composable
+fun DashboardPreviewLoginLight() {
+    FinanceAppTheme(darkTheme = false) {
+        DashboardScreen(isLogin = true)
+    }
+}
+
+@Preview(showBackground = true, name = "Dark Mode - Login")
+@Composable
+fun DashboardPreviewLoginDark() {
+    FinanceAppTheme(darkTheme = true) {
         DashboardScreen(isLogin = true)
     }
 }

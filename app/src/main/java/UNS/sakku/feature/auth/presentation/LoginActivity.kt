@@ -20,12 +20,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import uns.sakku.UtamaActivity
+import uns.sakku.ui.theme.FinanceAppTheme
 
 class LoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            MaterialTheme {
+            FinanceAppTheme {
                 HalamanAuth(
                     onAuthSuccess = {
                         val intent = Intent(this, UtamaActivity::class.java)
@@ -48,14 +49,14 @@ fun HalamanAuth(onAuthSuccess: () -> Unit, isLoginMode: Boolean = true) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF9F9F9))
+            .background(MaterialTheme.colorScheme.background)
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text(text = if (isLoginMode) "Welcome Back" else "Create Account", fontSize = 28.sp, fontWeight = FontWeight.Bold, color = Color.DarkGray)
+        Text(text = if (isLoginMode) "Welcome Back" else "Create Account", fontSize = 28.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
         Spacer(modifier = Modifier.height(8.dp))
-        Text(text = if (isLoginMode) "Silakan login untuk melanjutkan" else "Daftar untuk mulai mengelola klip", fontSize = 14.sp, color = Color.Gray, textAlign = TextAlign.Center)
+        Text(text = if (isLoginMode) "Silakan login untuk melanjutkan" else "Daftar untuk mulai mengelola klip", fontSize = 14.sp, color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f), textAlign = TextAlign.Center)
         Spacer(modifier = Modifier.height(32.dp))
 
         if (!isLoginMode) {
@@ -71,32 +72,48 @@ fun HalamanAuth(onAuthSuccess: () -> Unit, isLoginMode: Boolean = true) {
         Button(
             onClick = onAuthSuccess,
             modifier = Modifier.fillMaxWidth().height(50.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE0E0E0)),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
             shape = RoundedCornerShape(25.dp)
         ) {
-            Text(text = if (isLoginMode) "Login" else "Register", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.DarkGray)
+            Text(text = if (isLoginMode) "Login" else "Register", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimary)
         }
 
         Spacer(modifier = Modifier.height(24.dp))
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-            Text(text = if (isLoginMode) "Belum punya akun? " else "Sudah punya akun? ", color = Color.Gray, fontSize = 14.sp)
-            Text(text = if (isLoginMode) "Daftar di sini" else "Login di sini", color = Color.DarkGray, fontSize = 14.sp, fontWeight = FontWeight.Bold, modifier = Modifier.clickable { isLoginMode = !isLoginMode; email = ""; password = ""; namaLengkap = "" })
+            Text(text = if (isLoginMode) "Belum punya akun? " else "Sudah punya akun? ", color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f), fontSize = 14.sp)
+            Text(text = if (isLoginMode) "Daftar di sini" else "Login di sini", color = MaterialTheme.colorScheme.primary, fontSize = 14.sp, fontWeight = FontWeight.Bold, modifier = Modifier.clickable { isLoginMode = !isLoginMode; email = ""; password = ""; namaLengkap = "" })
         }
     }
 }
 
-@Preview
+@Preview(showBackground = true, name = "Light Mode - Login")
 @Composable
-fun PreviewAuthScreen() {
-    MaterialTheme {
+fun PreviewAuthScreenLight() {
+    FinanceAppTheme(darkTheme = false) {
         HalamanAuth(onAuthSuccess = {})
     }
 }
-@Preview
+
+@Preview(showBackground = true, name = "Dark Mode - Login")
 @Composable
-fun PreviewAuthScreenRegister() {
-    MaterialTheme() {
-        // Menguji tampilan guest mode dengan isLogin = false
-        HalamanAuth(isLoginMode = false, onAuthSuccess = {});
+fun PreviewAuthScreenDark() {
+    FinanceAppTheme(darkTheme = true) {
+        HalamanAuth(onAuthSuccess = {})
+    }
+}
+
+@Preview(showBackground = true, name = "Light Mode - Register")
+@Composable
+fun PreviewAuthScreenRegisterLight() {
+    FinanceAppTheme(darkTheme = false) {
+        HalamanAuth(isLoginMode = false, onAuthSuccess = {})
+    }
+}
+
+@Preview(showBackground = true, name = "Dark Mode - Register")
+@Composable
+fun PreviewAuthScreenRegisterDark() {
+    FinanceAppTheme(darkTheme = true) {
+        HalamanAuth(isLoginMode = false, onAuthSuccess = {})
     }
 }

@@ -5,6 +5,10 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import uns.sakku.feature.auth.presentation.LoginActivity
 import uns.sakku.feature.dashboard.presentation.DashboardActivity
+import uns.sakku.feature.export.presentation.ExportActivity
+import uns.sakku.feature.notification.presentation.NotificationActivity
+import uns.sakku.feature.planner.presentation.PocketActivity
+import uns.sakku.feature.planner.presentation.PocketSavingActivity
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -15,7 +19,7 @@ class MainActivity : ComponentActivity() {
         // if (isLoggedIn) { go to UtamaActivity } else { go to LoginActivity }
 
         // Untuk saat ini, langsung arahkan ke LoginActivity
-        val intent = Intent(this, DashboardActivity::class.java)
+        val intent = Intent(this, PocketActivity::class.java)
         startActivity(intent)
 
         // Panggil finish() agar MainActivity mati.

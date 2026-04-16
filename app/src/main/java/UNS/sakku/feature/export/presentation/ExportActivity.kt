@@ -21,20 +21,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import uns.sakku.ui.theme.FinanceAppTheme
 
 class ExportActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            MaterialTheme {
+            FinanceAppTheme {
                 HalamanExport(
                     onNavigateBack = {
-                        finish() // Menutup activity dan kembali ke halaman sebelumnya
+                        finish()
                     },
                     onExportClicked = { format, rentangWaktu ->
-                        // Nanti di sini Anda memanggil UseCase dari layer Domain
-                        // Contoh: exportUseCase.execute(format, rentangWaktu)
-
                         Toast.makeText(
                             this,
                             "Mengekspor data ke $format untuk $rentangWaktu...",
@@ -53,17 +51,11 @@ fun HalamanExport(
     onNavigateBack: () -> Unit,
     onExportClicked: (String, String) -> Unit
 ) {
-    // State untuk menyimpan pilihan user
     var formatTerpilih by remember { mutableStateOf("PDF") }
     var rentangTerpilih by remember { mutableStateOf("1 Bulan Terakhir") }
 
-    // Opsi pilihan
     val opsiFormat = listOf("PDF", "CSV")
     val opsiRentang = listOf("1 Minggu Terakhir", "1 Bulan Terakhir", "3 Bulan Terakhir", "1 Tahun Terakhir")
-
-    // Tema Warna Ungu (Color Palette)
-    val purplePrimary = Color(0xFF6750A4)
-    val backgroundLight = Color(0xFFF7F2FA)
 
     Scaffold(
         topBar = {
@@ -75,13 +67,13 @@ fun HalamanExport(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = purplePrimary,
-                    titleContentColor = Color.White,
-                    navigationIconContentColor = Color.White
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
                 )
             )
         },
-        containerColor = backgroundLight
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -92,7 +84,7 @@ fun HalamanExport(
             Text(
                 text = "Pilih pengaturan untuk mengunduh laporan keuangan Anda.",
                 fontSize = 14.sp,
-                color = Color.Gray,
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
                 modifier = Modifier.padding(bottom = 24.dp)
             )
 
@@ -101,11 +93,11 @@ fun HalamanExport(
                 text = "Format Dokumen",
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp,
-                color = purplePrimary,
+                color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
             Card(
-                colors = CardDefaults.cardColors(containerColor = Color.White),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -124,9 +116,13 @@ fun HalamanExport(
                             RadioButton(
                                 selected = (format == formatTerpilih),
                                 onClick = { formatTerpilih = format },
-                                colors = RadioButtonDefaults.colors(selectedColor = purplePrimary)
+                                colors = RadioButtonDefaults.colors(selectedColor = MaterialTheme.colorScheme.primary)
                             )
-                            Text(text = format, modifier = Modifier.padding(start = 8.dp))
+                            Text(
+                                text = format,
+                                modifier = Modifier.padding(start = 8.dp),
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
                         }
                     }
                 }
@@ -139,11 +135,11 @@ fun HalamanExport(
                 text = "Rentang Waktu",
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp,
-                color = purplePrimary,
+                color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
             Card(
-                colors = CardDefaults.cardColors(containerColor = Color.White),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -162,9 +158,13 @@ fun HalamanExport(
                             RadioButton(
                                 selected = (rentang == rentangTerpilih),
                                 onClick = { rentangTerpilih = rentang },
-                                colors = RadioButtonDefaults.colors(selectedColor = purplePrimary)
+                                colors = RadioButtonDefaults.colors(selectedColor = MaterialTheme.colorScheme.primary)
                             )
-                            Text(text = rentang, modifier = Modifier.padding(start = 8.dp))
+                            Text(
+                                text = rentang,
+                                modifier = Modifier.padding(start = 8.dp),
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
                         }
                     }
                 }
@@ -179,24 +179,38 @@ fun HalamanExport(
                     .fillMaxWidth()
                     .height(56.dp),
                 shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = purplePrimary)
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
                 Icon(
                     imageVector = Icons.Default.CheckCircle,
                     contentDescription = "Export Icon",
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier.size(20.dp),
+                    tint = MaterialTheme.colorScheme.onPrimary
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(text = "Ekspor Sekarang", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                Text(
+                    text = "Ekspor Sekarang",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
             }
         }
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, name = "Light Mode")
 @Composable
-fun PreviewHalamanExport() {
-    MaterialTheme {
+fun PreviewHalamanExportLight() {
+    FinanceAppTheme(darkTheme = false) {
+        HalamanExport(onNavigateBack = {}, onExportClicked = { _, _ -> })
+    }
+}
+
+@Preview(showBackground = true, name = "Dark Mode")
+@Composable
+fun PreviewHalamanExportDark() {
+    FinanceAppTheme(darkTheme = true) {
         HalamanExport(onNavigateBack = {}, onExportClicked = { _, _ -> })
     }
 }
