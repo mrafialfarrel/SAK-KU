@@ -12,7 +12,9 @@ import uns.sakku.feature.auth.presentation.LoginScreen
 import uns.sakku.feature.dashboard.presentation.DashboardScreen
 import uns.sakku.feature.export.presentation.ExportScreen
 import uns.sakku.feature.notification.presentation.NotificationScreen
-import uns.sakku.feature.pocket.presentation.PocketScreen
+import uns.sakku.feature.pocket.presentation.PocketSavingScreen
+import uns.sakku.feature.pocket.presentation.PocketsScreen
+import uns.sakku.feature.pocket.presentation.SavingsScreen
 import uns.sakku.feature.report.presentation.ReportScreen
 import uns.sakku.feature.transaction.presentation.TransactionScreen
 
@@ -42,8 +44,11 @@ fun ComposeApp() {
                     entry<Routes.TransactionRoute> { TransactionScreen() }
                     entry<Routes.ReportRoute> { ReportScreen() }
                     entry<Routes.NotificationRoute> { NotificationScreen() }
-                    entry<Routes.PocketRoute> { PocketScreen() }
                     entry<Routes.ExportRoute> { ExportScreen() }
+                    entry<Routes.PocketSavingRoute> { PocketSavingScreen() }
+//                    Rute PocketSavingScreen
+                    entry<Routes.SavingsRoute> { SavingsScreen() }
+                    entry<Routes.PocketsRoute> { PocketsScreen() }
                 }
             )
         }

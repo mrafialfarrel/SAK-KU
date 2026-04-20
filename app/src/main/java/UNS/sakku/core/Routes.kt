@@ -9,10 +9,6 @@ object Routes {
     @Serializable
     data object AuthRoute : NavKey
 
-    // Rute Utama / Dashboard
-    @Serializable
-    data object UtamaRoute : NavKey
-
     @Serializable
     data object DashboardRoute : NavKey
 
@@ -27,15 +23,14 @@ object Routes {
     data object NotificationRoute : NavKey
 
     @Serializable
-    data object PocketRoute : NavKey
+    data object PocketSavingRoute : NavKey
 
+    @Serializable
+    data object SavingsRoute : NavKey
+
+    @Serializable
+    data object PocketsRoute : NavKey
     @Serializable
     data object ExportRoute : NavKey
 
-    @Serializable
-    data object ProfileRoute : NavKey
-
-    // CONTOH JIKA BUTUH PARAMETER NANTINYA (misal detail transaksi):
-    // @Serializable
-    // data class DetailTransactionRoute(val id: String) : NavKey
 }

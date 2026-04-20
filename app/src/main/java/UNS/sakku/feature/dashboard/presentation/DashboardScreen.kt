@@ -1,6 +1,5 @@
 package uns.sakku.feature.dashboard.presentation
 
-import android.R.attr.onClick
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -40,7 +39,7 @@ fun DashboardScreen() {
         // Alur: Dashboard > Notification
         onNavigateToNotification = { backStack.add(Routes.NotificationRoute) },
         // Alur: Dashboard > Pocket
-        onNavigateToPocket = { backStack.add(Routes.PocketRoute) },
+        onNavigateToPocket = { backStack.add(Routes.PocketSavingRoute) },
         // Alur: Dashboard > Report
         onNavigateToReport = { backStack.add(Routes.ReportRoute) }
     )

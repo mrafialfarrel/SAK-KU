@@ -1,6 +1,5 @@
 package uns.sakku.feature.report.presentation
 
-import android.R.attr.onClick
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background

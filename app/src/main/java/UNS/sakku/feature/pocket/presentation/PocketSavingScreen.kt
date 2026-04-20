@@ -26,24 +26,25 @@ import uns.sakku.core.LocalBackStack
 import uns.sakku.core.Routes
 
 @Composable
-fun PocketScreen() {
+fun PocketSavingScreen() {
     val backStack = LocalBackStack.current
 
     // Pastikan UI aslimu diganti namanya dari PocketScreen menjadi HalamanPocket
-    HalamanPocket(
+    HalamanPocketSaving(
         // Alur: Pocket > Transaction
         onNavigateToTransaction = { backStack.add(Routes.TransactionRoute) },
+        onNavigateToSavings = { backStack.add(Routes.SavingsRoute) }, // Rute ke full screen tabungan
+        onNavigateToPockets = { backStack.add(Routes.PocketsRoute) }, // Rute ke full screen pengeluaran
         onBackClick = { backStack.removeLastOrNull() }
     )
 }
 
-data class SavingGoal(val name: String, val target: Float, val currentAmount: Float)
-data class PocketBudget(val category: String, val limit: Float, val spentAmount: Float)
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HalamanPocket(
+fun HalamanPocketSaving(
     onNavigateToTransaction: () -> Unit,
+    onNavigateToSavings: () -> Unit,
+    onNavigateToPockets: () -> Unit,
     onBackClick: () -> Unit = {}) {
     val savings = listOf(
         SavingGoal("Dana Darurat", 10000000f, 4500000f),
@@ -98,7 +99,7 @@ fun HalamanPocket(
                     fontSize = 18.sp,
                     color = MaterialTheme.colorScheme.onBackground
                 )
-                TextButton(onClick = { /* TODO: Aksi lihat semua tabungan */ }) {
+                TextButton(onClick = onNavigateToSavings) {
                     Text(
                         text = ">",
                         color = MaterialTheme.colorScheme.primary,
@@ -143,7 +144,7 @@ fun HalamanPocket(
                     fontSize = 18.sp,
                     color = MaterialTheme.colorScheme.onBackground
                 )
-                TextButton(onClick = { /* TODO: Aksi lihat semua tabungan */ }) {
+                TextButton(onClick = onNavigateToPockets) {
                     Text(text = ">", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                 }
             }
@@ -175,128 +176,29 @@ fun HalamanPocket(
     }
 }
 
-@Composable
-fun SavingCard(saving: SavingGoal) {
-    val progressPercentage = if (saving.target > 0) (saving.currentAmount / saving.target) else 0f
-
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text(text = saving.name, fontWeight = FontWeight.Bold, fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurface)
-                Text(text = "${(progressPercentage * 100).toInt()}%", fontWeight = FontWeight.Bold, color = IncomeGreen)
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(text = "Terkumpul: Rp ${saving.currentAmount.toInt()} / Rp ${saving.target.toInt()}", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(8.dp)
-                    .clip(RoundedCornerShape(4.dp))
-                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(progressPercentage.coerceIn(0f, 1f))
-                        .fillMaxHeight()
-                        .background(IncomeGreen)
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun PocketCard(pocket: PocketBudget) {
-    val progressPercentage = if (pocket.limit > 0) (pocket.spentAmount / pocket.limit) else 0f
-
-    val isOverBudget = pocket.spentAmount > pocket.limit
-    val barColor = if (isOverBudget) ExpenseRed else MaterialTheme.colorScheme.primary
-    val textColor = if (isOverBudget) ExpenseRed else MaterialTheme.colorScheme.onSurface
-
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = if (isOverBudget) ExpenseRed.copy(alpha = 0.1f) else MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(text = pocket.category, fontWeight = FontWeight.Bold, fontSize = 16.sp, color = textColor)
-
-                if (isOverBudget) {
-                    Icon(imageVector = Icons.Default.Warning, contentDescription = "Over Budget", tint = ExpenseRed, modifier = Modifier.size(20.dp))
-                }
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text(text = "Terpakai: Rp ${pocket.spentAmount.toInt()}", fontSize = 12.sp, color = textColor, fontWeight = if(isOverBudget) FontWeight.Bold else FontWeight.Normal)
-                Text(text = "Batas: Rp ${pocket.limit.toInt()}", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(8.dp)
-                    .clip(RoundedCornerShape(4.dp))
-                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(progressPercentage.coerceIn(0f, 1f))
-                        .fillMaxHeight()
-                        .background(barColor)
-                )
-            }
-
-            if (isOverBudget) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "Perhatian: Anda telah melewati batas anggaran kantong ini!",
-                    color = ExpenseRed,
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Medium
-                )
-            }
-        }
-    }
-}
 
 @Preview(showBackground = true, name = "Light Mode")
 @Composable
-fun PocketPreviewLight() {
+fun PocketSavingPreviewLight() {
     FinanceAppTheme(darkTheme = false) {
-        HalamanPocket(
+        HalamanPocketSaving(
             onNavigateToTransaction = { },
-            onBackClick = { }
+            onBackClick = { },
+            onNavigateToSavings = { },
+            onNavigateToPockets = { }
         )
     }
 }
 
 @Preview(showBackground = true, name = "Dark Mode")
 @Composable
-fun PocketPreviewDark() {
+fun PocketSavingPreviewDark() {
     FinanceAppTheme(darkTheme = true) {
-        HalamanPocket(
+        HalamanPocketSaving(
             onNavigateToTransaction = { },
-            onBackClick = { }
+            onBackClick = { },
+            onNavigateToSavings = { },
+            onNavigateToPockets = { }
         )
     }
 }
