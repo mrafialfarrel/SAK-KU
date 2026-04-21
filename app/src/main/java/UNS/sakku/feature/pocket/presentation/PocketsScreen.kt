@@ -15,18 +15,32 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import uns.sakku.ui.theme.ExpenseRed
 import uns.sakku.core.LocalBackStack
+import uns.sakku.core.Routes
+import uns.sakku.ui.theme.FinanceAppTheme
 
 data class PocketBudget(val category: String, val limit: Float, val spentAmount: Float)
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PocketsScreen() {
     val backStack = LocalBackStack.current
 
+    HalamanPockets(
+        onNavigateBack = { backStack.removeLastOrNull() },
+        onNavigateToAdd = { backStack.add(Routes.AddPocketSavingRoute(initialIsTabungan = false)) }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun HalamanPockets(
+    onNavigateBack: () -> Unit,
+    onNavigateToAdd: () -> Unit
+) {
     // Simulasi data
     val pockets = listOf(
         PocketBudget("Makanan & Minuman", 2000000f, 1500000f),
@@ -40,7 +54,7 @@ fun PocketsScreen() {
             TopAppBar(
                 title = { Text("Batas Pengeluaran", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimary) },
                 navigationIcon = {
-                    IconButton(onClick = { backStack.removeLastOrNull() }) {
+                    IconButton(onClick = onNavigateBack) {
                         Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali", tint = MaterialTheme.colorScheme.onPrimary)
                     }
                 },
@@ -57,7 +71,7 @@ fun PocketsScreen() {
                 .verticalScroll(rememberScrollState())
         ) {
             OutlinedButton(
-                onClick = { /* TODO: Aksi tambah kantong */ },
+                onClick = onNavigateToAdd,
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp)
             ) {
@@ -138,5 +152,26 @@ fun PocketCard(pocket: PocketBudget) {
                 )
             }
         }
+    }
+}
+@Preview(showBackground = true, name = "Light Mode")
+@Composable
+fun PocketsPreviewLight() {
+    FinanceAppTheme(darkTheme = false) {
+        HalamanPockets(
+            onNavigateBack = {},
+            onNavigateToAdd = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Dark Mode")
+@Composable
+fun PocketsPreviewDark() {
+    FinanceAppTheme(darkTheme = true) {
+        HalamanPockets(
+            onNavigateBack = {},
+            onNavigateToAdd = {}
+        )
     }
 }

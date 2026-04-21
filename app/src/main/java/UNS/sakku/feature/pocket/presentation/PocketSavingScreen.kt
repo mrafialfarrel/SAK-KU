@@ -9,19 +9,15 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import uns.sakku.ui.theme.FinanceAppTheme
-import uns.sakku.ui.theme.IncomeGreen
-import uns.sakku.ui.theme.ExpenseRed
 import uns.sakku.core.LocalBackStack
 import uns.sakku.core.Routes
 
@@ -35,6 +31,7 @@ fun PocketSavingScreen() {
         onNavigateToTransaction = { backStack.add(Routes.TransactionRoute) },
         onNavigateToSavings = { backStack.add(Routes.SavingsRoute) }, // Rute ke full screen tabungan
         onNavigateToPockets = { backStack.add(Routes.PocketsRoute) }, // Rute ke full screen pengeluaran
+        onNavigateToAddPocketSaving = {isTabungan -> backStack.add(Routes.AddPocketSavingRoute(initialIsTabungan = isTabungan))}, // Rute ke tambah tabungan/kantong
         onBackClick = { backStack.removeLastOrNull() }
     )
 }
@@ -45,6 +42,7 @@ fun HalamanPocketSaving(
     onNavigateToTransaction: () -> Unit,
     onNavigateToSavings: () -> Unit,
     onNavigateToPockets: () -> Unit,
+    onNavigateToAddPocketSaving: (Boolean) -> Unit,
     onBackClick: () -> Unit = {}) {
     val savings = listOf(
         SavingGoal("Dana Darurat", 10000000f, 4500000f),
@@ -114,7 +112,7 @@ fun HalamanPocketSaving(
             )
 
             OutlinedButton(
-                onClick = { /* TODO: Aksi tambah tabungan */ },
+                onClick = { onNavigateToAddPocketSaving(true) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp)
             ) {
@@ -156,13 +154,13 @@ fun HalamanPocketSaving(
             Spacer(modifier = Modifier.height(16.dp))
 
             OutlinedButton(
-                onClick = { /* TODO: Aksi tambah tabungan */ },
+                onClick = { onNavigateToAddPocketSaving(false) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Icon(imageVector = Icons.Default.Add, contentDescription = "Tambah Tabungan", modifier = Modifier.size(18.dp))
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(text = "Tambah Tabungan")
+                Text(text = "Tambah Kantong")
             }
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -185,7 +183,8 @@ fun PocketSavingPreviewLight() {
             onNavigateToTransaction = { },
             onBackClick = { },
             onNavigateToSavings = { },
-            onNavigateToPockets = { }
+            onNavigateToPockets = { },
+            onNavigateToAddPocketSaving = {  }
         )
     }
 }
@@ -198,7 +197,8 @@ fun PocketSavingPreviewDark() {
             onNavigateToTransaction = { },
             onBackClick = { },
             onNavigateToSavings = { },
-            onNavigateToPockets = { }
+            onNavigateToPockets = { },
+            onNavigateToAddPocketSaving = {}
         )
     }
 }

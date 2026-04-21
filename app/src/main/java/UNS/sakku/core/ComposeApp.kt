@@ -12,6 +12,7 @@ import uns.sakku.feature.auth.presentation.LoginScreen
 import uns.sakku.feature.dashboard.presentation.DashboardScreen
 import uns.sakku.feature.export.presentation.ExportScreen
 import uns.sakku.feature.notification.presentation.NotificationScreen
+import uns.sakku.feature.pocket.presentation.AddPocketSavingScreen
 import uns.sakku.feature.pocket.presentation.PocketSavingScreen
 import uns.sakku.feature.pocket.presentation.PocketsScreen
 import uns.sakku.feature.pocket.presentation.SavingsScreen
@@ -49,6 +50,9 @@ fun ComposeApp() {
 //                    Rute PocketSavingScreen
                     entry<Routes.SavingsRoute> { SavingsScreen() }
                     entry<Routes.PocketsRoute> { PocketsScreen() }
+                    entry<Routes.AddPocketSavingRoute> { route ->
+                        AddPocketSavingScreen(initialIsTabungan = route.initialIsTabungan)
+                    }
                 }
             )
         }

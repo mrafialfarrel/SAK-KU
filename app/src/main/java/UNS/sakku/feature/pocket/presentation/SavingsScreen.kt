@@ -13,17 +13,32 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import uns.sakku.ui.theme.IncomeGreen
 import uns.sakku.core.LocalBackStack
+import uns.sakku.core.Routes
+import uns.sakku.ui.theme.FinanceAppTheme
 
 data class SavingGoal(val name: String, val target: Float, val currentAmount: Float)
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SavingsScreen() {
     val backStack = LocalBackStack.current
+
+    HalamanSavings(
+        onNavigateBack = { backStack.removeLastOrNull() },
+        onNavigateToAdd = { backStack.add(Routes.AddPocketSavingRoute(initialIsTabungan = true)) }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun HalamanSavings(
+    onNavigateBack: () -> Unit,
+    onNavigateToAdd: () -> Unit
+) {
 
     // Simulasi data (bisa diganti dari ViewModel nantinya)
     val savings = listOf(
@@ -37,7 +52,7 @@ fun SavingsScreen() {
             TopAppBar(
                 title = { Text("Semua Tabungan", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimary) },
                 navigationIcon = {
-                    IconButton(onClick = { backStack.removeLastOrNull() }) {
+                    IconButton(onClick = onNavigateBack) {
                         Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali", tint = MaterialTheme.colorScheme.onPrimary)
                     }
                 },
@@ -54,7 +69,7 @@ fun SavingsScreen() {
                 .verticalScroll(rememberScrollState())
         ) {
             OutlinedButton(
-                onClick = { /* TODO: Aksi tambah tabungan */ },
+                onClick = onNavigateToAdd,
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp)
             ) {
@@ -109,5 +124,26 @@ fun SavingCard(saving: SavingGoal) {
                 )
             }
         }
+    }
+}
+@Preview(showBackground = true, name = "Light Mode")
+@Composable
+fun SavingsPreviewLight() {
+    FinanceAppTheme(darkTheme = false) {
+        HalamanSavings(
+            onNavigateBack = {},
+            onNavigateToAdd = {  }
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Dark Mode")
+@Composable
+fun SavingsPreviewDark() {
+    FinanceAppTheme(darkTheme = true) {
+        HalamanSavings(
+            onNavigateBack = { },
+            onNavigateToAdd = { }
+        )
     }
 }
