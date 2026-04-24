@@ -27,6 +27,7 @@ import uns.sakku.ui.theme.FinanceAppTheme
 import uns.sakku.ui.theme.IncomeGreen
 import uns.sakku.ui.theme.ExpenseRed
 import uns.sakku.core.LocalBackStack
+import uns.sakku.core.SharedTransactionState
 // Data Class diperbarui untuk menampung Kategori dan Alokasi (Tabungan/Kantong)
 data class TransactionItem(
     val id: String,
@@ -52,7 +53,7 @@ fun HalamanTransaction(initialIsPemasukan: Boolean = false,
                        onNavigateBack: () -> Unit) {
     val context = LocalContext.current
 
-    val transaksiList = remember { mutableStateListOf<TransactionItem>() }
+    val transaksiList = SharedTransactionState.transaksiList
 
     var keterangan by remember { mutableStateOf("") }
     var nominal by remember { mutableStateOf("") }
@@ -69,16 +70,16 @@ fun HalamanTransaction(initialIsPemasukan: Boolean = false,
     var editId by remember { mutableStateOf<String?>(null) }
 
     // Data Hardcode untuk Dropdown
-    val listKategoriPemasukan = listOf("Gaji", "Hadiah", "Bonus")
-    val listKategoriPengeluaran = listOf("Konsumsi", "Transportasi", "Darurat")
+    val listKategoriPemasukan = listOf("Gaji", "Hadiah", "Uang Saku")
+    val listKategoriPengeluaran = listOf("Konsumsi", "Transportasi", "Darurat", "Hiburan" )
 
     val listTabungan = listOf("Beli Laptop", "Tabungan Dana Darurat")
-    val listKantong = listOf("Konsumsi", "Transportasi", "Darurat") // Sesuai permintaan, isinya sama dengan pengeluaran
+    val listKantong = listOf("Konsumsi", "Transportasi", "Darurat", "Hiburan") // Sesuai permintaan, isinya sama dengan pengeluaran
 
     // Logika Dinamis: Menentukan list mana yang dipakai berdasarkan isPemasukan
     val currentKategoriList = if (isPemasukan) listKategoriPemasukan else listKategoriPengeluaran
     val currentAlokasiList = if (isPemasukan) listTabungan else listKantong
-    val alokasiLabel = if (isPemasukan) "Pilih Tabungan" else "Pilih Kantong"
+    val alokasiLabel = "Pilih Kantong"
 
     Scaffold(
         topBar = {

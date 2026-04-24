@@ -23,11 +23,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import java.text.NumberFormat
+import java.util.Locale
 import uns.sakku.ui.theme.FinanceAppTheme
 import uns.sakku.ui.theme.IncomeGreen
 import uns.sakku.ui.theme.ExpenseRed
 import uns.sakku.core.Routes
 import uns.sakku.core.LocalBackStack
+import uns.sakku.core.SharedTransactionState
+
 @Composable
 fun DashboardScreen() {
     val backStack = LocalBackStack.current
@@ -53,6 +57,13 @@ fun HalamanDashboard(
     onNavigateToNotification: () -> Unit,
     onNavigateToPocket: () -> Unit,
     onNavigateToReport: () -> Unit) {
+
+    // --- TAMBAHAN BARU: Hitung total Saldo, Pemasukan, dan Pengeluaran secara dinamis ---
+    val transaksiList = SharedTransactionState.transaksiList
+    val totalPemasukan = transaksiList.filter { it.isPemasukan }.sumOf { it.nominal }
+    val totalPengeluaran = transaksiList.filter { !it.isPemasukan }.sumOf { it.nominal }
+    val totalSaldo = totalPemasukan - totalPengeluaran
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -67,9 +78,9 @@ fun HalamanDashboard(
                     if (isLogin) {
                         // PERBAIKAN: Gunakan pemanggilan fungsi yang benar
                         IconButton(onClick = onNavigateToNotification,
-                                modifier = Modifier
+                            modifier = Modifier
                                 .clip(RoundedCornerShape(8.dp))
-                            .clickable(onClick = onNavigateToNotification)) {
+                                .clickable(onClick = onNavigateToNotification)) {
                             Icon(
                                 imageVector = Icons.Default.Notifications,
                                 contentDescription = "Notifikasi",
@@ -110,9 +121,12 @@ fun HalamanDashboard(
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 // Kiri: Saldo (Mengambil 55% ruang)
-                BalanceCard(modifier = Modifier
-                    .weight(1.2f)
-                    .fillMaxHeight())
+                BalanceCard(
+                    modifier = Modifier
+                        .weight(1.2f)
+                        .fillMaxHeight(),
+                    saldo = totalSaldo
+                )
 
                 // Kanan: Pemasukan (Atas) & Pengeluaran (Bawah) (Mengambil 45% ruang)
                 Column(
@@ -126,7 +140,7 @@ fun HalamanDashboard(
                             .weight(1f)
                             .fillMaxWidth(),
                         title = "Pemasukan",
-                        amount = "Rp 5.2 Jt", // Disingkat agar tidak terpotong di layar kecil
+                        amount = formatRupiahDasbor(totalPemasukan),
                         icon = Icons.Default.ArrowDownward,
                         iconColor = IncomeGreen
                     )
@@ -136,7 +150,7 @@ fun HalamanDashboard(
                             .weight(1f)
                             .fillMaxWidth(),
                         title = "Pengeluaran",
-                        amount = "Rp 3.1 Jt", // Disingkat
+                        amount = formatRupiahDasbor(totalPengeluaran),
                         icon = Icons.Default.ArrowUpward,
                         iconColor = ExpenseRed
                     )
@@ -166,7 +180,7 @@ fun HalamanDashboard(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // 3. Daftar Transaksi Terakhir (Placeholder)
+            // 3. Daftar Transaksi Terakhir
             Text(
                 text = "Transaksi Terakhir",
                 fontSize = 18.sp,
@@ -180,7 +194,7 @@ fun HalamanDashboard(
 }
 
 @Composable
-fun BalanceCard(modifier: Modifier = Modifier) {
+fun BalanceCard(modifier: Modifier = Modifier, saldo: Double) {
     Card(
         modifier = modifier,
         shape = RoundedCornerShape(16.dp),
@@ -197,7 +211,7 @@ fun BalanceCard(modifier: Modifier = Modifier) {
         ) {
             Text(text = "Total Saldo Anda", color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f), fontSize = 12.sp)
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = "Rp 2.050.000", color = MaterialTheme.colorScheme.onPrimary, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+            Text(text = formatRupiahDasbor(saldo), color = MaterialTheme.colorScheme.onPrimary, fontSize = 20.sp, fontWeight = FontWeight.Bold)
         }
     }
 }
@@ -243,7 +257,7 @@ fun QuickMenuButton(
     icon: ImageVector,
     title: String,
     onClick: () -> Unit
-    ) {
+) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
@@ -277,39 +291,50 @@ fun QuickMenuButton(
 
 @Composable
 fun RecentTransactionsList() {
-    // Data Dummy (Di arsitektur asli, ini akan didapat dari ViewModel -> Repository)
-    val dummyData = listOf(
-        Pair("Makan Siang", "- Rp 45.000"),
-        Pair("Gaji Bulanan", "+ Rp 5.000.000"),
-        Pair("Beli Kopi", "- Rp 25.000"),
-        Pair("Langganan Internet", "- Rp 350.000")
-    )
+    val transaksiList = SharedTransactionState.transaksiList
 
-    LazyColumn(
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        items(dummyData) { transaction ->
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                shape = RoundedCornerShape(8.dp)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
+    if (transaksiList.isEmpty()) {
+        Box(modifier = Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
+            Text("Belum ada transaksi terbaru.", color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f))
+        }
+    } else {
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            // Tampilkan 5 transaksi terakhir saja, dibalik agar yang terbaru di atas
+            items(transaksiList.reversed().take(5)) { transaction ->
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    shape = RoundedCornerShape(8.dp)
                 ) {
-                    Text(text = transaction.first, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurface)
-                    Text(
-                        text = transaction.second,
-                        color = if (transaction.second.startsWith("+")) IncomeGreen else ExpenseRed,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(text = transaction.keterangan, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurface)
+
+                        val symbol = if (transaction.isPemasukan) "+" else "-"
+                        val color = if (transaction.isPemasukan) IncomeGreen else ExpenseRed
+
+                        Text(
+                            text = "$symbol ${formatRupiahDasbor(transaction.nominal)}",
+                            color = color,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
             }
         }
     }
+}
+
+fun formatRupiahDasbor(number: Double): String {
+    val localeID = Locale("in", "ID")
+    val formatRupiah = NumberFormat.getCurrencyInstance(localeID)
+    return formatRupiah.format(number).replace("Rp", "Rp ").replace(",00", "")
 }
 
 @Preview(showBackground = true, name = "Light Mode - Guest")

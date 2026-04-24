@@ -44,15 +44,18 @@ fun HalamanPocketSaving(
     onNavigateToPockets: () -> Unit,
     onNavigateToAddPocketSaving: (Boolean) -> Unit,
     onBackClick: () -> Unit = {}) {
+
+    // Nilai saat ini (currentAmount) diubah menjadi 0f agar bar persentase mulai dari 0%
     val savings = listOf(
-        SavingGoal("Dana Darurat", 10000000f, 4500000f),
-        SavingGoal("Beli Laptop Baru", 15000000f, 2000000f)
+        SavingGoal("Dana Darurat", 10000000f, 0f),
+        SavingGoal("Beli Laptop Baru", 15000000f, 0f)
     )
 
+    // Nilai terpakai (spentAmount) diubah menjadi 0f agar bar pengeluaran mulai dari 0%
     val pockets = listOf(
-        PocketBudget("Makanan & Minuman", 2000000f, 1500000f),
-        PocketBudget("Transportasi", 500000f, 400000f),
-        PocketBudget("Hiburan", 500000f, 650000f)
+        PocketBudget("Makanan & Minuman", 2000000f, 0f),
+        PocketBudget("Transportasi", 500000f, 0f),
+        PocketBudget("Hiburan", 500000f, 0f)
     )
 
     Scaffold(
@@ -147,9 +150,9 @@ fun HalamanPocketSaving(
                 }
             }
             Text(
-                    text = "Pantau batas pengeluaran kategori Anda bulan ini.",
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+                text = "Pantau batas pengeluaran kategori Anda bulan ini.",
+                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
             )
             Spacer(modifier = Modifier.height(16.dp))
 
