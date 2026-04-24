@@ -1,5 +1,6 @@
 package uns.sakku.feature.auth.presentation
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -8,6 +9,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
@@ -33,6 +35,7 @@ fun LoginScreen() {
 
 @Composable
 fun HalamanAuth(onAuthSuccess: () -> Unit, ComposeIsLoginMode: Boolean = true) {
+    val context = LocalContext.current // Ditambahkan untuk memunculkan Toast
 
     var isLoginMode  by remember { mutableStateOf(ComposeIsLoginMode) }
     var namaLengkap by remember { mutableStateOf("") }
@@ -63,7 +66,26 @@ fun HalamanAuth(onAuthSuccess: () -> Unit, ComposeIsLoginMode: Boolean = true) {
         Spacer(modifier = Modifier.height(32.dp))
 
         Button(
-            onClick = onAuthSuccess,
+            onClick = {
+                // Validasi Input
+                if (isLoginMode) {
+                    if (email.isNotBlank() && password.isNotBlank()) {
+                        // Output untuk Developer berupa Toast
+                        Toast.makeText(context, "Developer Info -> Login Email: $email, Pass: $password", Toast.LENGTH_LONG).show()
+                        onAuthSuccess()
+                    } else {
+                        Toast.makeText(context, "Harap isi Email dan Password terlebih dahulu", Toast.LENGTH_SHORT).show()
+                    }
+                } else {
+                    if (namaLengkap.isNotBlank() && email.isNotBlank() && password.isNotBlank()) {
+                        // Output untuk Developer berupa Toast
+                        Toast.makeText(context, "Developer Info -> Register Nama: $namaLengkap, Email: $email, Pass: $password", Toast.LENGTH_LONG).show()
+                        onAuthSuccess()
+                    } else {
+                        Toast.makeText(context, "Harap isi semua kolom pendaftaran", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            },
             modifier = Modifier.fillMaxWidth().height(50.dp),
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
             shape = RoundedCornerShape(25.dp)
