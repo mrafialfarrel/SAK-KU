@@ -111,7 +111,6 @@ fun HalamanDashboard(
                 .background(MaterialTheme.colorScheme.background)
                 .padding(paddingValues)
                 .padding(16.dp)
-                .clickable(onClick = onNavigateToLogin)
         ) {
             // 1. Kartu Saldo & Ringkasan (Disusun berdampingan Kiri-Kanan)
             Row(
