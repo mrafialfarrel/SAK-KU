@@ -22,6 +22,8 @@ import uns.sakku.ui.theme.ExpenseRed
 import uns.sakku.core.LocalBackStack
 import uns.sakku.core.Routes
 import uns.sakku.ui.theme.FinanceAppTheme
+import uns.sakku.feature.pocket.presentation.components.PocketBudget
+import uns.sakku.feature.pocket.presentation.components.PocketCard
 
 data class PocketBudget(val category: String, val limit: Float, val spentAmount: Float)
 
@@ -90,70 +92,6 @@ fun HalamanPockets(
     }
 }
 
-@Composable
-fun PocketCard(pocket: PocketBudget) {
-    val progressPercentage = if (pocket.limit > 0) (pocket.spentAmount / pocket.limit) else 0f
-
-    val isOverBudget = pocket.spentAmount > pocket.limit
-    val barColor = if (isOverBudget) ExpenseRed else MaterialTheme.colorScheme.primary
-    val textColor = if (isOverBudget) ExpenseRed else MaterialTheme.colorScheme.onSurface
-
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = if (isOverBudget) ExpenseRed.copy(alpha = 0.1f) else MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(text = pocket.category, fontWeight = FontWeight.Bold, fontSize = 16.sp, color = textColor)
-
-                if (isOverBudget) {
-                    Icon(imageVector = Icons.Default.Warning, contentDescription = "Over Budget", tint = ExpenseRed, modifier = Modifier.size(20.dp))
-                }
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text(text = "Terpakai: Rp ${pocket.spentAmount.toInt()}", fontSize = 12.sp, color = textColor, fontWeight = if(isOverBudget) FontWeight.Bold else FontWeight.Normal)
-                Text(text = "Batas: Rp ${pocket.limit.toInt()}", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(8.dp)
-                    .clip(RoundedCornerShape(4.dp))
-                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(progressPercentage.coerceIn(0f, 1f))
-                        .fillMaxHeight()
-                        .background(barColor)
-                )
-            }
-
-            if (isOverBudget) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "Perhatian: Anda telah melewati batas anggaran kantong ini!",
-                    color = ExpenseRed,
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Medium
-                )
-            }
-        }
-    }
-}
 @Preview(showBackground = true, name = "Light Mode")
 @Composable
 fun PocketsPreviewLight() {

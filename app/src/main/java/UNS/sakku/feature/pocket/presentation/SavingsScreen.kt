@@ -20,6 +20,8 @@ import uns.sakku.ui.theme.IncomeGreen
 import uns.sakku.core.LocalBackStack
 import uns.sakku.core.Routes
 import uns.sakku.ui.theme.FinanceAppTheme
+import uns.sakku.feature.pocket.presentation.components.SavingGoal
+import uns.sakku.feature.pocket.presentation.components.SavingCard
 
 data class SavingGoal(val name: String, val target: Float, val currentAmount: Float)
 
@@ -88,44 +90,6 @@ fun HalamanSavings(
     }
 }
 
-@Composable
-fun SavingCard(saving: SavingGoal) {
-    val progressPercentage = if (saving.target > 0) (saving.currentAmount / saving.target) else 0f
-
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text(text = saving.name, fontWeight = FontWeight.Bold, fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurface)
-                Text(text = "${(progressPercentage * 100).toInt()}%", fontWeight = FontWeight.Bold, color = IncomeGreen)
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(text = "Terkumpul: Rp ${saving.currentAmount.toInt()} / Rp ${saving.target.toInt()}", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(8.dp)
-                    .clip(RoundedCornerShape(4.dp))
-                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(progressPercentage.coerceIn(0f, 1f))
-                        .fillMaxHeight()
-                        .background(IncomeGreen)
-                )
-            }
-        }
-    }
-}
 @Preview(showBackground = true, name = "Light Mode")
 @Composable
 fun SavingsPreviewLight() {

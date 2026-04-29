@@ -28,6 +28,7 @@ import uns.sakku.ui.theme.FinanceAppTheme
 import uns.sakku.ui.theme.IncomeGreen
 import uns.sakku.ui.theme.ExpenseRed
 import uns.sakku.core.LocalBackStack
+import uns.sakku.core.utils.formatRupiah
 
 // Data Class untuk menampung item Tabungan / Kantong yang baru dibuat
 data class AllocationItem(
@@ -255,7 +256,7 @@ fun HalamanAddPocketSaving(
                                         modifier = Modifier.padding(bottom = 4.dp)
                                     )
                                     Text(
-                                        text = "Target/Batas: ${formatRupiahAllocation(item.nominal)}",
+                                        text = "Target/Batas: ${formatRupiah(item.nominal)}",
                                         color = if (item.isTabungan) IncomeGreen else ExpenseRed,
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 14.sp
@@ -291,12 +292,6 @@ fun HalamanAddPocketSaving(
             }
         }
     }
-}
-
-fun formatRupiahAllocation(number: Double): String {
-    val localeID = Locale("in", "ID")
-    val formatRupiah = NumberFormat.getCurrencyInstance(localeID)
-    return formatRupiah.format(number).replace("Rp", "Rp ").replace(",00", "")
 }
 
 @Preview(showBackground = true, name = "Light Mode - Tabungan")
