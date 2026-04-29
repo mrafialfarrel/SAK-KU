@@ -3,9 +3,9 @@ package uns.sakku.feature.pocket.presentation
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
@@ -29,13 +29,11 @@ import uns.sakku.feature.pocket.presentation.components.SavingCard
 fun PocketSavingScreen() {
     val backStack = LocalBackStack.current
 
-    // Pastikan UI aslimu diganti namanya dari PocketScreen menjadi HalamanPocket
     HalamanPocketSaving(
-        // Alur: Pocket > Transaction
         onNavigateToTransaction = { backStack.add(Routes.TransactionRoute) },
-        onNavigateToSavings = { backStack.add(Routes.SavingsRoute) }, // Rute ke full screen tabungan
-        onNavigateToPockets = { backStack.add(Routes.PocketsRoute) }, // Rute ke full screen pengeluaran
-        onNavigateToAddPocketSaving = {isTabungan -> backStack.add(Routes.AddPocketSavingRoute(initialIsTabungan = isTabungan))}, // Rute ke tambah tabungan/kantong
+        onNavigateToSavings = { backStack.add(Routes.SavingsRoute) },
+        onNavigateToPockets = { backStack.add(Routes.PocketsRoute) },
+        onNavigateToAddPocketSaving = {isTabungan -> backStack.add(Routes.AddPocketSavingRoute(initialIsTabungan = isTabungan))},
         onBackClick = { backStack.removeLastOrNull() }
     )
 }
@@ -49,13 +47,11 @@ fun HalamanPocketSaving(
     onNavigateToAddPocketSaving: (Boolean) -> Unit,
     onBackClick: () -> Unit = {}) {
 
-    // Nilai saat ini (currentAmount) diubah menjadi 0f agar bar persentase mulai dari 0%
     val savings = listOf(
         SavingGoal("Dana Darurat", 10000000f, 0f),
         SavingGoal("Beli Laptop Baru", 15000000f, 0f)
     )
 
-    // Nilai terpakai (spentAmount) diubah menjadi 0f agar bar pengeluaran mulai dari 0%
     val pockets = listOf(
         PocketBudget("Makanan & Minuman", 2000000f, 0f),
         PocketBudget("Transportasi", 500000f, 0f),
@@ -85,98 +81,105 @@ fun HalamanPocketSaving(
             }
         }
     ) { paddingValues ->
-        Column(
+        // MENGGUNAKAN LAZYCOLUMN
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
-                .padding(paddingValues)
-                .padding(16.dp)
-                .verticalScroll(rememberScrollState())
+                .padding(paddingValues),
+            contentPadding = PaddingValues(16.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Progres Tabungan",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-                TextButton(onClick = onNavigateToSavings) {
+            // Bagian Header Tabungan
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Text(
-                        text = ">",
-                        color = MaterialTheme.colorScheme.primary,
-                        fontWeight = FontWeight.Bold
+                        text = "Progres Tabungan",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp,
+                        color = MaterialTheme.colorScheme.onBackground
                     )
+                    TextButton(onClick = onNavigateToSavings) {
+                        Text(
+                            text = ">",
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+                Text(
+                    text = "Pantau tujuan pemasukan Anda bulan ini.",
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+                )
+
+                OutlinedButton(
+                    onClick = { onNavigateToAddPocketSaving(true) },
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 16.dp),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Icon(imageVector = Icons.Default.Add, contentDescription = "Tambah Tabungan", modifier = Modifier.size(18.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(text = "Tambah Tabungan")
                 }
             }
-            Text(
-                text = "Pantau tujuan pemasukan Anda bulan ini.",
-                fontSize = 12.sp,
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
-            )
 
-            OutlinedButton(
-                onClick = { onNavigateToAddPocketSaving(true) },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Icon(imageVector = Icons.Default.Add, contentDescription = "Tambah Tabungan", modifier = Modifier.size(18.dp))
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(text = "Tambah Tabungan")
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-
-            savings.forEach { saving ->
+            // List Item Tabungan
+            items(savings) { saving ->
                 SavingCard(saving = saving)
                 Spacer(modifier = Modifier.height(12.dp))
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
-            HorizontalDivider(color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.2f), thickness = 1.dp)
-            Spacer(modifier = Modifier.height(24.dp))
+            // Bagian Header Kantong/Pengeluaran
+            item {
+                Spacer(modifier = Modifier.height(12.dp))
+                HorizontalDivider(color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.2f), thickness = 1.dp)
+                Spacer(modifier = Modifier.height(24.dp))
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Batas Pengeluaran (Kantong)",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                    TextButton(onClick = onNavigateToPockets) {
+                        Text(text = ">", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                    }
+                }
                 Text(
-                    text = "Batas Pengeluaran (Kantong)",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp,
-                    color = MaterialTheme.colorScheme.onBackground
+                    text = "Pantau batas pengeluaran kategori Anda bulan ini.",
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
                 )
-                TextButton(onClick = onNavigateToPockets) {
-                    Text(text = ">", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+
+                OutlinedButton(
+                    onClick = { onNavigateToAddPocketSaving(false) },
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 16.dp),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Icon(imageVector = Icons.Default.Add, contentDescription = "Tambah Tabungan", modifier = Modifier.size(18.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(text = "Tambah Kantong")
                 }
             }
-            Text(
-                text = "Pantau batas pengeluaran kategori Anda bulan ini.",
-                fontSize = 12.sp,
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
-            )
-            Spacer(modifier = Modifier.height(16.dp))
 
-            OutlinedButton(
-                onClick = { onNavigateToAddPocketSaving(false) },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Icon(imageVector = Icons.Default.Add, contentDescription = "Tambah Tabungan", modifier = Modifier.size(18.dp))
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(text = "Tambah Kantong")
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-
-            pockets.forEach { pocket ->
+            // List Item Kantong
+            items(pockets) { pocket ->
                 PocketCard(pocket = pocket)
                 Spacer(modifier = Modifier.height(12.dp))
             }
 
-            Spacer(modifier = Modifier.height(64.dp))
+            item {
+                Spacer(modifier = Modifier.height(64.dp))
+            }
         }
     }
 }

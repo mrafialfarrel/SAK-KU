@@ -2,30 +2,23 @@ package uns.sakku.feature.pocket.presentation
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import uns.sakku.ui.theme.ExpenseRed
 import uns.sakku.core.LocalBackStack
 import uns.sakku.core.Routes
 import uns.sakku.ui.theme.FinanceAppTheme
 import uns.sakku.feature.pocket.presentation.components.PocketBudget
 import uns.sakku.feature.pocket.presentation.components.PocketCard
-
-data class PocketBudget(val category: String, val limit: Float, val spentAmount: Float)
 
 @Composable
 fun PocketsScreen() {
@@ -43,12 +36,11 @@ fun HalamanPockets(
     onNavigateBack: () -> Unit,
     onNavigateToAdd: () -> Unit
 ) {
-    // Simulasi data
     val pockets = listOf(
         PocketBudget("Makanan & Minuman", 2000000f, 1500000f),
         PocketBudget("Transportasi", 500000f, 400000f),
         PocketBudget("Hiburan", 500000f, 650000f),
-        PocketBudget("Belanja", 1000000f, 1200000f) // Contoh over budget
+        PocketBudget("Belanja", 1000000f, 1200000f)
     )
 
     Scaffold(
@@ -64,29 +56,28 @@ fun HalamanPockets(
             )
         }
     ) { paddingValues ->
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
-                .padding(paddingValues)
-                .padding(16.dp)
-                .verticalScroll(rememberScrollState())
+                .padding(paddingValues),
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp) // Jarak otomatis antar item
         ) {
-            OutlinedButton(
-                onClick = onNavigateToAdd,
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Icon(imageVector = Icons.Default.Add, contentDescription = "Tambah Kantong", modifier = Modifier.size(18.dp))
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(text = "Tambah Kategori Kantong")
+            item {
+                OutlinedButton(
+                    onClick = onNavigateToAdd,
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Icon(imageVector = Icons.Default.Add, contentDescription = "Tambah Kantong", modifier = Modifier.size(18.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(text = "Tambah Kategori Kantong")
+                }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            pockets.forEach { pocket ->
+            items(pockets) { pocket ->
                 PocketCard(pocket = pocket)
-                Spacer(modifier = Modifier.height(12.dp))
             }
         }
     }
