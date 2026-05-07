@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -16,44 +16,58 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import uns.sakku.ui.theme.FinanceAppTheme
 import uns.sakku.core.LocalBackStack
-@Composable
-fun ExportScreen() {
-    val backStack = LocalBackStack.current
-    val context = LocalContext.current // Pengganti 'this' untuk Toast
 
+// --- STATEFUL COMPOSABLE ---
+@Composable
+fun ExportScreen(
+    viewModel: ExportViewModel = viewModel()
+) {
+    val backStack = LocalBackStack.current
+    val context = LocalContext.current // Composition-dependent (tetap di UI)
+
+    // Observasi StateFlow dari ViewModel
+    val uiState by viewModel.uiState.collectAsState()
+
+    // Pass data dan event ke Stateless Child
     HalamanExport(
-        onNavigateBack = { backStack.removeLastOrNull() }, // Pengganti finish()
-        onExportClicked = { format, rentangWaktu ->
+        uiState = uiState,
+        onNavigateBack = { backStack.removeLastOrNull() },
+        onFormatSelected = viewModel::onFormatSelected,
+        onRangeSelected = viewModel::onRangeSelected,
+        onExportClicked = {
+            // Panggil fungsi logika di ViewModel jika ada
+            viewModel.exportData()
+
+            // Tampilkan UI feedback (Toast)
             Toast.makeText(
                 context,
-                "Mengekspor data ke $format untuk $rentangWaktu...",
+                "Mengekspor data ke ${uiState.formatTerpilih} untuk ${uiState.rentangTerpilih}...",
                 Toast.LENGTH_SHORT
             ).show()
         }
     )
 }
 
+// --- STATELESS COMPOSABLE ---
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HalamanExport(
+    uiState: ExportUiState,
     onNavigateBack: () -> Unit,
-    onExportClicked: (String, String) -> Unit
+    onFormatSelected: (String) -> Unit,
+    onRangeSelected: (String) -> Unit,
+    onExportClicked: () -> Unit
 ) {
-    var formatTerpilih by remember { mutableStateOf("PDF") }
-    var rentangTerpilih by remember { mutableStateOf("1 Bulan Terakhir") }
-
-    val opsiFormat = listOf("PDF", "CSV")
-    val opsiRentang = listOf("1 Minggu Terakhir", "1 Bulan Terakhir", "3 Bulan Terakhir", "6 Bulan Terakhir")
-
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Ekspor Laporan", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Kembali")
+                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -92,20 +106,20 @@ fun HalamanExport(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.padding(8.dp)) {
-                    opsiFormat.forEach { format ->
+                    uiState.opsiFormat.forEach { format ->
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .selectable(
-                                    selected = (format == formatTerpilih),
-                                    onClick = { formatTerpilih = format }
+                                    selected = (format == uiState.formatTerpilih),
+                                    onClick = { onFormatSelected(format) } // <-- Event Trigger
                                 )
                                 .padding(horizontal = 8.dp, vertical = 4.dp)
                         ) {
                             RadioButton(
-                                selected = (format == formatTerpilih),
-                                onClick = { formatTerpilih = format },
+                                selected = (format == uiState.formatTerpilih),
+                                onClick = { onFormatSelected(format) }, // <-- Event Trigger
                                 colors = RadioButtonDefaults.colors(selectedColor = MaterialTheme.colorScheme.primary)
                             )
                             Text(
@@ -134,20 +148,20 @@ fun HalamanExport(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.padding(8.dp)) {
-                    opsiRentang.forEach { rentang ->
+                    uiState.opsiRentang.forEach { rentang ->
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .selectable(
-                                    selected = (rentang == rentangTerpilih),
-                                    onClick = { rentangTerpilih = rentang }
+                                    selected = (rentang == uiState.rentangTerpilih),
+                                    onClick = { onRangeSelected(rentang) } // <-- Event Trigger
                                 )
                                 .padding(horizontal = 8.dp, vertical = 4.dp)
                         ) {
                             RadioButton(
-                                selected = (rentang == rentangTerpilih),
-                                onClick = { rentangTerpilih = rentang },
+                                selected = (rentang == uiState.rentangTerpilih),
+                                onClick = { onRangeSelected(rentang) }, // <-- Event Trigger
                                 colors = RadioButtonDefaults.colors(selectedColor = MaterialTheme.colorScheme.primary)
                             )
                             Text(
@@ -164,7 +178,7 @@ fun HalamanExport(
 
             // Tombol Ekspor
             Button(
-                onClick = { onExportClicked(formatTerpilih, rentangTerpilih) },
+                onClick = onExportClicked, // <-- Event Trigger
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
@@ -189,11 +203,18 @@ fun HalamanExport(
     }
 }
 
+// Preview Mock Data
 @Preview(showBackground = true, name = "Light Mode")
 @Composable
 fun PreviewHalamanExportLight() {
     FinanceAppTheme(darkTheme = false) {
-        HalamanExport(onNavigateBack = {}, onExportClicked = { _, _ -> })
+        HalamanExport(
+            uiState = ExportUiState(),
+            onNavigateBack = {},
+            onFormatSelected = {},
+            onRangeSelected = {},
+            onExportClicked = {}
+        )
     }
 }
 
@@ -201,6 +222,12 @@ fun PreviewHalamanExportLight() {
 @Composable
 fun PreviewHalamanExportDark() {
     FinanceAppTheme(darkTheme = true) {
-        HalamanExport(onNavigateBack = {}, onExportClicked = { _, _ -> })
+        HalamanExport(
+            uiState = ExportUiState(),
+            onNavigateBack = {},
+            onFormatSelected = {},
+            onRangeSelected = {},
+            onExportClicked = {}
+        )
     }
 }

@@ -20,7 +20,6 @@ import androidx.compose.ui.unit.sp
 import uns.sakku.ui.theme.ExpenseRed
 import uns.sakku.ui.theme.IncomeGreen
 
-// Data Class
 data class ExpenseCategory(val name: String, val amount: Float, val color: Color)
 
 @Composable
@@ -50,15 +49,7 @@ fun FilterRow(filters: List<String>, selectedFilter: String, onFilterSelected: (
 }
 
 @Composable
-fun SimpleBarChart(selectedFilter: String) {
-    val dataPoints = remember(selectedFilter) {
-        when (selectedFilter) {
-            "1 Minggu" -> listOf(40f, 60f, 30f, 80f, 50f, 90f, 40f)
-            "1 Tahun" -> listOf(50f, 60f, 70f, 40f, 80f, 90f, 60f, 70f, 50f, 40f, 80f, 100f)
-            else -> listOf(60f, 40f, 80f, 50f)
-        }
-    }
-
+fun SimpleBarChart(dataPoints: List<Float>) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -83,7 +74,7 @@ fun SimpleBarChart(selectedFilter: String) {
                 Box(
                     modifier = Modifier
                         .width(24.dp)
-                        .fillMaxHeight(animatedHeight / 100f)
+                        .fillMaxHeight(if(animatedHeight > 0) animatedHeight / 100f else 0.01f)
                         .clip(RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp))
                         .background(MaterialTheme.colorScheme.primary)
                 )
@@ -93,13 +84,10 @@ fun SimpleBarChart(selectedFilter: String) {
 }
 
 @Composable
-fun SummaryAndPercentage(selectedFilter: String) {
-    val income = 7500000f
-    val expense = 3000000f
+fun SummaryAndPercentage(income: Float, expense: Float) {
     val total = income + expense
-
-    val incomePercent = (income / total) * 100
-    val expensePercent = (expense / total) * 100
+    val incomePercent = if (total > 0) (income / total) * 100 else 0f
+    val expensePercent = if (total > 0) (expense / total) * 100 else 0f
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -110,19 +98,23 @@ fun SummaryAndPercentage(selectedFilter: String) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Column {
                     Text("Total Pemasukan", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f), fontSize = 12.sp)
-                    Text("Rp 7.500.000", color = IncomeGreen, fontWeight = FontWeight.Bold)
+                    Text("Rp ${income.toLong()}", color = IncomeGreen, fontWeight = FontWeight.Bold)
                 }
                 Column(horizontalAlignment = Alignment.End) {
                     Text("Total Pengeluaran", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f), fontSize = 12.sp)
-                    Text("Rp 3.000.000", color = ExpenseRed, fontWeight = FontWeight.Bold)
+                    Text("Rp ${expense.toLong()}", color = ExpenseRed, fontWeight = FontWeight.Bold)
                 }
             }
 
             Spacer(modifier = Modifier.height(24.dp))
 
             Row(modifier = Modifier.fillMaxWidth().height(16.dp).clip(RoundedCornerShape(8.dp))) {
-                Box(modifier = Modifier.weight(incomePercent / 100).fillMaxHeight().background(IncomeGreen))
-                Box(modifier = Modifier.weight(expensePercent / 100).fillMaxHeight().background(ExpenseRed))
+                if (incomePercent > 0) {
+                    Box(modifier = Modifier.weight(incomePercent).fillMaxHeight().background(IncomeGreen))
+                }
+                if (expensePercent > 0) {
+                    Box(modifier = Modifier.weight(expensePercent).fillMaxHeight().background(ExpenseRed))
+                }
             }
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -136,14 +128,8 @@ fun SummaryAndPercentage(selectedFilter: String) {
 }
 
 @Composable
-fun ExpenseCategoryBreakdown(selectedFilter: String) {
-    val categories = listOf(
-        ExpenseCategory("Makanan & Minuman", 1500000f, Color(0xFFFF9800)),
-        ExpenseCategory("Hiburan", 600000f, Color(0xFF9C27B0)),
-        ExpenseCategory("Transportasi", 500000f, Color(0xFF03A9F4)),
-        ExpenseCategory("Tagihan & Utilitas", 400000f, ExpenseRed)
-    )
-    val totalExpense = categories.sumOf { it.amount.toDouble() }.toFloat()
+fun ExpenseCategoryBreakdown(categories: List<ExpenseCategory>) {
+    val totalAmount = categories.sumOf { it.amount.toDouble() }.toFloat()
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -152,7 +138,7 @@ fun ExpenseCategoryBreakdown(selectedFilter: String) {
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             categories.forEach { category ->
-                val percentage = if (totalExpense > 0) (category.amount / totalExpense) * 100 else 0f
+                val percentage = if (totalAmount > 0) (category.amount / totalAmount) * 100 else 0f
 
                 Row(
                     modifier = Modifier
@@ -199,14 +185,24 @@ fun ExpenseCategoryBreakdown(selectedFilter: String) {
                         .clip(RoundedCornerShape(3.dp))
                         .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth(percentage / 100f)
-                            .fillMaxHeight()
-                            .background(category.color)
-                    )
+                    if (percentage > 0f) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(percentage / 100f)
+                                .fillMaxHeight()
+                                .background(category.color)
+                        )
+                    }
                 }
                 Spacer(modifier = Modifier.height(16.dp))
+            }
+            if (categories.isEmpty()) {
+                Text(
+                    text = "Belum ada data",
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                    modifier = Modifier.align(Alignment.CenterHorizontally).padding(vertical = 16.dp)
+                )
             }
         }
     }

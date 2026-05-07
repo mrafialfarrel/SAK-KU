@@ -15,11 +15,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import uns.sakku.ui.theme.ExpenseRed
 import uns.sakku.ui.theme.IncomeGreen
+import uns.sakku.feature.pocket.data.SavingGoal
+import uns.sakku.feature.pocket.data.PocketBudget
 
-// Data Classes
-data class SavingGoal(val name: String, val target: Float, val currentAmount: Float)
-data class PocketBudget(val category: String, val limit: Float, val spentAmount: Float)
-
+// UI Layer: Stateless Components
 @Composable
 fun SavingCard(saving: SavingGoal) {
     val progressPercentage = if (saving.target > 0) (saving.currentAmount / saving.target) else 0f

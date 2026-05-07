@@ -10,39 +10,43 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import uns.sakku.core.LocalBackStack
 import uns.sakku.core.Routes
 import uns.sakku.ui.theme.FinanceAppTheme
-import uns.sakku.feature.pocket.presentation.components.PocketBudget
+import uns.sakku.feature.pocket.data.PocketBudget
 import uns.sakku.feature.pocket.presentation.components.PocketCard
 
+// UI Layer: Stateful Composable
 @Composable
-fun PocketsScreen() {
+fun PocketsScreen(viewModel: PocketSavingViewModel = viewModel()) {
     val backStack = LocalBackStack.current
 
+    // Observe data pockets dari ViewModel
+    val pockets by viewModel.pockets.collectAsState()
+
+    // Pass data dan handler logic ke Stateless Component
     HalamanPockets(
+        pockets = pockets,
         onNavigateBack = { backStack.removeLastOrNull() },
         onNavigateToAdd = { backStack.add(Routes.AddPocketSavingRoute(initialIsTabungan = false)) }
     )
 }
 
+// UI Layer: Stateless Composable
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HalamanPockets(
+    pockets: List<PocketBudget>,
     onNavigateBack: () -> Unit,
     onNavigateToAdd: () -> Unit
 ) {
-    val pockets = listOf(
-        PocketBudget("Makanan & Minuman", 2000000f, 1500000f),
-        PocketBudget("Transportasi", 500000f, 400000f),
-        PocketBudget("Hiburan", 500000f, 650000f),
-        PocketBudget("Belanja", 1000000f, 1200000f)
-    )
-
     Scaffold(
         topBar = {
             TopAppBar(
@@ -72,10 +76,11 @@ fun HalamanPockets(
                 ) {
                     Icon(imageVector = Icons.Default.Add, contentDescription = "Tambah Kantong", modifier = Modifier.size(18.dp))
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = "Tambah Kategori Kantong")
+                    Text(text = "Tambah/Ubah Kantong")
                 }
             }
 
+            // Gunakan data dari parameter yang disuntikkan dari ViewModel
             items(pockets) { pocket ->
                 PocketCard(pocket = pocket)
             }
@@ -88,6 +93,7 @@ fun HalamanPockets(
 fun PocketsPreviewLight() {
     FinanceAppTheme(darkTheme = false) {
         HalamanPockets(
+            pockets = emptyList(), // Dummy kosong untuk preview
             onNavigateBack = {},
             onNavigateToAdd = {}
         )
@@ -99,6 +105,7 @@ fun PocketsPreviewLight() {
 fun PocketsPreviewDark() {
     FinanceAppTheme(darkTheme = true) {
         HalamanPockets(
+            pockets = emptyList(),
             onNavigateBack = {},
             onNavigateToAdd = {}
         )

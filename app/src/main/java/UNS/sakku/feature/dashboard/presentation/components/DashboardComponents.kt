@@ -119,13 +119,13 @@ fun QuickMenuButton(
 
 /**
  * STATELESS COMPONENT
- * Sekarang komponen ini hanya menerima [transaksiList] dari luar (parameter).
+ * Sekarang komponen ini hanya menerima [TransactionItem] dari luar (parameter).
  */
 /**
  * STATELESS COMPONENT
  */
 @Composable
-fun RecentTransactionsList(transaksiList: List<TransactionItem>) { // Ganti tipe data menjadi TransactionItem
+fun RecentTransactionsList(transaksiList: List<TransactionItem>) {
     if (transaksiList.isEmpty()) {
         Box(modifier = Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
             Text("Belum ada transaksi terbaru.", color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f))

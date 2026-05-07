@@ -21,49 +21,61 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import java.text.NumberFormat
-import java.util.Locale
+import androidx.lifecycle.viewmodel.compose.viewModel
+import java.util.UUID
 import uns.sakku.ui.theme.FinanceAppTheme
 import uns.sakku.ui.theme.IncomeGreen
 import uns.sakku.ui.theme.ExpenseRed
 import uns.sakku.core.LocalBackStack
 import uns.sakku.core.utils.formatRupiah
+import uns.sakku.feature.pocket.data.AllocationItem
 
-// Data Class untuk menampung item Tabungan / Kantong yang baru dibuat
-data class AllocationItem(
-    val id: String,
-    val nama: String,
-    val nominal: Double,
-    val isTabungan: Boolean // true = Tabungan, false = Kantong (Batas Pengeluaran)
-)
-
+// UI Layer: Stateful Composable
 @Composable
-fun AddPocketSavingScreen(initialIsTabungan: Boolean = true) {
+fun AddPocketSavingScreen(
+    initialIsTabungan: Boolean = true,
+    viewModel: PocketSavingViewModel = viewModel()
+) {
     val backStack = LocalBackStack.current
 
+    // UI Observe data
+    val allocations by viewModel.allocations.collectAsState()
+
+    // Pass data dan handler logic ke Stateless Component
     HalamanAddPocketSaving(
         initialIsTabungan = initialIsTabungan,
+        allocations = allocations,
+        onAddAllocation = { viewModel.addAllocation(it) },
+        onUpdateAllocation = { viewModel.updateAllocation(it) },
+        onDeleteAllocation = { viewModel.deleteAllocation(it) },
         onNavigateBack = { backStack.removeLastOrNull() }
     )
 }
 
+// UI Layer: Stateless Composable
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HalamanAddPocketSaving(
     initialIsTabungan: Boolean = true,
+    allocations: List<AllocationItem>,
+    onAddAllocation: (AllocationItem) -> Unit,
+    onUpdateAllocation: (AllocationItem) -> Unit,
+    onDeleteAllocation: (AllocationItem) -> Unit,
     onNavigateBack: () -> Unit
 ) {
     val context = LocalContext.current
 
-    // State untuk menyimpan daftar item yang dibuat (sebagai simulasi)
-    val allocationList = remember { mutableStateListOf<AllocationItem>() }
-
+    // UI States (Input Forms) dipertahankan di UI Layer, tidak diletakkan di ViewModel
     var nama by remember { mutableStateOf("") }
     var nominal by remember { mutableStateOf("") }
     var isTabungan by remember { mutableStateOf(initialIsTabungan) }
 
     var isEditMode by remember { mutableStateOf(false) }
     var editId by remember { mutableStateOf<String?>(null) }
+
+    // States untuk Alert Dialog Konfirmasi Hapus
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var itemToDelete by remember { mutableStateOf<AllocationItem?>(null) }
 
     Scaffold(
         topBar = {
@@ -166,23 +178,14 @@ fun HalamanAddPocketSaving(
                                 val nominalDouble = nominal.toDoubleOrNull() ?: 0.0
 
                                 if (isEditMode && editId != null) {
-                                    val index = allocationList.indexOfFirst { it.id == editId }
-                                    if (index != -1) {
-                                        allocationList[index] = AllocationItem(
-                                            editId!!, nama, nominalDouble, isTabungan
-                                        )
-                                    }
+                                    val updatedItem = AllocationItem(editId!!, nama, nominalDouble, isTabungan)
+                                    onUpdateAllocation(updatedItem)
                                     isEditMode = false
                                     editId = null
                                     Toast.makeText(context, "Data diperbarui", Toast.LENGTH_SHORT).show()
                                 } else {
-                                    val newItem = AllocationItem(
-                                        id = System.currentTimeMillis().toString(),
-                                        nama = nama,
-                                        nominal = nominalDouble,
-                                        isTabungan = isTabungan
-                                    )
-                                    allocationList.add(newItem)
+                                    val newItem = AllocationItem(UUID.randomUUID().toString(), nama, nominalDouble, isTabungan)
+                                    onAddAllocation(newItem)
                                     Toast.makeText(context, "Berhasil ditambahkan", Toast.LENGTH_SHORT).show()
                                 }
 
@@ -220,7 +223,6 @@ fun HalamanAddPocketSaving(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // DAFTAR ITEM (Riwayat penambahan)
             Text(
                 text = "Daftar Alokasi Anda",
                 fontWeight = FontWeight.Bold,
@@ -229,13 +231,13 @@ fun HalamanAddPocketSaving(
                 modifier = Modifier.padding(bottom = 8.dp)
             )
 
-            if (allocationList.isEmpty()) {
+            if (allocations.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text("Belum ada data. Silakan tambah di atas.", color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f))
                 }
             } else {
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    items(allocationList) { item ->
+                    items(allocations) { item ->
                         Card(
                             modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
                             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -249,7 +251,7 @@ fun HalamanAddPocketSaving(
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(text = item.nama, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                                     Text(
-                                        text = if (item.isTabungan) "Jenis: Tabungan" else "Jenis: Kantong (Pengeluaran)",
+                                        text = if (item.isTabungan) "Jenis: Tabungan Pemasukan" else "Jenis: Kantong Pengeluaran",
                                         fontSize = 12.sp,
                                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                                         modifier = Modifier.padding(bottom = 4.dp)
@@ -272,15 +274,10 @@ fun HalamanAddPocketSaving(
                                     Icon(imageVector = Icons.Default.Edit, contentDescription = "Edit", tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
                                 }
 
+                                // Tombol Hapus memicu Alert Dialog
                                 IconButton(onClick = {
-                                    allocationList.remove(item)
-                                    if (editId == item.id) {
-                                        isEditMode = false
-                                        editId = null
-                                        nama = ""
-                                        nominal = ""
-                                    }
-                                    Toast.makeText(context, "Data dihapus", Toast.LENGTH_SHORT).show()
+                                    itemToDelete = item
+                                    showDeleteDialog = true
                                 }) {
                                     Icon(imageVector = Icons.Default.Delete, contentDescription = "Hapus", tint = ExpenseRed)
                                 }
@@ -291,35 +288,65 @@ fun HalamanAddPocketSaving(
             }
         }
     }
-}
 
-@Preview(showBackground = true, name = "Light Mode - Tabungan")
-@Composable
-fun PreviewAddTabunganLight() {
-    FinanceAppTheme(darkTheme = false) {
-        HalamanAddPocketSaving(initialIsTabungan = true, onNavigateBack = {})
+    // Menampilkan Alert Dialog Konfirmasi Hapus
+    if (showDeleteDialog && itemToDelete != null) {
+        AlertDialog(
+            onDismissRequest = {
+                showDeleteDialog = false
+                itemToDelete = null
+            },
+            title = {
+                Text(text = "Konfirmasi Hapus", fontWeight = FontWeight.Bold)
+            },
+            text = {
+                Text(text = "Apakah Anda yakin ingin menghapus '${itemToDelete?.nama}'? Data yang dihapus tidak dapat dikembalikan.")
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        itemToDelete?.let {
+                            onDeleteAllocation(it)
+                            // Jika data yang dihapus sedang diedit, reset form-nya
+                            if (editId == it.id) {
+                                isEditMode = false
+                                editId = null
+                                nama = ""
+                                nominal = ""
+                            }
+                            Toast.makeText(context, "Data dihapus", Toast.LENGTH_SHORT).show()
+                        }
+                        showDeleteDialog = false
+                        itemToDelete = null
+                    }
+                ) {
+                    Text("Hapus", color = ExpenseRed, fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showDeleteDialog = false
+                        itemToDelete = null
+                    }
+                ) {
+                    Text("Batal", color = MaterialTheme.colorScheme.onSurface)
+                }
+            }
+        )
     }
 }
-@Preview(showBackground = true, name = "Light Mode - Tabungan")
-@Composable
-fun PreviewAddTabunganDark() {
-    FinanceAppTheme(darkTheme = true) {
-        HalamanAddPocketSaving(initialIsTabungan = true, onNavigateBack = {})
-    }
-}
 
-@Preview(showBackground = true, name = "Dark Mode - Kantong")
+@Preview(showBackground = true)
 @Composable
-fun PreviewAddKantongLight() {
-    FinanceAppTheme(darkTheme = false) {
-        HalamanAddPocketSaving(initialIsTabungan = false, onNavigateBack = {})
-    }
-}
-
-@Preview(showBackground = true, name = "Dark Mode - Kantong")
-@Composable
-fun PreviewAddKantongDark() {
-    FinanceAppTheme(darkTheme = true) {
-        HalamanAddPocketSaving(initialIsTabungan = false, onNavigateBack = {})
+fun PreviewAddScreen() {
+    FinanceAppTheme {
+        HalamanAddPocketSaving(
+            allocations = emptyList(),
+            onAddAllocation = {},
+            onUpdateAllocation = {},
+            onDeleteAllocation = {},
+            onNavigateBack = {}
+        )
     }
 }

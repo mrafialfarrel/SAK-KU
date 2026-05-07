@@ -10,39 +10,43 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import uns.sakku.core.LocalBackStack
 import uns.sakku.core.Routes
 import uns.sakku.ui.theme.FinanceAppTheme
-import uns.sakku.feature.pocket.presentation.components.SavingGoal
+import uns.sakku.feature.pocket.data.SavingGoal
 import uns.sakku.feature.pocket.presentation.components.SavingCard
 
+// UI Layer: Stateful Composable
 @Composable
-fun SavingsScreen() {
+fun SavingsScreen(viewModel: PocketSavingViewModel = viewModel()) {
     val backStack = LocalBackStack.current
 
+    // Observe data savings dari ViewModel
+    val savings by viewModel.savings.collectAsState()
+
+    // Pass data dan handler logic ke Stateless Component
     HalamanSavings(
+        savings = savings,
         onNavigateBack = { backStack.removeLastOrNull() },
         onNavigateToAdd = { backStack.add(Routes.AddPocketSavingRoute(initialIsTabungan = true)) }
     )
 }
 
+// UI Layer: Stateless Composable
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HalamanSavings(
+    savings: List<SavingGoal>,
     onNavigateBack: () -> Unit,
     onNavigateToAdd: () -> Unit
 ) {
-
-    val savings = listOf(
-        SavingGoal("Dana Darurat", 10000000f, 4500000f),
-        SavingGoal("Beli Laptop Baru", 15000000f, 2000000f),
-        SavingGoal("Liburan Akhir Tahun", 5000000f, 1000000f)
-    )
-
     Scaffold(
         topBar = {
             TopAppBar(
@@ -72,10 +76,11 @@ fun HalamanSavings(
                 ) {
                     Icon(imageVector = Icons.Default.Add, contentDescription = "Tambah Tabungan", modifier = Modifier.size(18.dp))
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = "Tambah Tabungan Baru")
+                    Text(text = "Tambah/Ubah Tabungan")
                 }
             }
 
+            // Gunakan data dari parameter yang disuntikkan dari ViewModel
             items(savings) { saving ->
                 SavingCard(saving = saving)
             }
@@ -88,6 +93,7 @@ fun HalamanSavings(
 fun SavingsPreviewLight() {
     FinanceAppTheme(darkTheme = false) {
         HalamanSavings(
+            savings = emptyList(), // Dummy kosong untuk preview
             onNavigateBack = {},
             onNavigateToAdd = {  }
         )
@@ -99,6 +105,7 @@ fun SavingsPreviewLight() {
 fun SavingsPreviewDark() {
     FinanceAppTheme(darkTheme = true) {
         HalamanSavings(
+            savings = emptyList(),
             onNavigateBack = { },
             onNavigateToAdd = { }
         )

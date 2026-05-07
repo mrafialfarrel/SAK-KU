@@ -3,8 +3,6 @@ package uns.sakku.feature.dashboard.presentation
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalanceWallet
@@ -14,21 +12,15 @@ import androidx.compose.material.icons.filled.Assessment
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel // Import ViewModel Compose
-import java.text.NumberFormat
-import java.util.Locale
 import uns.sakku.ui.theme.FinanceAppTheme
 import uns.sakku.ui.theme.IncomeGreen
 import uns.sakku.ui.theme.ExpenseRed
@@ -47,21 +39,15 @@ import uns.sakku.feature.transaction.presentation.TransactionItem // Tambahkan i
  */
 @Composable
 fun DashboardScreen(
-    viewModel: DashboardViewModel = viewModel() // Mengambil ViewModel
+    viewModel: DashboardViewModel = viewModel()
 ) {
     val backStack = LocalBackStack.current
-
-    // Mengamati StateFlow dari ViewModel secara reaktif
     val uiState by viewModel.uiState.collectAsState()
 
-    // TAMBAHAN: Refresh data setiap kali DashboardScreen tampil ke layar
-    LaunchedEffect(Unit) {
-        viewModel.refreshData()
-    }
-
     HalamanDashboard(
-        isLogin = false,
-        uiState = uiState, // Kirim State (Data) ke UI
+        // PERUBAHAN DI SINI: Gunakan uiState.isLogin, bukan false lagi!
+        isLogin = uiState.isLogin,
+        uiState = uiState,
         onNavigateToLogin = { backStack.add(Routes.AuthRoute) },
         onNavigateToNotification = { backStack.add(Routes.NotificationRoute) },
         onNavigateToPocket = { backStack.add(Routes.PocketSavingRoute) },

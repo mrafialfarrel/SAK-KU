@@ -1,58 +1,61 @@
 package uns.sakku.feature.report.presentation
 
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import uns.sakku.ui.theme.FinanceAppTheme
-import uns.sakku.ui.theme.IncomeGreen
-import uns.sakku.ui.theme.ExpenseRed
+import androidx.lifecycle.viewmodel.compose.viewModel
 import uns.sakku.core.LocalBackStack
 import uns.sakku.core.Routes
-import uns.sakku.feature.report.presentation.components.ExpenseCategory
-import uns.sakku.feature.report.presentation.components.SimpleBarChart
-import uns.sakku.feature.report.presentation.components.FilterRow
-import uns.sakku.feature.report.presentation.components.SummaryAndPercentage
 import uns.sakku.feature.report.presentation.components.ExpenseCategoryBreakdown
+import uns.sakku.feature.report.presentation.components.FilterRow
+import uns.sakku.feature.report.presentation.components.SimpleBarChart
+import uns.sakku.feature.report.presentation.components.SummaryAndPercentage
+import uns.sakku.ui.theme.FinanceAppTheme
 
+// --- STATEFUL COMPOSABLE ---
 @Composable
-fun ReportScreen() {
+fun ReportScreen(
+    viewModel: ReportViewModel = viewModel() // Menggunakan viewModel()
+) {
     val backStack = LocalBackStack.current
 
+    // Observasi StateFlow menjadi State untuk Compose
+    val uiState by viewModel.uiState.collectAsState()
+
+    // Pass data dan lambda (event) saja ke Stateless Child
     HalamanReport(
-        // Alur: Report > Export
+        uiState = uiState,
+        onFilterSelected = viewModel::onFilterSelected,
         onNavigateToExport = { backStack.add(Routes.ExportRoute) },
-        // Kembali ke Dashboard
         onBackClick = { backStack.removeLastOrNull() }
     )
 }
 
+// --- STATELESS COMPOSABLE ---
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HalamanReport(
+    uiState: ReportUiState,
+    onFilterSelected: (String) -> Unit,
     onNavigateToExport: () -> Unit = {},
-    onBackClick: () -> Unit = {}) {
-    var selectedFilter by remember { mutableStateOf("1 Bulan") }
-    val filters = listOf("1 Minggu", "1 Bulan", "3 Bulan", "6 Bulan", "1 Tahun")
+    onBackClick: () -> Unit = {}
+) {
+    // ScrollState bergantung pada komposisi, jadi diletakkan di UI, BUKAN ViewModel
+    val scrollState = rememberScrollState()
 
     Scaffold(
         topBar = {
@@ -66,8 +69,8 @@ fun HalamanReport(
                 actions = {
                     IconButton(onClick = onNavigateToExport,
                         modifier = Modifier
-                        .clip(RoundedCornerShape(8.dp))
-                        .clickable(onClick = onNavigateToExport)) {
+                            .clip(RoundedCornerShape(8.dp))
+                            .clickable(onClick = onNavigateToExport)) {
                         Icon(imageVector = Icons.Default.Download, contentDescription = "Ekspor", tint = MaterialTheme.colorScheme.onPrimary)
                     }
                 },
@@ -81,48 +84,53 @@ fun HalamanReport(
                 .background(MaterialTheme.colorScheme.background)
                 .padding(paddingValues)
                 .padding(16.dp)
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(scrollState)
         ) {
             FilterRow(
-                filters = filters,
-                selectedFilter = selectedFilter,
-                onFilterSelected = { selectedFilter = it }
+                filters = uiState.filters,
+                selectedFilter = uiState.selectedFilter,
+                onFilterSelected = onFilterSelected
             )
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            Text(text = "Grafik Arus Kas ($selectedFilter)", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = MaterialTheme.colorScheme.onBackground)
+            Text(text = "Grafik Arus Kas (${uiState.selectedFilter})", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = MaterialTheme.colorScheme.onBackground)
             Spacer(modifier = Modifier.height(16.dp))
-            SimpleBarChart(selectedFilter = selectedFilter)
+            // Pass data points langsung
+            SimpleBarChart(dataPoints = uiState.chartDataPoints)
 
             Spacer(modifier = Modifier.height(32.dp))
 
             Text(text = "Ringkasan", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = MaterialTheme.colorScheme.onBackground)
             Spacer(modifier = Modifier.height(16.dp))
-            SummaryAndPercentage(selectedFilter = selectedFilter)
+            // Pass value income & expense langsung
+            SummaryAndPercentage(income = uiState.totalIncome, expense = uiState.totalExpense)
 
             Spacer(modifier = Modifier.height(32.dp))
 
             Text(text = "Kategori Pengeluaran", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = MaterialTheme.colorScheme.onBackground)
             Spacer(modifier = Modifier.height(16.dp))
-            ExpenseCategoryBreakdown(selectedFilter = selectedFilter)
+            // Pass value categories langsung
+            ExpenseCategoryBreakdown(categories = uiState.expenseCategories)
 
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(text = "Kategori Pemasukan", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = MaterialTheme.colorScheme.onBackground)
             Spacer(modifier = Modifier.height(16.dp))
-            ExpenseCategoryBreakdown(selectedFilter = selectedFilter)
+            // Pass value categories langsung
+            ExpenseCategoryBreakdown(categories = uiState.incomeCategories)
 
             Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }
 
+// Preview Mock Data
 @Preview(showBackground = true, name = "Light Mode")
 @Composable
 fun ReportPreviewLight() {
     FinanceAppTheme(darkTheme = false) {
-        HalamanReport()
+        HalamanReport(uiState = ReportUiState(), onFilterSelected = {})
     }
 }
 
@@ -130,6 +138,6 @@ fun ReportPreviewLight() {
 @Composable
 fun ReportPreviewDark() {
     FinanceAppTheme(darkTheme = true) {
-        HalamanReport()
+        HalamanReport(uiState = ReportUiState(), onFilterSelected = {})
     }
 }

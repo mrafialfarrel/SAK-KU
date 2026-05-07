@@ -5,11 +5,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import uns.sakku.feature.auth.data.AuthRepository // Import repository
 
-/**
- * State untuk menyimpan status otentikasi.
- * Ini digunakan untuk memicu aksi satu kali (seperti Toast atau Navigasi).
- */
 data class AuthUiState(
     val isSuccess: Boolean = false,
     val errorMessage: String? = null
@@ -21,9 +18,11 @@ class AuthViewModel : ViewModel() {
     val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
 
     fun login(email: String, pass: String) {
-        // Validasi dipindah ke ViewModel (Logika Bisnis)
-        // Di dunia nyata, di sini Anda akan memanggil Firebase / API Backend
         if (email.isNotBlank() && pass.isNotBlank()) {
+            // SET GLOBAL STATE: Beritahu seluruh aplikasi bahwa user sudah login
+            AuthRepository.setLoggedIn(true)
+
+            // Beritahu UI (LoginScreen) untuk pindah halaman
             _uiState.update { it.copy(isSuccess = true, errorMessage = null) }
         } else {
             _uiState.update { it.copy(errorMessage = "Harap isi Email dan Password terlebih dahulu") }
@@ -32,16 +31,16 @@ class AuthViewModel : ViewModel() {
 
     fun register(nama: String, email: String, pass: String) {
         if (nama.isNotBlank() && email.isNotBlank() && pass.isNotBlank()) {
+            // SET GLOBAL STATE: Beritahu seluruh aplikasi bahwa user sudah login
+            AuthRepository.setLoggedIn(true)
+
+            // Beritahu UI (LoginScreen) untuk pindah halaman
             _uiState.update { it.copy(isSuccess = true, errorMessage = null) }
         } else {
             _uiState.update { it.copy(errorMessage = "Harap isi semua kolom pendaftaran") }
         }
     }
 
-    /**
-     * Penting: Fungsi ini dipanggil oleh UI setelah berhasil melakukan aksi
-     * (memunculkan toast/navigasi) agar state kembali netral dan tidak memicu aksi berulang-ulang.
-     */
     fun resetState() {
         _uiState.update { AuthUiState() }
     }

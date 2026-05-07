@@ -31,23 +31,20 @@ fun LoginScreen(
     val backStack = LocalBackStack.current
     val context = LocalContext.current
 
-    // Observasi state secara reaktif
     val uiState by viewModel.uiState.collectAsState()
 
-    // LaunchedEffect digunakan untuk bereaksi terhadap perubahan state tanpa menggambar ulang UI
-    // Sangat cocok untuk Navigasi dan menampilkan Toast
     LaunchedEffect(uiState) {
         if (uiState.isSuccess) {
-            viewModel.resetState() // Reset agar tidak memicu navigasi lagi jika kembali (back)
+            viewModel.resetState()
+            Toast.makeText(context, "Login Berhasil", Toast.LENGTH_SHORT).show()
 
-            // Output untuk Developer berupa Toast (Bisa dihapus nanti)
-            Toast.makeText(context, "Developer Info -> Otentikasi Berhasil", Toast.LENGTH_SHORT).show()
+            // Navigasi ke Dashboard. Dashboard akan otomatis membaca status login dari Repository!
             backStack.add(Routes.DashboardRoute)
         }
 
         if (uiState.errorMessage != null) {
             Toast.makeText(context, uiState.errorMessage, Toast.LENGTH_SHORT).show()
-            viewModel.resetState() // Reset agar Toast tidak muncul terus-menerus
+            viewModel.resetState()
         }
     }
 
@@ -64,10 +61,10 @@ fun LoginScreen(
 fun HalamanAuth(
     onLoginClick: (String, String) -> Unit,
     onRegisterClick: (String, String, String) -> Unit,
-    ComposeIsLoginMode: Boolean = true
+    composeIsLoginMode: Boolean = true
 ) {
     // UI State (transient state) disimpan di Composable
-    var isLoginMode by remember { mutableStateOf(ComposeIsLoginMode) }
+    var isLoginMode by remember { mutableStateOf(composeIsLoginMode) }
     var namaLengkap by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -141,7 +138,7 @@ fun PreviewAuthScreenDark() {
 @Composable
 fun PreviewAuthScreenRegisterLight() {
     FinanceAppTheme(darkTheme = false) {
-        HalamanAuth(ComposeIsLoginMode = false, onLoginClick = { _, _ -> }, onRegisterClick = { _, _, _ -> })
+        HalamanAuth(composeIsLoginMode = false, onLoginClick = { _, _ -> }, onRegisterClick = { _, _, _ -> })
     }
 }
 
@@ -149,6 +146,6 @@ fun PreviewAuthScreenRegisterLight() {
 @Composable
 fun PreviewAuthScreenRegisterDark() {
     FinanceAppTheme(darkTheme = true) {
-        HalamanAuth(ComposeIsLoginMode = false, onLoginClick = { _, _ -> }, onRegisterClick = { _, _, _ -> })
+        HalamanAuth(composeIsLoginMode = false, onLoginClick = { _, _ -> }, onRegisterClick = { _, _, _ -> })
     }
 }

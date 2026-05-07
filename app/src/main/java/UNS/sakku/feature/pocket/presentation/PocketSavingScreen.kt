@@ -11,53 +11,56 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import uns.sakku.ui.theme.FinanceAppTheme
 import uns.sakku.core.LocalBackStack
 import uns.sakku.core.Routes
-import uns.sakku.feature.pocket.presentation.components.PocketBudget
+import uns.sakku.feature.pocket.data.PocketBudget
+import uns.sakku.feature.pocket.data.SavingGoal
 import uns.sakku.feature.pocket.presentation.components.PocketCard
-import uns.sakku.feature.pocket.presentation.components.SavingGoal
 import uns.sakku.feature.pocket.presentation.components.SavingCard
 
+// UI Layer: Stateful Composable
 @Composable
-fun PocketSavingScreen() {
+fun PocketSavingScreen(viewModel: PocketSavingViewModel = viewModel()) {
     val backStack = LocalBackStack.current
 
+    // Objek UI tidak mengurus data mentah, ia observe ke ViewModel StateFlow
+    val savings by viewModel.savings.collectAsState()
+    val pockets by viewModel.pockets.collectAsState()
+
+    // Pass data dan event ke Stateless Component
     HalamanPocketSaving(
+        savings = savings,
+        pockets = pockets,
         onNavigateToTransaction = { backStack.add(Routes.TransactionRoute) },
         onNavigateToSavings = { backStack.add(Routes.SavingsRoute) },
         onNavigateToPockets = { backStack.add(Routes.PocketsRoute) },
-        onNavigateToAddPocketSaving = {isTabungan -> backStack.add(Routes.AddPocketSavingRoute(initialIsTabungan = isTabungan))},
+        onNavigateToAddPocketSaving = { isTabungan -> backStack.add(Routes.AddPocketSavingRoute(initialIsTabungan = isTabungan)) },
         onBackClick = { backStack.removeLastOrNull() }
     )
 }
 
+// UI Layer: Stateless Composable
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HalamanPocketSaving(
+    savings: List<SavingGoal>,
+    pockets: List<PocketBudget>,
     onNavigateToTransaction: () -> Unit,
     onNavigateToSavings: () -> Unit,
     onNavigateToPockets: () -> Unit,
     onNavigateToAddPocketSaving: (Boolean) -> Unit,
-    onBackClick: () -> Unit = {}) {
-
-    val savings = listOf(
-        SavingGoal("Dana Darurat", 10000000f, 0f),
-        SavingGoal("Beli Laptop Baru", 15000000f, 0f)
-    )
-
-    val pockets = listOf(
-        PocketBudget("Makanan & Minuman", 2000000f, 0f),
-        PocketBudget("Transportasi", 500000f, 0f),
-        PocketBudget("Hiburan", 500000f, 0f)
-    )
-
+    onBackClick: () -> Unit = {}
+) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -74,14 +77,12 @@ fun HalamanPocketSaving(
             FloatingActionButton(
                 onClick = onNavigateToTransaction,
                 containerColor = MaterialTheme.colorScheme.primary,
-                modifier = Modifier
-                    .clickable(onClick = onNavigateToTransaction)
+                modifier = Modifier.clickable(onClick = onNavigateToTransaction)
             ) {
                 Icon(imageVector = Icons.Default.Add, contentDescription = "Tambah", tint = MaterialTheme.colorScheme.onSecondary)
             }
         }
     ) { paddingValues ->
-        // MENGGUNAKAN LAZYCOLUMN
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -103,11 +104,7 @@ fun HalamanPocketSaving(
                         color = MaterialTheme.colorScheme.onBackground
                     )
                     TextButton(onClick = onNavigateToSavings) {
-                        Text(
-                            text = ">",
-                            color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.Bold
-                        )
+                        Text(text = ">", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                     }
                 }
                 Text(
@@ -123,11 +120,11 @@ fun HalamanPocketSaving(
                 ) {
                     Icon(imageVector = Icons.Default.Add, contentDescription = "Tambah Tabungan", modifier = Modifier.size(18.dp))
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = "Tambah Tabungan")
+                    Text(text = "Tambah/Ubah Tabungan")
                 }
             }
 
-            // List Item Tabungan
+            // List Item Tabungan menggunakan data dari ViewModel
             items(savings) { saving ->
                 SavingCard(saving = saving)
                 Spacer(modifier = Modifier.height(12.dp))
@@ -167,11 +164,11 @@ fun HalamanPocketSaving(
                 ) {
                     Icon(imageVector = Icons.Default.Add, contentDescription = "Tambah Tabungan", modifier = Modifier.size(18.dp))
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = "Tambah Kantong")
+                    Text(text = "Tambah/Ubah Kantong")
                 }
             }
 
-            // List Item Kantong
+            // List Item Kantong menggunakan data dari ViewModel
             items(pockets) { pocket ->
                 PocketCard(pocket = pocket)
                 Spacer(modifier = Modifier.height(12.dp))
@@ -184,31 +181,18 @@ fun HalamanPocketSaving(
     }
 }
 
-
 @Preview(showBackground = true, name = "Light Mode")
 @Composable
 fun PocketSavingPreviewLight() {
     FinanceAppTheme(darkTheme = false) {
         HalamanPocketSaving(
+            savings = emptyList(),
+            pockets = emptyList(),
             onNavigateToTransaction = { },
             onBackClick = { },
             onNavigateToSavings = { },
             onNavigateToPockets = { },
             onNavigateToAddPocketSaving = {  }
-        )
-    }
-}
-
-@Preview(showBackground = true, name = "Dark Mode")
-@Composable
-fun PocketSavingPreviewDark() {
-    FinanceAppTheme(darkTheme = true) {
-        HalamanPocketSaving(
-            onNavigateToTransaction = { },
-            onBackClick = { },
-            onNavigateToSavings = { },
-            onNavigateToPockets = { },
-            onNavigateToAddPocketSaving = {}
         )
     }
 }

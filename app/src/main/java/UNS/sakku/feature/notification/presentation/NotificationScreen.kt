@@ -8,11 +8,14 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ExitToApp // Icon Logout
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -23,24 +26,14 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import uns.sakku.ui.theme.FinanceAppTheme
 import uns.sakku.ui.theme.IncomeGreen
 import uns.sakku.ui.theme.ExpenseRed
 import uns.sakku.core.LocalBackStack
-@Composable
-fun NotificationScreen() {
-    val backStack = LocalBackStack.current
-
-    // Pastikan UI aslimu diganti namanya dari NotificationScreen menjadi HalamanNotification
-    HalamanNotification(
-        onBackClick = { backStack.removeLastOrNull() }
-    )
-}
 
 enum class NotificationType {
-    WARNING,
-    INFO,
-    SUCCESS
+    WARNING, INFO, SUCCESS
 }
 
 data class NotificationItem(
@@ -52,44 +45,34 @@ data class NotificationItem(
     val isRead: Boolean
 )
 
+@Composable
+fun NotificationScreen(
+    viewModel: NotificationViewModel = viewModel()
+) {
+    val backStack = LocalBackStack.current
+    val notifications by viewModel.notifications.collectAsState()
+
+    HalamanNotification(
+        notifications = notifications,
+        onBackClick = { backStack.removeLastOrNull() },
+        onNotificationClick = { id -> viewModel.markAsRead(id) },
+        onLogoutClick = {
+            // 1. Panggil logika logout di ViewModel (mengubah global state)
+            viewModel.logout()
+            // 2. Lempar pengguna kembali ke Dashboard (Dashboard otomatis jadi mode Guest)
+            backStack.removeLastOrNull()
+        }
+    )
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HalamanNotification(onBackClick: () -> Unit = {}) {
-    val notifications = listOf(
-        NotificationItem(
-            id = "1",
-            title = "Peringatan Kantong Keuangan!",
-            message = "Pengeluaran untuk kategori 'Hiburan' telah melewati batas anggaran Anda bulan ini.",
-            timestamp = "Hari ini, 14:30",
-            type = NotificationType.WARNING,
-            isRead = false
-        ),
-        NotificationItem(
-            id = "2",
-            title = "Laporan Bulanan Siap",
-            message = "Laporan analisis keuangan untuk bulan Mei sudah tersedia. Anda dapat mengekspornya ke PDF/CSV.",
-            timestamp = "Kemarin, 09:00",
-            type = NotificationType.INFO,
-            isRead = false
-        ),
-        NotificationItem(
-            id = "3",
-            title = "Target Tabungan Tercapai \uD83C\uDF89",
-            message = "Selamat! Anda telah mencapai 100% dari target tabungan 'Dana Darurat'.",
-            timestamp = "10 Apr, 16:45",
-            type = NotificationType.SUCCESS,
-            isRead = true
-        ),
-        NotificationItem(
-            id = "4",
-            title = "Pengingat Tabungan",
-            message = "Jangan lupa sisihkan pendapatan bulan ini untuk target 'Beli Laptop Baru'.",
-            timestamp = "01 Apr, 08:00",
-            type = NotificationType.INFO,
-            isRead = true
-        )
-    )
-
+fun HalamanNotification(
+    notifications: List<NotificationItem>,
+    onBackClick: () -> Unit = {},
+    onNotificationClick: (String) -> Unit = {},
+    onLogoutClick: () -> Unit = {} // PARAMETER BARU
+) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -97,6 +80,16 @@ fun HalamanNotification(onBackClick: () -> Unit = {}) {
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali", tint = MaterialTheme.colorScheme.onPrimary)
+                    }
+                },
+                actions = {
+                    // TOMBOL LOGOUT BARU
+                    IconButton(onClick = onLogoutClick) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ExitToApp,
+                            contentDescription = "Logout",
+                            tint = MaterialTheme.colorScheme.onPrimary
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primary)
@@ -119,7 +112,10 @@ fun HalamanNotification(onBackClick: () -> Unit = {}) {
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     items(notifications) { notif ->
-                        NotificationCard(notification = notif)
+                        NotificationCard(
+                            notification = notif,
+                            onClick = { onNotificationClick(notif.id) }
+                        )
                     }
                 }
             }
@@ -128,16 +124,20 @@ fun HalamanNotification(onBackClick: () -> Unit = {}) {
 }
 
 @Composable
-fun NotificationCard(notification: NotificationItem) {
+fun NotificationCard(
+    notification: NotificationItem,
+    onClick: () -> Unit = {}
+) {
     val (icon: ImageVector, iconColor: Color) = when (notification.type) {
         NotificationType.WARNING -> Pair(Icons.Default.Warning, ExpenseRed)
-        NotificationType.INFO -> Pair(Icons.Default.Info, Color(0xFF03A9F4)) // Tetap biru untuk info
+        NotificationType.INFO -> Pair(Icons.Default.Info, Color(0xFF03A9F4))
         NotificationType.SUCCESS -> Pair(Icons.Default.CheckCircle, IncomeGreen)
     }
 
     val cardBackgroundColor = if (notification.isRead) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f)
 
     Card(
+        onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = cardBackgroundColor),
         elevation = CardDefaults.cardElevation(defaultElevation = if (notification.isRead) 1.dp else 4.dp),
@@ -209,18 +209,16 @@ fun NotificationCard(notification: NotificationItem) {
     }
 }
 
+// Preview Data
 @Preview(showBackground = true, name = "Light Mode")
 @Composable
 fun NotificationPreviewLight() {
     FinanceAppTheme(darkTheme = false) {
-        HalamanNotification()
-    }
-}
-
-@Preview(showBackground = true, name = "Dark Mode")
-@Composable
-fun NotificationPreviewDark() {
-    FinanceAppTheme(darkTheme = true) {
-        HalamanNotification()
+        HalamanNotification(
+            notifications = listOf(
+                NotificationItem("1", "Peringatan", "Cek pengeluaran", "12:00", NotificationType.WARNING, false)
+            ),
+            onLogoutClick = {}
+        )
     }
 }
