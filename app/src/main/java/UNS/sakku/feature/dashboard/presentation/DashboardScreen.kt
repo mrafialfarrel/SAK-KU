@@ -3,8 +3,6 @@ package uns.sakku.feature.dashboard.presentation
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalanceWallet
@@ -14,59 +12,64 @@ import androidx.compose.material.icons.filled.Assessment
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import java.text.NumberFormat
-import java.util.Locale
+import androidx.lifecycle.viewmodel.compose.viewModel // Import ViewModel Compose
 import uns.sakku.ui.theme.FinanceAppTheme
 import uns.sakku.ui.theme.IncomeGreen
 import uns.sakku.ui.theme.ExpenseRed
 import uns.sakku.core.Routes
 import uns.sakku.core.LocalBackStack
-import uns.sakku.core.SharedTransactionState
 import uns.sakku.core.utils.formatRupiah
 import uns.sakku.feature.dashboard.presentation.components.BalanceCard
 import uns.sakku.feature.dashboard.presentation.components.SummaryCard
 import uns.sakku.feature.dashboard.presentation.components.QuickMenuButton
 import uns.sakku.feature.dashboard.presentation.components.RecentTransactionsList
+
+/**
+ * Stateful Composable:
+ * Bertugas membuat/mengambil ViewModel, mengamati State, dan mengatur navigasi.
+ */
 @Composable
-fun DashboardScreen() {
+fun DashboardScreen(
+    viewModel: DashboardViewModel = viewModel() // Mengambil ViewModel
+) {
     val backStack = LocalBackStack.current
+
+    // Mengamati StateFlow dari ViewModel secara reaktif
+    val uiState by viewModel.uiState.collectAsState()
 
     HalamanDashboard(
         isLogin = false,
-        // Alur: Dashboard > Login (Mungkin untuk logout atau sesi habis)
+        uiState = uiState, // Kirim State (Data) ke UI
         onNavigateToLogin = { backStack.add(Routes.AuthRoute) },
-        // Alur: Dashboard > Notification
         onNavigateToNotification = { backStack.add(Routes.NotificationRoute) },
-        // Alur: Dashboard > Pocket
         onNavigateToPocket = { backStack.add(Routes.PocketSavingRoute) },
-        // Alur: Dashboard > Report
         onNavigateToReport = { backStack.add(Routes.ReportRoute) }
     )
 }
 
+/**
+ * Stateless Composable:
+ * Hanya bertugas menampilkan UI berdasarkan [uiState] yang diterima. Tidak tahu asal usul datanya.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HalamanDashboard(
     isLogin: Boolean = false,
+    uiState: DashboardUiState, // Menerima parameter State dari induk
     onNavigateToLogin: () -> Unit,
     onNavigateToNotification: () -> Unit,
     onNavigateToPocket: () -> Unit,
-    onNavigateToReport: () -> Unit) {
-
-    // --- TAMBAHAN BARU: Hitung total Saldo, Pemasukan, dan Pengeluaran secara dinamis ---
-    val transaksiList = SharedTransactionState.transaksiList
-    val totalPemasukan = transaksiList.filter { it.isPemasukan }.sumOf { it.nominal }
-    val totalPengeluaran = transaksiList.filter { !it.isPemasukan }.sumOf { it.nominal }
-    val totalSaldo = totalPemasukan - totalPengeluaran
+    onNavigateToReport: () -> Unit
+) {
+    // Logika perhitungan SharedTransactionState sudah dihapus dan dipindah ke ViewModel
 
     Scaffold(
         topBar = {
@@ -80,7 +83,6 @@ fun HalamanDashboard(
                 },
                 actions = {
                     if (isLogin) {
-                        // PERBAIKAN: Gunakan pemanggilan fungsi yang benar
                         IconButton(onClick = onNavigateToNotification,
                             modifier = Modifier
                                 .clip(RoundedCornerShape(8.dp))
@@ -92,13 +94,12 @@ fun HalamanDashboard(
                             )
                         }
                     } else {
-                        // PERBAIKAN: Gunakan pemanggilan fungsi yang benar
                         Text(
                             text = "Login",
                             color = MaterialTheme.colorScheme.onPrimary,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier
-                                .padding(end = 16.dp) // Berikan sedikit jarak dari tepi kanan
+                                .padding(end = 16.dp)
                                 .clickable { onNavigateToLogin() }
                         )
                     }
@@ -116,22 +117,19 @@ fun HalamanDashboard(
                 .padding(paddingValues)
                 .padding(16.dp)
         ) {
-            // 1. Kartu Saldo & Ringkasan (Disusun berdampingan Kiri-Kanan)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(IntrinsicSize.Max), // Tinggi row mengikuti konten tertinggi di dalamnya
+                    .height(IntrinsicSize.Max),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                // Kiri: Saldo (Mengambil 55% ruang)
                 BalanceCard(
                     modifier = Modifier
                         .weight(1.2f)
                         .fillMaxHeight(),
-                    saldo = totalSaldo
+                    saldo = uiState.totalSaldo // Ambil dari UI State
                 )
 
-                // Kanan: Pemasukan (Atas) & Pengeluaran (Bawah) (Mengambil 45% ruang)
                 Column(
                     modifier = Modifier
                         .weight(1f)
@@ -143,7 +141,7 @@ fun HalamanDashboard(
                             .weight(1f)
                             .fillMaxWidth(),
                         title = "Pemasukan",
-                        amount = formatRupiah(totalPemasukan),
+                        amount = formatRupiah(uiState.totalPemasukan), // Ambil dari UI State
                         icon = Icons.Default.ArrowDownward,
                         iconColor = IncomeGreen
                     )
@@ -153,7 +151,7 @@ fun HalamanDashboard(
                             .weight(1f)
                             .fillMaxWidth(),
                         title = "Pengeluaran",
-                        amount = formatRupiah(totalPengeluaran),
+                        amount = formatRupiah(uiState.totalPengeluaran), // Ambil dari UI State
                         icon = Icons.Default.ArrowUpward,
                         iconColor = ExpenseRed
                     )
@@ -162,13 +160,11 @@ fun HalamanDashboard(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // 2. Menu Lain (Kantong & Laporan)
             Row(
                 modifier = Modifier
                     .fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                // PERBAIKAN: Oper callback navigasi ke masing-masing tombol
                 QuickMenuButton(
                     icon = Icons.Default.AccountBalanceWallet,
                     title = "Kantong",
@@ -183,7 +179,6 @@ fun HalamanDashboard(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // 3. Daftar Transaksi Terakhir
             Text(
                 text = "Transaksi Terakhir",
                 fontSize = 18.sp,
@@ -191,10 +186,21 @@ fun HalamanDashboard(
                 color = MaterialTheme.colorScheme.onBackground
             )
             Spacer(modifier = Modifier.height(8.dp))
-            RecentTransactionsList()
+
+            // Berikan list transaksi dari UI State ke komponen
+            RecentTransactionsList(transaksiList = uiState.recentTransactions)
         }
     }
 }
+
+// --- PREVIEW ---
+// Buat dummy state untuk mengisi Preview karena Preview tidak menjalankan ViewModel
+private val dummyUiState = DashboardUiState(
+    totalSaldo = 1500000.0,
+    totalPemasukan = 2500000.0,
+    totalPengeluaran = 1000000.0,
+    recentTransactions = emptyList() // Biarkan kosong untuk preview, atau isi dummy data
+)
 
 @Preview(showBackground = true, name = "Light Mode - Guest")
 @Composable
@@ -202,6 +208,7 @@ fun DashboardPreviewLight() {
     FinanceAppTheme(darkTheme = false) {
         HalamanDashboard(
             isLogin = false,
+            uiState = dummyUiState,
             onNavigateToLogin = { },
             onNavigateToNotification = { },
             onNavigateToPocket = { },
@@ -216,6 +223,7 @@ fun DashboardPreviewDark() {
     FinanceAppTheme(darkTheme = true) {
         HalamanDashboard(
             isLogin = false,
+            uiState = dummyUiState,
             onNavigateToLogin = { },
             onNavigateToNotification = { },
             onNavigateToPocket = { },
@@ -230,6 +238,7 @@ fun DashboardPreviewLoginLight() {
     FinanceAppTheme(darkTheme = false) {
         HalamanDashboard(
             isLogin = true,
+            uiState = dummyUiState,
             onNavigateToLogin = { },
             onNavigateToNotification = { },
             onNavigateToPocket = { },
@@ -244,6 +253,7 @@ fun DashboardPreviewLoginDark() {
     FinanceAppTheme(darkTheme = true) {
         HalamanDashboard(
             isLogin = true,
+            uiState = dummyUiState,
             onNavigateToLogin = { },
             onNavigateToNotification = { },
             onNavigateToPocket = { },

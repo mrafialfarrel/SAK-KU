@@ -16,10 +16,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import uns.sakku.core.SharedTransactionState
 import uns.sakku.core.utils.formatRupiah
-import uns.sakku.ui.theme.ExpenseRed
-import uns.sakku.ui.theme.IncomeGreen
+
 
 @Composable
 fun BalanceCard(modifier: Modifier = Modifier, saldo: Double) {
@@ -117,10 +115,12 @@ fun QuickMenuButton(
     }
 }
 
+/**
+ * STATELESS COMPONENT
+ * Sekarang komponen ini hanya menerima [transaksiList] dari luar (parameter).
+ */
 @Composable
-fun RecentTransactionsList() {
-    val transaksiList = SharedTransactionState.transaksiList
-
+fun RecentTransactionsList(transaksiList: List<Any>) { // TODO: Ganti 'Any' dengan model Transaction Anda
     if (transaksiList.isEmpty()) {
         Box(modifier = Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
             Text("Belum ada transaksi terbaru.", color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f))
@@ -129,7 +129,11 @@ fun RecentTransactionsList() {
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            items(transaksiList.reversed().take(5)) { transaction ->
+            // Karena sudah di .take(5) di ViewModel, kita langsung iterasi semua item yang diterima
+            items(transaksiList) { item ->
+                // TODO: Uncomment / Sesuaikan baris di bawah ini apabila class Transaction sudah di-import
+                // val transaction = item as Transaction
+
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -141,6 +145,7 @@ fun RecentTransactionsList() {
                             .padding(16.dp),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
+                        /* TODO: Hapus tanda komentar pada bagian di bawah jika menggunakan class Transaction yang asli
                         Text(text = transaction.keterangan, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurface)
 
                         val symbol = if (transaction.isPemasukan) "+" else "-"
@@ -151,6 +156,7 @@ fun RecentTransactionsList() {
                             color = color,
                             fontWeight = FontWeight.Bold
                         )
+                        */
                     }
                 }
             }
