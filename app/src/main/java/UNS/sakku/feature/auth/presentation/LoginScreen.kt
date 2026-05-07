@@ -16,28 +16,58 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel // Import viewModel
 import uns.sakku.ui.theme.FinanceAppTheme
 import uns.sakku.core.Routes
 import uns.sakku.core.LocalBackStack
 
+/**
+ * Stateful Composable: Bertanggung jawab atas ViewModel dan Side Effects
+ */
 @Composable
-fun LoginScreen() {
-    // 1. Ambil akses navigasi dari CompositionLocal
+fun LoginScreen(
+    viewModel: AuthViewModel = viewModel()
+) {
     val backStack = LocalBackStack.current
+    val context = LocalContext.current
 
-    // 2. Panggil fungsi UI kamu
-    HalamanAuth(
-        onAuthSuccess = {
+    // Observasi state secara reaktif
+    val uiState by viewModel.uiState.collectAsState()
+
+    // LaunchedEffect digunakan untuk bereaksi terhadap perubahan state tanpa menggambar ulang UI
+    // Sangat cocok untuk Navigasi dan menampilkan Toast
+    LaunchedEffect(uiState) {
+        if (uiState.isSuccess) {
+            viewModel.resetState() // Reset agar tidak memicu navigasi lagi jika kembali (back)
+
+            // Output untuk Developer berupa Toast (Bisa dihapus nanti)
+            Toast.makeText(context, "Developer Info -> Otentikasi Berhasil", Toast.LENGTH_SHORT).show()
             backStack.add(Routes.DashboardRoute)
         }
+
+        if (uiState.errorMessage != null) {
+            Toast.makeText(context, uiState.errorMessage, Toast.LENGTH_SHORT).show()
+            viewModel.resetState() // Reset agar Toast tidak muncul terus-menerus
+        }
+    }
+
+    HalamanAuth(
+        onLoginClick = viewModel::login,
+        onRegisterClick = viewModel::register
     )
 }
 
+/**
+ * Stateless Composable: Form input UI yang buta terhadap logika validasi.
+ */
 @Composable
-fun HalamanAuth(onAuthSuccess: () -> Unit, ComposeIsLoginMode: Boolean = true) {
-    val context = LocalContext.current // Ditambahkan untuk memunculkan Toast
-
-    var isLoginMode  by remember { mutableStateOf(ComposeIsLoginMode) }
+fun HalamanAuth(
+    onLoginClick: (String, String) -> Unit,
+    onRegisterClick: (String, String, String) -> Unit,
+    ComposeIsLoginMode: Boolean = true
+) {
+    // UI State (transient state) disimpan di Composable
+    var isLoginMode by remember { mutableStateOf(ComposeIsLoginMode) }
     var namaLengkap by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -67,23 +97,12 @@ fun HalamanAuth(onAuthSuccess: () -> Unit, ComposeIsLoginMode: Boolean = true) {
 
         Button(
             onClick = {
-                // Validasi Input
+                // Semua validasi kini diurus oleh ViewModel!
+                // UI hanya bertugas mengirim apa yang diketik pengguna.
                 if (isLoginMode) {
-                    if (email.isNotBlank() && password.isNotBlank()) {
-                        // Output untuk Developer berupa Toast
-                        Toast.makeText(context, "Developer Info -> Login Email: $email, Pass: $password", Toast.LENGTH_LONG).show()
-                        onAuthSuccess()
-                    } else {
-                        Toast.makeText(context, "Harap isi Email dan Password terlebih dahulu", Toast.LENGTH_SHORT).show()
-                    }
+                    onLoginClick(email, password)
                 } else {
-                    if (namaLengkap.isNotBlank() && email.isNotBlank() && password.isNotBlank()) {
-                        // Output untuk Developer berupa Toast
-                        Toast.makeText(context, "Developer Info -> Register Nama: $namaLengkap, Email: $email, Pass: $password", Toast.LENGTH_LONG).show()
-                        onAuthSuccess()
-                    } else {
-                        Toast.makeText(context, "Harap isi semua kolom pendaftaran", Toast.LENGTH_SHORT).show()
-                    }
+                    onRegisterClick(namaLengkap, email, password)
                 }
             },
             modifier = Modifier.fillMaxWidth().height(50.dp),
@@ -101,11 +120,12 @@ fun HalamanAuth(onAuthSuccess: () -> Unit, ComposeIsLoginMode: Boolean = true) {
     }
 }
 
+// --- PREVIEW ---
 @Preview(showBackground = true, name = "Light Mode - Login")
 @Composable
 fun PreviewAuthScreenLight() {
     FinanceAppTheme(darkTheme = false) {
-        HalamanAuth(onAuthSuccess = {})
+        HalamanAuth(onLoginClick = { _, _ -> }, onRegisterClick = { _, _, _ -> })
     }
 }
 
@@ -113,7 +133,7 @@ fun PreviewAuthScreenLight() {
 @Composable
 fun PreviewAuthScreenDark() {
     FinanceAppTheme(darkTheme = true) {
-        HalamanAuth(onAuthSuccess = {})
+        HalamanAuth(onLoginClick = { _, _ -> }, onRegisterClick = { _, _, _ -> })
     }
 }
 
@@ -121,7 +141,7 @@ fun PreviewAuthScreenDark() {
 @Composable
 fun PreviewAuthScreenRegisterLight() {
     FinanceAppTheme(darkTheme = false) {
-        HalamanAuth(ComposeIsLoginMode = false, onAuthSuccess = {})
+        HalamanAuth(ComposeIsLoginMode = false, onLoginClick = { _, _ -> }, onRegisterClick = { _, _, _ -> })
     }
 }
 
@@ -129,6 +149,6 @@ fun PreviewAuthScreenRegisterLight() {
 @Composable
 fun PreviewAuthScreenRegisterDark() {
     FinanceAppTheme(darkTheme = true) {
-        HalamanAuth(ComposeIsLoginMode = false, onAuthSuccess = {})
+        HalamanAuth(ComposeIsLoginMode = false, onLoginClick = { _, _ -> }, onRegisterClick = { _, _, _ -> })
     }
 }

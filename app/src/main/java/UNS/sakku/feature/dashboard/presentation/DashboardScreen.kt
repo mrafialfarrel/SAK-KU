@@ -3,6 +3,8 @@ package uns.sakku.feature.dashboard.presentation
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalanceWallet
@@ -12,15 +14,21 @@ import androidx.compose.material.icons.filled.Assessment
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel // Import ViewModel Compose
+import java.text.NumberFormat
+import java.util.Locale
 import uns.sakku.ui.theme.FinanceAppTheme
 import uns.sakku.ui.theme.IncomeGreen
 import uns.sakku.ui.theme.ExpenseRed
@@ -31,6 +39,7 @@ import uns.sakku.feature.dashboard.presentation.components.BalanceCard
 import uns.sakku.feature.dashboard.presentation.components.SummaryCard
 import uns.sakku.feature.dashboard.presentation.components.QuickMenuButton
 import uns.sakku.feature.dashboard.presentation.components.RecentTransactionsList
+import uns.sakku.feature.transaction.presentation.TransactionItem // Tambahkan import TransactionItem
 
 /**
  * Stateful Composable:
@@ -44,6 +53,11 @@ fun DashboardScreen(
 
     // Mengamati StateFlow dari ViewModel secara reaktif
     val uiState by viewModel.uiState.collectAsState()
+
+    // TAMBAHAN: Refresh data setiap kali DashboardScreen tampil ke layar
+    LaunchedEffect(Unit) {
+        viewModel.refreshData()
+    }
 
     HalamanDashboard(
         isLogin = false,
@@ -194,12 +208,15 @@ fun HalamanDashboard(
 }
 
 // --- PREVIEW ---
-// Buat dummy state untuk mengisi Preview karena Preview tidak menjalankan ViewModel
+// Mengisi data preview agar layout transaksi tidak terlihat kosong
 private val dummyUiState = DashboardUiState(
     totalSaldo = 1500000.0,
     totalPemasukan = 2500000.0,
     totalPengeluaran = 1000000.0,
-    recentTransactions = emptyList() // Biarkan kosong untuk preview, atau isi dummy data
+    recentTransactions = listOf(
+        TransactionItem("1", "Makan Siang", 50000.0, false, "Konsumsi", "Dompet Utama"),
+        TransactionItem("2", "Gaji", 5000000.0, true, "Gaji", "Rekening Bank")
+    )
 )
 
 @Preview(showBackground = true, name = "Light Mode - Guest")

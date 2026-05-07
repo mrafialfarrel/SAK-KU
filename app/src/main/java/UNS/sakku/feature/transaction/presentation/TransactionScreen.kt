@@ -1,7 +1,6 @@
 package uns.sakku.feature.transaction.presentation
 
 import android.widget.Toast
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -11,8 +10,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
@@ -25,13 +24,13 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import java.text.NumberFormat
-import java.util.Locale
+import androidx.lifecycle.viewmodel.compose.viewModel // Import viewModel
 import uns.sakku.ui.theme.FinanceAppTheme
 import uns.sakku.ui.theme.IncomeGreen
 import uns.sakku.ui.theme.ExpenseRed
 import uns.sakku.core.LocalBackStack
-import uns.sakku.core.SharedTransactionState
+import uns.sakku.core.utils.formatRupiah
+import uns.sakku.feature.transaction.presentation.components.TransactionCard
 
 data class TransactionItem(
     val id: String,
@@ -42,23 +41,46 @@ data class TransactionItem(
     val alokasi: String
 )
 
+/**
+ * Stateful Composable
+ * Menginisialisasi ViewModel dan mengamati StateFlow
+ */
 @Composable
-fun TransactionScreen() {
+fun TransactionScreen(
+    viewModel: TransactionViewModel = viewModel()
+) {
     val backStack = LocalBackStack.current
 
+    // Observasi state secara reaktif
+    val uiState by viewModel.uiState.collectAsState()
+
     HalamanTransaction(
-        onNavigateBack = { backStack.removeLastOrNull() }
+        transactions = uiState.transactions, // Kirim list dari ViewModel
+        onNavigateBack = { backStack.removeLastOrNull() },
+        // Teruskan aksi ke fungsi ViewModel
+        onAddTransaction = viewModel::addTransaction,
+        onUpdateTransaction = viewModel::updateTransaction,
+        onDeleteTransaction = viewModel::deleteTransaction
     )
 }
 
+/**
+ * Stateless (pada aspek data/bisnis) Composable
+ * Tetap memiliki state UI (seperti input teks) menggunakan 'remember'
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HalamanTransaction(initialIsPemasukan: Boolean = false,
-                       onNavigateBack: () -> Unit) {
+fun HalamanTransaction(
+    transactions: List<TransactionItem>,
+    initialIsPemasukan: Boolean = false,
+    onNavigateBack: () -> Unit,
+    onAddTransaction: (keterangan: String, nominal: Double, isPemasukan: Boolean, kategori: String, alokasi: String) -> Unit,
+    onUpdateTransaction: (id: String, keterangan: String, nominal: Double, isPemasukan: Boolean, kategori: String, alokasi: String) -> Unit,
+    onDeleteTransaction: (TransactionItem) -> Unit
+) {
     val context = LocalContext.current
-    val transaksiList = SharedTransactionState.transaksiList
 
-    // State untuk Form Input
+    // State untuk Form Input (Tetap di UI karena hanya state sementara/transient)
     var keterangan by remember { mutableStateOf("") }
     var nominal by remember { mutableStateOf("") }
     var isPemasukan by remember { mutableStateOf(initialIsPemasukan) }
@@ -67,11 +89,11 @@ fun HalamanTransaction(initialIsPemasukan: Boolean = false,
     var expandedKategori by remember { mutableStateOf(false) }
     var expandedAlokasi by remember { mutableStateOf(false) }
 
-    // State untuk Bottom Sheet
+    // State untuk Bottom Sheet (UI State)
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showBottomSheet by remember { mutableStateOf(false) }
 
-    // State untuk Edit/Hapus
+    // State untuk Edit/Hapus (UI State)
     var isEditMode by remember { mutableStateOf(false) }
     var editId by remember { mutableStateOf<String?>(null) }
     var showDeleteAlert by remember { mutableStateOf(false) }
@@ -93,7 +115,7 @@ fun HalamanTransaction(initialIsPemasukan: Boolean = false,
                 title = { Text("Catatan Keuangan", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Kembali")
+                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -103,7 +125,6 @@ fun HalamanTransaction(initialIsPemasukan: Boolean = false,
                 )
             )
         },
-        // Floating Action Button untuk membuka Bottom Sheet
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
@@ -129,7 +150,7 @@ fun HalamanTransaction(initialIsPemasukan: Boolean = false,
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            if (transaksiList.isEmpty()) {
+            if (transactions.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text("Belum ada transaksi. Silakan tambah data via tombol +.", color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f))
                 }
@@ -148,56 +169,27 @@ fun HalamanTransaction(initialIsPemasukan: Boolean = false,
                         )
                     }
 
-                    items(transaksiList.reversed()) { item ->
-                        Card(
-                            modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(16.dp).fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(text = item.keterangan, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-                                    Text(
-                                        text = "${item.kategori} • ${item.alokasi}",
-                                        fontSize = 12.sp,
-                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                                        modifier = Modifier.padding(bottom = 4.dp)
-                                    )
-                                    Text(
-                                        text = if (item.isPemasukan) "+ ${formatRupiah(item.nominal)}" else "- ${formatRupiah(item.nominal)}",
-                                        color = if (item.isPemasukan) IncomeGreen else ExpenseRed,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 14.sp
-                                    )
-                                }
-
-                                IconButton(onClick = {
-                                    keterangan = item.keterangan
-                                    nominal = item.nominal.toLong().toString()
-                                    isPemasukan = item.isPemasukan
-                                    selectedKategori = item.kategori
-                                    selectedAlokasi = item.alokasi
-                                    isEditMode = true
-                                    editId = item.id
-                                    showBottomSheet = true // Buka Bottom Sheet untuk mengedit
-                                }) {
-                                    Icon(imageVector = Icons.Default.Edit, contentDescription = "Edit", tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
-                                }
-
-                                IconButton(onClick = {
-                                    itemToDelete = item
-                                    showDeleteAlert = true // Tampilkan Popup Konfirmasi
-                                }) {
-                                    Icon(imageVector = Icons.Default.Delete, contentDescription = "Hapus", tint = ExpenseRed)
-                                }
+                    items(transactions.reversed()) { item ->
+                        // PENGGUNAAN KOMPONEN REUSABLE
+                        TransactionCard(
+                            transaction = item,
+                            showActions = true, // Di layar ini, kita ingin melihat tombol edit/hapus
+                            onEditClick = {
+                                keterangan = item.keterangan
+                                nominal = item.nominal.toLong().toString()
+                                isPemasukan = item.isPemasukan
+                                selectedKategori = item.kategori
+                                selectedAlokasi = item.alokasi
+                                isEditMode = true
+                                editId = item.id
+                                showBottomSheet = true
+                            },
+                            onDeleteClick = {
+                                itemToDelete = item
+                                showDeleteAlert = true
                             }
-                        }
+                        )
                     }
-                    // Tambahan padding bawah agar item terakhir tidak tertutup FAB
                     item { Spacer(modifier = Modifier.height(72.dp)) }
                 }
             }
@@ -215,7 +207,7 @@ fun HalamanTransaction(initialIsPemasukan: Boolean = false,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
-                    .padding(bottom = 32.dp) // padding ekstra bawah
+                    .padding(bottom = 32.dp)
                     .verticalScroll(rememberScrollState())
             ) {
                 Text(
@@ -247,7 +239,6 @@ fun HalamanTransaction(initialIsPemasukan: Boolean = false,
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // RADIO BUTTONS
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -306,7 +297,6 @@ fun HalamanTransaction(initialIsPemasukan: Boolean = false,
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // DROPDOWN 1: KATEGORI
                 ExposedDropdownMenuBox(
                     expanded = expandedKategori,
                     onExpandedChange = { expandedKategori = !expandedKategori }
@@ -337,7 +327,6 @@ fun HalamanTransaction(initialIsPemasukan: Boolean = false,
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // DROPDOWN 2: ALOKASI
                 ExposedDropdownMenuBox(
                     expanded = expandedAlokasi,
                     onExpandedChange = { expandedAlokasi = !expandedAlokasi }
@@ -368,34 +357,22 @@ fun HalamanTransaction(initialIsPemasukan: Boolean = false,
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // TOMBOL SIMPAN
                 Button(
                     onClick = {
                         if (keterangan.isNotBlank() && nominal.isNotBlank() && selectedKategori.isNotBlank() && selectedAlokasi.isNotBlank()) {
                             val nominalDouble = nominal.toDoubleOrNull() ?: 0.0
 
                             if (isEditMode && editId != null) {
-                                val index = transaksiList.indexOfFirst { it.id == editId }
-                                if (index != -1) {
-                                    transaksiList[index] = TransactionItem(
-                                        editId!!, keterangan, nominalDouble, isPemasukan, selectedKategori, selectedAlokasi
-                                    )
-                                }
+                                // Panggil lambda ViewModel untuk UPDATE
+                                onUpdateTransaction(editId!!, keterangan, nominalDouble, isPemasukan, selectedKategori, selectedAlokasi)
                                 Toast.makeText(context, "Transaksi diperbarui", Toast.LENGTH_SHORT).show()
                             } else {
-                                val newItem = TransactionItem(
-                                    id = System.currentTimeMillis().toString(),
-                                    keterangan = keterangan,
-                                    nominal = nominalDouble,
-                                    isPemasukan = isPemasukan,
-                                    kategori = selectedKategori,
-                                    alokasi = selectedAlokasi
-                                )
-                                transaksiList.add(newItem)
+                                // Panggil lambda ViewModel untuk ADD
+                                onAddTransaction(keterangan, nominalDouble, isPemasukan, selectedKategori, selectedAlokasi)
                                 Toast.makeText(context, "Transaksi ditambahkan", Toast.LENGTH_SHORT).show()
                             }
 
-                            showBottomSheet = false // Tutup bottom sheet jika berhasil
+                            showBottomSheet = false
                         } else {
                             Toast.makeText(context, "Harap isi semua kolom dan pilihan", Toast.LENGTH_SHORT).show()
                         }
@@ -423,7 +400,8 @@ fun HalamanTransaction(initialIsPemasukan: Boolean = false,
             confirmButton = {
                 TextButton(
                     onClick = {
-                        transaksiList.remove(itemToDelete)
+                        // Panggil lambda ViewModel untuk DELETE
+                        onDeleteTransaction(itemToDelete!!)
                         showDeleteAlert = false
                         itemToDelete = null
                         Toast.makeText(context, "Transaksi berhasil dihapus", Toast.LENGTH_SHORT).show()
@@ -443,17 +421,18 @@ fun HalamanTransaction(initialIsPemasukan: Boolean = false,
     }
 }
 
-fun formatRupiah(number: Double): String {
-    val localeID = Locale("in", "ID")
-    val formatRupiah = NumberFormat.getCurrencyInstance(localeID)
-    return formatRupiah.format(number).replace("Rp", "Rp ").replace(",00", "")
-}
-
+// --- PREVIEW ---
 @Preview(showBackground = true, name = "Light Mode")
 @Composable
 fun PreviewTransactionScreenLight() {
     FinanceAppTheme(darkTheme = false) {
-        HalamanTransaction(onNavigateBack = {})
+        HalamanTransaction(
+            transactions = emptyList(), // Kirim dummy kosong
+            onNavigateBack = {},
+            onAddTransaction = { _, _, _, _, _ -> },
+            onUpdateTransaction = { _, _, _, _, _, _ -> },
+            onDeleteTransaction = {}
+        )
     }
 }
 
@@ -461,28 +440,12 @@ fun PreviewTransactionScreenLight() {
 @Composable
 fun PreviewTransactionScreenDark() {
     FinanceAppTheme(darkTheme = true) {
-        HalamanTransaction(onNavigateBack = {})
-    }
-}
-
-@Preview(showBackground = true, name = "Light Mode (Pemasukan)")
-@Composable
-fun PreviewTransactionPemasukanScreenLight() {
-    FinanceAppTheme(darkTheme = false) {
         HalamanTransaction(
-            initialIsPemasukan = true,
-            onNavigateBack = {}
-        )
-    }
-}
-
-@Preview(showBackground = true, name = "Dark Mode (Pemasukan)")
-@Composable
-fun PreviewTransactionPemasukanScreenDark() {
-    FinanceAppTheme(darkTheme = true) {
-        HalamanTransaction(
-            initialIsPemasukan = true,
-            onNavigateBack = {}
+            transactions = emptyList(),
+            onNavigateBack = {},
+            onAddTransaction = { _, _, _, _, _ -> },
+            onUpdateTransaction = { _, _, _, _, _, _ -> },
+            onDeleteTransaction = {}
         )
     }
 }

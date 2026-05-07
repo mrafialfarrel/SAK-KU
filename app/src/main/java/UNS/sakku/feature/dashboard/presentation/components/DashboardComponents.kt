@@ -17,6 +17,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import uns.sakku.core.utils.formatRupiah
+import uns.sakku.feature.transaction.presentation.TransactionItem
+import uns.sakku.feature.transaction.presentation.components.TransactionCard
 
 
 @Composable
@@ -119,8 +121,11 @@ fun QuickMenuButton(
  * STATELESS COMPONENT
  * Sekarang komponen ini hanya menerima [transaksiList] dari luar (parameter).
  */
+/**
+ * STATELESS COMPONENT
+ */
 @Composable
-fun RecentTransactionsList(transaksiList: List<Any>) { // TODO: Ganti 'Any' dengan model Transaction Anda
+fun RecentTransactionsList(transaksiList: List<TransactionItem>) { // Ganti tipe data menjadi TransactionItem
     if (transaksiList.isEmpty()) {
         Box(modifier = Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
             Text("Belum ada transaksi terbaru.", color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f))
@@ -129,36 +134,12 @@ fun RecentTransactionsList(transaksiList: List<Any>) { // TODO: Ganti 'Any' deng
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // Karena sudah di .take(5) di ViewModel, kita langsung iterasi semua item yang diterima
-            items(transaksiList) { item ->
-                // TODO: Uncomment / Sesuaikan baris di bawah ini apabila class Transaction sudah di-import
-                // val transaction = item as Transaction
-
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        /* TODO: Hapus tanda komentar pada bagian di bawah jika menggunakan class Transaction yang asli
-                        Text(text = transaction.keterangan, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurface)
-
-                        val symbol = if (transaction.isPemasukan) "+" else "-"
-                        val color = if (transaction.isPemasukan) IncomeGreen else ExpenseRed
-
-                        Text(
-                            text = "$symbol ${formatRupiah(transaction.nominal)}",
-                            color = color,
-                            fontWeight = FontWeight.Bold
-                        )
-                        */
-                    }
-                }
+            items(transaksiList) { transaction ->
+                // PENGGUNAAN KOMPONEN REUSABLE
+                TransactionCard(
+                    transaction = transaction,
+                    showActions = false // Di Dashboard, kita tidak ingin tombol edit/hapus muncul
+                )
             }
         }
     }
