@@ -55,7 +55,17 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+    // Framework utama untuk Unit Test
     testImplementation(libs.junit)
+
+    // MockK: Library mocking terbaik untuk Kotlin (mirip Mockito di Java, tapi lebih optimal untuk Kotlin)
+    testImplementation(libs.mockk)
+
+    // Coroutines Test: Wajib untuk menguji viewModelScope.launch dan fungsi suspend
+    testImplementation(libs.kotlinx.coroutines.test)
+
+    // Turbine: Library ringan dari CashApp untuk menguji StateFlow/SharedFlow dengan sangat mudah
+    testImplementation(libs.turbine)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
