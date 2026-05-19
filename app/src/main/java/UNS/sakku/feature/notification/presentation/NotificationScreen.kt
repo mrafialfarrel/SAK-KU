@@ -31,7 +31,7 @@ import uns.sakku.ui.theme.FinanceAppTheme
 import uns.sakku.ui.theme.IncomeGreen
 import uns.sakku.ui.theme.ExpenseRed
 import uns.sakku.core.LocalBackStack
-
+import uns.sakku.ui.theme.ThemeMode
 enum class NotificationType {
     WARNING, INFO, SUCCESS
 }
@@ -213,7 +213,7 @@ fun NotificationCard(
 @Preview(showBackground = true, name = "Light Mode")
 @Composable
 fun NotificationPreviewLight() {
-    FinanceAppTheme(darkTheme = false) {
+    FinanceAppTheme(ThemeMode.LIGHT) {
         HalamanNotification(
             notifications = listOf(
                 NotificationItem("1", "Peringatan", "Cek pengeluaran", "12:00", NotificationType.WARNING, false)

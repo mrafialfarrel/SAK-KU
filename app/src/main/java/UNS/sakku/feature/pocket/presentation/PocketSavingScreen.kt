@@ -27,7 +27,7 @@ import uns.sakku.feature.pocket.data.PocketBudget
 import uns.sakku.feature.pocket.data.SavingGoal
 import uns.sakku.feature.pocket.presentation.components.PocketCard
 import uns.sakku.feature.pocket.presentation.components.SavingCard
-
+import uns.sakku.ui.theme.ThemeMode
 // UI Layer: Stateful Composable
 @Composable
 fun PocketSavingScreen(viewModel: PocketSavingViewModel = viewModel()) {
@@ -184,7 +184,7 @@ fun HalamanPocketSaving(
 @Preview(showBackground = true, name = "Light Mode")
 @Composable
 fun PocketSavingPreviewLight() {
-    FinanceAppTheme(darkTheme = false) {
+    FinanceAppTheme(ThemeMode.LIGHT) {
         HalamanPocketSaving(
             savings = emptyList(),
             pockets = emptyList(),

@@ -20,6 +20,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel // Import viewModel
 import uns.sakku.ui.theme.FinanceAppTheme
 import uns.sakku.core.Routes
 import uns.sakku.core.LocalBackStack
+import uns.sakku.ui.theme.ThemeMode
 
 /**
  * Stateful Composable: Bertanggung jawab atas ViewModel dan Side Effects
@@ -121,7 +122,7 @@ fun HalamanAuth(
 @Preview(showBackground = true, name = "Light Mode - Login")
 @Composable
 fun PreviewAuthScreenLight() {
-    FinanceAppTheme(darkTheme = false) {
+    FinanceAppTheme(ThemeMode.LIGHT) {
         HalamanAuth(onLoginClick = { _, _ -> }, onRegisterClick = { _, _, _ -> })
     }
 }
@@ -129,7 +130,7 @@ fun PreviewAuthScreenLight() {
 @Preview(showBackground = true, name = "Dark Mode - Login")
 @Composable
 fun PreviewAuthScreenDark() {
-    FinanceAppTheme(darkTheme = true) {
+    FinanceAppTheme(ThemeMode.DARK) {
         HalamanAuth(onLoginClick = { _, _ -> }, onRegisterClick = { _, _, _ -> })
     }
 }
@@ -137,7 +138,7 @@ fun PreviewAuthScreenDark() {
 @Preview(showBackground = true, name = "Light Mode - Register")
 @Composable
 fun PreviewAuthScreenRegisterLight() {
-    FinanceAppTheme(darkTheme = false) {
+    FinanceAppTheme(ThemeMode.LIGHT) {
         HalamanAuth(composeIsLoginMode = false, onLoginClick = { _, _ -> }, onRegisterClick = { _, _, _ -> })
     }
 }
@@ -145,7 +146,7 @@ fun PreviewAuthScreenRegisterLight() {
 @Preview(showBackground = true, name = "Dark Mode - Register")
 @Composable
 fun PreviewAuthScreenRegisterDark() {
-    FinanceAppTheme(darkTheme = true) {
+    FinanceAppTheme(ThemeMode.DARK) {
         HalamanAuth(composeIsLoginMode = false, onLoginClick = { _, _ -> }, onRegisterClick = { _, _, _ -> })
     }
 }

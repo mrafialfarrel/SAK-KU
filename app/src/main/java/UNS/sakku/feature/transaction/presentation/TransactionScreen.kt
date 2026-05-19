@@ -12,7 +12,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -28,6 +27,7 @@ import uns.sakku.ui.theme.FinanceAppTheme
 import uns.sakku.ui.theme.ExpenseRed
 import uns.sakku.core.LocalBackStack
 import uns.sakku.feature.transaction.presentation.components.TransactionCard
+import uns.sakku.ui.theme.ThemeMode
 
 data class TransactionItem(
     val id: String,
@@ -218,7 +218,7 @@ fun HalamanTransaction(
 @Preview(showBackground = true)
 @Composable
 fun PreviewTransactionScreen() {
-    FinanceAppTheme(darkTheme = false) {
+    FinanceAppTheme(ThemeMode.LIGHT) {
         HalamanTransaction(
             transactions = emptyList(),
             listKantong = listOf("Dompet", "OVO"),

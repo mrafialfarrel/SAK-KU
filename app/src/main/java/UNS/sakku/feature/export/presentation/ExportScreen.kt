@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import uns.sakku.ui.theme.FinanceAppTheme
 import uns.sakku.core.LocalBackStack
+import uns.sakku.ui.theme.ThemeMode
 
 // --- STATEFUL COMPOSABLE ---
 @Composable
@@ -207,7 +208,7 @@ fun HalamanExport(
 @Preview(showBackground = true, name = "Light Mode")
 @Composable
 fun PreviewHalamanExportLight() {
-    FinanceAppTheme(darkTheme = false) {
+    FinanceAppTheme(ThemeMode.LIGHT) {
         HalamanExport(
             uiState = ExportUiState(),
             onNavigateBack = {},
@@ -221,7 +222,7 @@ fun PreviewHalamanExportLight() {
 @Preview(showBackground = true, name = "Dark Mode")
 @Composable
 fun PreviewHalamanExportDark() {
-    FinanceAppTheme(darkTheme = true) {
+    FinanceAppTheme(ThemeMode.DARK) {
         HalamanExport(
             uiState = ExportUiState(),
             onNavigateBack = {},

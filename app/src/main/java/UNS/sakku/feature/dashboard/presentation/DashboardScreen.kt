@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Assessment
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -31,7 +32,9 @@ import uns.sakku.feature.dashboard.presentation.components.BalanceCard
 import uns.sakku.feature.dashboard.presentation.components.SummaryCard
 import uns.sakku.feature.dashboard.presentation.components.QuickMenuButton
 import uns.sakku.feature.dashboard.presentation.components.RecentTransactionsList
+import uns.sakku.feature.dashboard.presentation.components.SettingsDialog
 import uns.sakku.feature.transaction.presentation.TransactionItem // Tambahkan import TransactionItem
+import uns.sakku.ui.theme.ThemeMode
 
 /**
  * Stateful Composable:
@@ -39,7 +42,7 @@ import uns.sakku.feature.transaction.presentation.TransactionItem // Tambahkan i
  */
 @Composable
 fun DashboardScreen(
-    viewModel: DashboardViewModel = viewModel()
+    viewModel: DashboardViewModel = viewModel(factory = DashboardViewModel.Factory)
 ) {
     val backStack = LocalBackStack.current
     val uiState by viewModel.uiState.collectAsState()
@@ -51,7 +54,11 @@ fun DashboardScreen(
         onNavigateToLogin = { backStack.add(Routes.AuthRoute) },
         onNavigateToNotification = { backStack.add(Routes.NotificationRoute) },
         onNavigateToPocket = { backStack.add(Routes.PocketSavingRoute) },
-        onNavigateToReport = { backStack.add(Routes.ReportRoute) }
+        onNavigateToReport = { backStack.add(Routes.ReportRoute) },
+        onSettingsClick = { viewModel.setShowSettingsDialog(true) },
+        onThemeSelected = { viewModel.setThemeMode(it) },
+        onNotificationToggled = { viewModel.setNotificationEnabled(it) },
+        onSettingsDismiss = { viewModel.setShowSettingsDialog(false) }
     )
 }
 
@@ -67,10 +74,22 @@ fun HalamanDashboard(
     onNavigateToLogin: () -> Unit,
     onNavigateToNotification: () -> Unit,
     onNavigateToPocket: () -> Unit,
-    onNavigateToReport: () -> Unit
+    onNavigateToReport: () -> Unit,
+    onSettingsClick: () -> Unit,
+    onThemeSelected: (ThemeMode) -> Unit,
+    onNotificationToggled: (Boolean) -> Unit,
+    onSettingsDismiss: () -> Unit
 ) {
-    // Logika perhitungan SharedTransactionState sudah dihapus dan dipindah ke ViewModel
 
+    if (uiState.showSettingsDialog) {
+        SettingsDialog(
+            selectedTheme = uiState.selectedTheme,
+            isNotificationEnabled = uiState.isNotificationEnabled,
+            onThemeSelected = onThemeSelected,
+            onNotificationToggled = onNotificationToggled,
+            onDismiss = onSettingsDismiss
+        )
+    }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -90,6 +109,14 @@ fun HalamanDashboard(
                             Icon(
                                 imageVector = Icons.Default.Notifications,
                                 contentDescription = "Notifikasi",
+                                tint = MaterialTheme.colorScheme.onPrimary
+                            )
+                        }
+
+                        IconButton(onClick = onSettingsClick) {
+                            Icon(
+                                imageVector = Icons.Default.Settings,
+                                contentDescription = "Pengaturan",
                                 tint = MaterialTheme.colorScheme.onPrimary
                             )
                         }
@@ -208,14 +235,18 @@ private val dummyUiState = DashboardUiState(
 @Preview(showBackground = true, name = "Light Mode - Guest")
 @Composable
 fun DashboardPreviewLight() {
-    FinanceAppTheme(darkTheme = false) {
+    FinanceAppTheme(ThemeMode.LIGHT) {
         HalamanDashboard(
             isLogin = false,
             uiState = dummyUiState,
             onNavigateToLogin = { },
             onNavigateToNotification = { },
             onNavigateToPocket = { },
-            onNavigateToReport = { }
+            onNavigateToReport = { },
+            onSettingsClick = { },
+            onThemeSelected = { },
+            onNotificationToggled = { },
+            onSettingsDismiss = { }
         )
     }
 }
@@ -223,14 +254,18 @@ fun DashboardPreviewLight() {
 @Preview(showBackground = true, name = "Dark Mode - Guest")
 @Composable
 fun DashboardPreviewDark() {
-    FinanceAppTheme(darkTheme = true) {
+    FinanceAppTheme(ThemeMode.DARK) {
         HalamanDashboard(
             isLogin = false,
             uiState = dummyUiState,
             onNavigateToLogin = { },
             onNavigateToNotification = { },
             onNavigateToPocket = { },
-            onNavigateToReport = { }
+            onNavigateToReport = { },
+            onSettingsClick = { },
+            onThemeSelected = { },
+            onNotificationToggled = { },
+            onSettingsDismiss = { }
         )
     }
 }
@@ -238,14 +273,18 @@ fun DashboardPreviewDark() {
 @Preview(showBackground = true, name = "Light Mode - Login")
 @Composable
 fun DashboardPreviewLoginLight() {
-    FinanceAppTheme(darkTheme = false) {
+    FinanceAppTheme(ThemeMode.LIGHT) {
         HalamanDashboard(
             isLogin = true,
             uiState = dummyUiState,
             onNavigateToLogin = { },
             onNavigateToNotification = { },
             onNavigateToPocket = { },
-            onNavigateToReport = { }
+            onNavigateToReport = { },
+            onSettingsClick = { },
+            onThemeSelected = { },
+            onNotificationToggled = { },
+            onSettingsDismiss = { }
         )
     }
 }
@@ -253,14 +292,18 @@ fun DashboardPreviewLoginLight() {
 @Preview(showBackground = true, name = "Dark Mode - Login")
 @Composable
 fun DashboardPreviewLoginDark() {
-    FinanceAppTheme(darkTheme = true) {
+    FinanceAppTheme(ThemeMode.DARK) {
         HalamanDashboard(
             isLogin = true,
             uiState = dummyUiState,
             onNavigateToLogin = { },
             onNavigateToNotification = { },
             onNavigateToPocket = { },
-            onNavigateToReport = { }
+            onNavigateToReport = { },
+            onSettingsClick = { },
+            onThemeSelected = { },
+            onNotificationToggled = { },
+            onSettingsDismiss = { }
         )
     }
 }

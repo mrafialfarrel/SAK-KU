@@ -16,9 +16,15 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import android.widget.Toast
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.Role
 import uns.sakku.core.utils.formatRupiah
 import uns.sakku.feature.transaction.presentation.TransactionItem
 import uns.sakku.feature.transaction.presentation.components.TransactionCard
+import uns.sakku.ui.theme.ThemeMode
 
 
 @Composable
@@ -143,4 +149,107 @@ fun RecentTransactionsList(transaksiList: List<TransactionItem>) {
             }
         }
     }
+}
+@Composable
+fun SettingsDialog(
+    selectedTheme: ThemeMode,
+    isNotificationEnabled: Boolean,
+    onThemeSelected: (ThemeMode) -> Unit,
+    onNotificationToggled: (Boolean) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val context = LocalContext.current
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = "Pengaturan",
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp
+            )
+        },
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                // Section: Tema Tampilan
+                Text(
+                    text = "Tema Tampilan",
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
+                Column(Modifier.selectableGroup()) {
+                    ThemeMode.entries.forEach { theme ->
+                        Row(
+                            Modifier
+                                .fillMaxWidth()
+                                .height(48.dp)
+                                .selectable(
+                                    selected = (theme == selectedTheme),
+                                    onClick = { onThemeSelected(theme) },
+                                    role = Role.RadioButton
+                                )
+                                .padding(horizontal = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RadioButton(
+                                selected = (theme == selectedTheme),
+                                onClick = null
+                            )
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Text(
+                                text = theme.label,
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+                HorizontalDivider()
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Section: Notifikasi
+                Text(
+                    text = "Notifikasi",
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "Aktifkan Pemberitahuan",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                    Switch(
+                        checked = isNotificationEnabled,
+                        onCheckedChange = { checked ->
+                            onNotificationToggled(checked)
+                            val statusText = if (checked) "diaktifkan" else "dimatikan"
+                            Toast.makeText(
+                                context,
+                                "Notifikasi $statusText",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Tutup")
+            }
+        }
+    )
 }

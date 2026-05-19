@@ -25,6 +25,7 @@ import uns.sakku.feature.report.presentation.components.FilterRow
 import uns.sakku.feature.report.presentation.components.SimpleBarChart
 import uns.sakku.feature.report.presentation.components.SummaryAndPercentage
 import uns.sakku.ui.theme.FinanceAppTheme
+import uns.sakku.ui.theme.ThemeMode
 
 // --- STATEFUL COMPOSABLE ---
 @Composable
@@ -129,7 +130,7 @@ fun HalamanReport(
 @Preview(showBackground = true, name = "Light Mode")
 @Composable
 fun ReportPreviewLight() {
-    FinanceAppTheme(darkTheme = false) {
+    FinanceAppTheme(ThemeMode.LIGHT) {
         HalamanReport(uiState = ReportUiState(), onFilterSelected = {})
     }
 }
@@ -137,7 +138,7 @@ fun ReportPreviewLight() {
 @Preview(showBackground = true, name = "Dark Mode")
 @Composable
 fun ReportPreviewDark() {
-    FinanceAppTheme(darkTheme = true) {
+    FinanceAppTheme(ThemeMode.DARK) {
         HalamanReport(uiState = ReportUiState(), onFilterSelected = {})
     }
 }

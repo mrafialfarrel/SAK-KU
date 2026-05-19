@@ -1,7 +1,11 @@
 package uns.sakku.feature.dashboard.presentation
 
+import android.app.Application
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -10,16 +14,25 @@ import kotlinx.coroutines.launch
 import uns.sakku.feature.transaction.data.TransactionRepository
 import uns.sakku.feature.transaction.presentation.TransactionItem
 import uns.sakku.feature.auth.data.AuthRepository // Import Auth Repo
+import  uns.sakku.core.data.SettingsRepository
+import uns.sakku.ui.theme.ThemeMode
 
 data class DashboardUiState(
     val totalSaldo: Double = 0.0,
     val totalPemasukan: Double = 0.0,
     val totalPengeluaran: Double = 0.0,
     val recentTransactions: List<TransactionItem> = emptyList(),
-    val isLogin: Boolean = false // TAMBAHKAN field isLogin ke State
+    val isLogin: Boolean = false, // TAMBAHKAN field isLogin ke State
+
+    // State untuk Pengaturan
+    val showSettingsDialog: Boolean = false,
+    val selectedTheme: ThemeMode = ThemeMode.SYSTEM,
+    val isNotificationEnabled: Boolean = true
 )
 
-class DashboardViewModel : ViewModel() {
+class DashboardViewModel(
+    private val settingsRepository: SettingsRepository
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(DashboardUiState())
     val uiState: StateFlow<DashboardUiState> = _uiState.asStateFlow()
@@ -48,6 +61,47 @@ class DashboardViewModel : ViewModel() {
                         recentTransactions = recent.toList()
                     )
                 }
+            }
+        }
+        // 3. Amati Pengaturan Tema dari DataStore (akan update UI otomatis saat app berjalan)
+        viewModelScope.launch {
+            settingsRepository.themeModeFlow.collect { savedTheme ->
+                _uiState.update { it.copy(selectedTheme = savedTheme) }
+            }
+        }
+
+        // 4. Amati Pengaturan Notifikasi dari DataStore
+        viewModelScope.launch {
+            settingsRepository.notificationFlow.collect { isEnabled ->
+                _uiState.update { it.copy(isNotificationEnabled = isEnabled) }
+            }
+        }
+    }
+    fun setShowSettingsDialog(show: Boolean) {
+        _uiState.update { it.copy(showSettingsDialog = show) }
+    }
+
+    fun setThemeMode(theme: ThemeMode) {
+        viewModelScope.launch {
+            // Simpan theme ke dataStore untuk ubah tema
+            settingsRepository.saveThemeMode(theme)
+        }
+    }
+
+    fun setNotificationEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            settingsRepository.saveNotificationEnabled(enabled)
+        }
+    }
+
+    // Pendekatan Factory standar Android untuk membuat ViewModel yang butuh Context/Repository
+    companion object {
+        val Factory: ViewModelProvider.Factory = viewModelFactory {
+            initializer {
+                // Mengambil Application Context dari environment
+                val application = (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as Application)
+                val repository = SettingsRepository(application)
+                DashboardViewModel(repository)
             }
         }
     }

@@ -7,7 +7,6 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import uns.sakku.ui.theme.FinanceAppTheme
 import uns.sakku.feature.auth.presentation.LoginScreen
 import uns.sakku.feature.dashboard.presentation.DashboardScreen
 import uns.sakku.feature.export.presentation.ExportScreen
@@ -25,7 +24,6 @@ fun ComposeApp() {
     val backStack = rememberNavBackStack(Routes.DashboardRoute)
 
     CompositionLocalProvider(LocalBackStack provides backStack) {
-        FinanceAppTheme {
             NavDisplay(
                 backStack = backStack,
                 entryDecorators = listOf(
@@ -57,4 +55,3 @@ fun ComposeApp() {
             )
         }
     }
-}

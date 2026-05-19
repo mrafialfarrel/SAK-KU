@@ -22,7 +22,7 @@ import uns.sakku.core.Routes
 import uns.sakku.ui.theme.FinanceAppTheme
 import uns.sakku.feature.pocket.data.SavingGoal
 import uns.sakku.feature.pocket.presentation.components.SavingCard
-
+import uns.sakku.ui.theme.ThemeMode
 // UI Layer: Stateful Composable
 @Composable
 fun SavingsScreen(viewModel: PocketSavingViewModel = viewModel()) {
@@ -91,7 +91,7 @@ fun HalamanSavings(
 @Preview(showBackground = true, name = "Light Mode")
 @Composable
 fun SavingsPreviewLight() {
-    FinanceAppTheme(darkTheme = false) {
+    FinanceAppTheme(ThemeMode.LIGHT) {
         HalamanSavings(
             savings = emptyList(), // Dummy kosong untuk preview
             onNavigateBack = {},
@@ -103,7 +103,7 @@ fun SavingsPreviewLight() {
 @Preview(showBackground = true, name = "Dark Mode")
 @Composable
 fun SavingsPreviewDark() {
-    FinanceAppTheme(darkTheme = true) {
+    FinanceAppTheme(ThemeMode.DARK) {
         HalamanSavings(
             savings = emptyList(),
             onNavigateBack = { },
