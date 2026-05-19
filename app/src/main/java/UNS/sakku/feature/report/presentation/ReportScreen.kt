@@ -13,6 +13,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -20,6 +21,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import uns.sakku.core.LocalBackStack
 import uns.sakku.core.Routes
+import uns.sakku.feature.report.presentation.components.ExpenseCategory
 import uns.sakku.feature.report.presentation.components.ExpenseCategoryBreakdown
 import uns.sakku.feature.report.presentation.components.FilterRow
 import uns.sakku.feature.report.presentation.components.SimpleBarChart
@@ -140,5 +142,88 @@ fun ReportPreviewLight() {
 fun ReportPreviewDark() {
     FinanceAppTheme(ThemeMode.DARK) {
         HalamanReport(uiState = ReportUiState(), onFilterSelected = {})
+    }
+}
+
+// ==========================================
+// 1. Preview SimpleBarChart
+// ==========================================
+@Preview(showBackground = true, name = "Simple Bar Chart")
+@Composable
+fun SimpleBarChartPreview() {
+    FinanceAppTheme {
+        SimpleBarChart(
+            // Data dummy mewakili grafik (misal: 7 hari dalam seminggu, skala 0-100)
+            dataPoints = listOf(20f, 50f, 80f, 40f, 100f, 60f, 30f)
+        )
+    }
+}
+
+// ==========================================
+// 2. Preview SummaryAndPercentage
+// ==========================================
+@Preview(showBackground = true, name = "Summary & Percentage (Normal)")
+@Composable
+fun SummaryAndPercentagePreview_Normal() {
+    FinanceAppTheme {
+        SummaryAndPercentage(
+            income = 8500000f,
+            expense = 3200000f
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Summary & Percentage (Kosong)")
+@Composable
+fun SummaryAndPercentagePreview_Empty() {
+    FinanceAppTheme {
+        // Berguna untuk melihat apakah handling "dibagi dengan 0" sudah aman
+        SummaryAndPercentage(
+            income = 0f,
+            expense = 0f
+        )
+    }
+}
+
+// ==========================================
+// 3. Preview ExpenseCategoryBreakdown
+// ==========================================
+@Preview(showBackground = true, name = "Expense Breakdown (Ada Data)")
+@Composable
+fun ExpenseCategoryBreakdownPreview_WithData() {
+    FinanceAppTheme {
+        // Membuat data dummy berdasarkan struktur pemakaian di komponen Anda
+        val dummyCategories = listOf(
+            ExpenseCategory(
+                name = "Makanan & Minuman",
+                amount = 1500000f,
+                color = Color(0xFFE57373) // Merah muda
+            ),
+            ExpenseCategory(
+                name = "Transportasi",
+                amount = 500000f,
+                color = Color(0xFF64B5F6) // Biru muda
+            ),
+            ExpenseCategory(
+                name = "Hiburan",
+                amount = 800000f,
+                color = Color(0xFFFFD54F) // Kuning
+            )
+        )
+
+        ExpenseCategoryBreakdown(
+            categories = dummyCategories
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Expense Breakdown (Kosong)")
+@Composable
+fun ExpenseCategoryBreakdownPreview_Empty() {
+    FinanceAppTheme {
+        // Preview untuk menguji state "Belum ada data"
+        ExpenseCategoryBreakdown(
+            categories = emptyList()
+        )
     }
 }

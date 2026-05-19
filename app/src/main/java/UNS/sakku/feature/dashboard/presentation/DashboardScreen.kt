@@ -34,6 +34,7 @@ import uns.sakku.feature.dashboard.presentation.components.QuickMenuButton
 import uns.sakku.feature.dashboard.presentation.components.RecentTransactionsList
 import uns.sakku.feature.dashboard.presentation.components.SettingsDialog
 import uns.sakku.feature.transaction.presentation.TransactionItem // Tambahkan import TransactionItem
+import uns.sakku.feature.transaction.presentation.components.TransactionCard
 import uns.sakku.ui.theme.ThemeMode
 
 /**
@@ -304,6 +305,51 @@ fun DashboardPreviewLoginDark() {
             onThemeSelected = { },
             onNotificationToggled = { },
             onSettingsDismiss = { }
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Settings Dialog Preview")
+@Composable
+fun SettingsDialogPreview() {
+    FinanceAppTheme {
+        SettingsDialog(
+            selectedTheme = ThemeMode.LIGHT,
+            isNotificationEnabled = true,
+            onThemeSelected = {},
+            onNotificationToggled = {},
+            onDismiss = {}
+        )
+    }
+}
+@Preview(showBackground = true, name = "Settings Dialog Preview")
+@Composable
+fun SettingsDialogPreviewDark() {
+    FinanceAppTheme(ThemeMode.DARK) {
+        SettingsDialog(
+            selectedTheme = ThemeMode.DARK,
+            isNotificationEnabled = true,
+            onThemeSelected = {},
+            onNotificationToggled = {},
+            onDismiss = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Tanpa Aksi (Dashboard)")
+@Composable
+fun TransactionCardPreview_Normal() {
+    FinanceAppTheme {
+        TransactionCard(
+            transaction = TransactionItem(
+                id = "1",
+                keterangan = "Makan Siang",
+                nominal = 50000.0,
+                isPemasukan = false,
+                kategori = "Konsumsi",
+                alokasi = "Dompet Utama"
+            ),
+            showActions = false
         )
     }
 }

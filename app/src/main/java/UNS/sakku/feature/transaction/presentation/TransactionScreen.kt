@@ -4,11 +4,6 @@ import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
@@ -18,7 +13,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -27,6 +21,7 @@ import uns.sakku.ui.theme.FinanceAppTheme
 import uns.sakku.ui.theme.ExpenseRed
 import uns.sakku.core.LocalBackStack
 import uns.sakku.feature.transaction.presentation.components.TransactionCard
+import uns.sakku.feature.transaction.presentation.components.TransactionSheetContent
 import uns.sakku.ui.theme.ThemeMode
 
 data class TransactionItem(
@@ -144,62 +139,46 @@ fun HalamanTransaction(
     }
 
     if (showBottomSheet) {
-        ModalBottomSheet(onDismissRequest = { showBottomSheet = false }, sheetState = sheetState, containerColor = MaterialTheme.colorScheme.surface) {
-            Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).padding(bottom = 32.dp).verticalScroll(rememberScrollState())) {
-                Text(if (isEditMode) "Edit Transaksi" else "Tambah Transaksi Baru", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(bottom = 16.dp))
-                OutlinedTextField(value = keterangan, onValueChange = { keterangan = it }, label = { Text("Keterangan") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
-                Spacer(modifier = Modifier.height(8.dp))
-                OutlinedTextField(value = nominal, onValueChange = { nominal = it }, label = { Text("Nominal (Rp)") }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), modifier = Modifier.fillMaxWidth(), singleLine = true)
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.selectable(selected = isPemasukan, onClick = { if (!isPemasukan) { isPemasukan = true; selectedKategori = ""; selectedAlokasi = "" } })) {
-                        RadioButton(selected = isPemasukan, onClick = { if (!isPemasukan) { isPemasukan = true; selectedKategori = ""; selectedAlokasi = "" } }, colors = RadioButtonDefaults.colors(selectedColor = MaterialTheme.colorScheme.primary))
-                        Text("Pemasukan", modifier = Modifier.padding(start = 4.dp, end = 16.dp))
+        ModalBottomSheet(
+            onDismissRequest = { showBottomSheet = false },
+            sheetState = sheetState,
+            containerColor = MaterialTheme.colorScheme.surface
+        ) {
+            // Panggil Komponen UI yang sudah diekstrak (Clean Code!)
+            TransactionSheetContent(
+                keterangan = keterangan,
+                onKeteranganChange = { keterangan = it },
+                nominal = nominal,
+                onNominalChange = { nominal = it },
+                isPemasukan = isPemasukan,
+                onIsPemasukanChange = { isPemasukanBaru ->
+                    if (isPemasukan != isPemasukanBaru) {
+                        isPemasukan = isPemasukanBaru
+                        selectedKategori = ""
+                        selectedAlokasi = ""
                     }
-                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.selectable(selected = !isPemasukan, onClick = { if (isPemasukan) { isPemasukan = false; selectedKategori = ""; selectedAlokasi = "" } })) {
-                        RadioButton(selected = !isPemasukan, onClick = { if (isPemasukan) { isPemasukan = false; selectedKategori = ""; selectedAlokasi = "" } }, colors = RadioButtonDefaults.colors(selectedColor = MaterialTheme.colorScheme.primary))
-                        Text("Pengeluaran", modifier = Modifier.padding(start = 4.dp))
-                    }
-                }
-                Spacer(modifier = Modifier.height(16.dp))
-
-                ExposedDropdownMenuBox(expanded = expandedKategori, onExpandedChange = { expandedKategori = !expandedKategori }) {
-                    OutlinedTextField(value = selectedKategori, onValueChange = {}, readOnly = true, label = { Text(if (isPemasukan) "Kategori Pemasukan" else "Kategori Pengeluaran") }, trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedKategori) }, modifier = Modifier.menuAnchor().fillMaxWidth())
-                    ExposedDropdownMenu(expanded = expandedKategori, onDismissRequest = { expandedKategori = false }) {
-                        currentKategoriList.forEach { kategori -> DropdownMenuItem(text = { Text(kategori) }, onClick = { selectedKategori = kategori; expandedKategori = false }) }
-                    }
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-
-                ExposedDropdownMenuBox(expanded = expandedAlokasi, onExpandedChange = { expandedAlokasi = !expandedAlokasi }) {
-                    OutlinedTextField(value = selectedAlokasi, onValueChange = {}, readOnly = true, label = { Text(alokasiLabel) }, trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedAlokasi) }, modifier = Modifier.menuAnchor().fillMaxWidth())
-                    ExposedDropdownMenu(expanded = expandedAlokasi, onDismissRequest = { expandedAlokasi = false }) {
-                        // Jika data dari repository kosong, tampilkan info
-                        if (currentAlokasiList.isEmpty()) {
-                            DropdownMenuItem(text = { Text("Belum ada data, buat di Menu Kantong") }, onClick = { expandedAlokasi = false })
+                },
+                selectedKategori = selectedKategori,
+                onKategoriChange = { selectedKategori = it },
+                selectedAlokasi = selectedAlokasi,
+                onAlokasiChange = { selectedAlokasi = it },
+                currentKategoriList = currentKategoriList,
+                currentAlokasiList = currentAlokasiList,
+                alokasiLabel = alokasiLabel,
+                onSaveClick = {
+                    if (keterangan.isNotBlank() && nominal.isNotBlank() && selectedKategori.isNotBlank() && selectedAlokasi.isNotBlank()) {
+                        val nominalDouble = nominal.toDoubleOrNull() ?: 0.0
+                        if (isEditMode && editId != null) {
+                            onUpdateTransaction(editId!!, keterangan, nominalDouble, isPemasukan, selectedKategori, selectedAlokasi)
                         } else {
-                            currentAlokasiList.forEach { alokasi -> DropdownMenuItem(text = { Text(alokasi) }, onClick = { selectedAlokasi = alokasi; expandedAlokasi = false }) }
+                            onAddTransaction(keterangan, nominalDouble, isPemasukan, selectedKategori, selectedAlokasi)
                         }
+                        showBottomSheet = false
+                    } else {
+                        Toast.makeText(context, "Harap isi semua kolom dan pilihan", Toast.LENGTH_SHORT).show()
                     }
-                }
-                Spacer(modifier = Modifier.height(24.dp))
-
-                Button(
-                    onClick = {
-                        if (keterangan.isNotBlank() && nominal.isNotBlank() && selectedKategori.isNotBlank() && selectedAlokasi.isNotBlank()) {
-                            val nominalDouble = nominal.toDoubleOrNull() ?: 0.0
-                            if (isEditMode && editId != null) {
-                                onUpdateTransaction(editId!!, keterangan, nominalDouble, isPemasukan, selectedKategori, selectedAlokasi)
-                            } else {
-                                onAddTransaction(keterangan, nominalDouble, isPemasukan, selectedKategori, selectedAlokasi)
-                            }
-                            showBottomSheet = false
-                        } else { Toast.makeText(context, "Harap isi semua kolom dan pilihan", Toast.LENGTH_SHORT).show() }
-                    },
-                    modifier = Modifier.fillMaxWidth().height(50.dp), shape = RoundedCornerShape(12.dp), colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-                ) { Text(if (isEditMode) "Simpan Perubahan" else "Tambah Transaksi", color = MaterialTheme.colorScheme.onPrimary) }
-            }
+                },
+            )
         }
     }
 
@@ -225,5 +204,79 @@ fun PreviewTransactionScreen() {
             listTabungan = listOf("Beli PS5"),
             onNavigateBack = {}, onAddTransaction = { _, _, _, _, _ -> }, onUpdateTransaction = { _, _, _, _, _, _ -> }, onDeleteTransaction = {}
         )
+    }
+}
+
+@Preview(showBackground = true, name = "Dengan Aksi (Menu Transaksi)")
+@Composable
+fun TransactionCardPreview_WithActions() {
+    FinanceAppTheme {
+        TransactionCard(
+            transaction = TransactionItem(
+                id = "1",
+                keterangan = "Makan Siang",
+                nominal = 50000.0,
+                isPemasukan = false,
+                kategori = "Konsumsi",
+                alokasi = "Dompet Utama"
+            ),
+            showActions = true,
+            onEditClick = {},   // Fungsi kosong untuk preview
+            onDeleteClick = {}  // Fungsi kosong untuk preview
+        )
+    }
+}
+
+
+// ==========================================
+// PREVIEW KONTEN BOTTOM SHEET
+// ==========================================
+@Preview(showBackground = true, name = "Pemasukan")
+@Composable
+fun TransactionSheetContentPreview_Add() {
+    FinanceAppTheme(ThemeMode.LIGHT) {
+        Surface(color = MaterialTheme.colorScheme.surface) {
+            TransactionSheetContent(
+                keterangan = "",
+                onKeteranganChange = {},
+                nominal = "",
+                onNominalChange = {},
+                isPemasukan = true,
+                onIsPemasukanChange = {},
+                selectedKategori = "",
+                onKategoriChange = {},
+                selectedAlokasi = "",
+                onAlokasiChange = {},
+                currentKategoriList = listOf("Gaji", "Bonus"),
+                currentAlokasiList = listOf("Tabungan Utama", "Investasi"),
+                alokasiLabel = "Pilih Tabungan",
+                onSaveClick = {},
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "Pengeluaran (Dark Mode)")
+@Composable
+fun TransactionSheetContentPreview_EditDark() {
+    FinanceAppTheme(ThemeMode.DARK) {
+        Surface(color = MaterialTheme.colorScheme.surface) {
+            TransactionSheetContent(
+                keterangan = "Makan Siang",
+                onKeteranganChange = {},
+                nominal = "45000",
+                onNominalChange = {},
+                isPemasukan = false,
+                onIsPemasukanChange = {},
+                selectedKategori = "Konsumsi",
+                onKategoriChange = {},
+                selectedAlokasi = "Dompet Utama",
+                onAlokasiChange = {},
+                currentKategoriList = listOf("Konsumsi"),
+                currentAlokasiList = listOf("Dompet Utama"),
+                alokasiLabel = "Pilih Kantong",
+                onSaveClick = {},
+            )
+        }
     }
 }
