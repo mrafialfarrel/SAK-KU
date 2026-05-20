@@ -19,6 +19,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import org.koin.androidx.compose.koinViewModel
 import uns.sakku.core.LocalBackStack
 import uns.sakku.core.Routes
 import uns.sakku.feature.report.presentation.components.ExpenseCategory
@@ -32,7 +33,7 @@ import uns.sakku.ui.theme.ThemeMode
 // --- STATEFUL COMPOSABLE ---
 @Composable
 fun ReportScreen(
-    viewModel: ReportViewModel = viewModel() // Menggunakan viewModel()
+    viewModel: ReportViewModel = koinViewModel()
 ) {
     val backStack = LocalBackStack.current
 

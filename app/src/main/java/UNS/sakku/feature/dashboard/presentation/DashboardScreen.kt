@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
@@ -21,7 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel // Import ViewModel Compose
+import org.koin.androidx.compose.koinViewModel
 import uns.sakku.ui.theme.FinanceAppTheme
 import uns.sakku.ui.theme.IncomeGreen
 import uns.sakku.ui.theme.ExpenseRed
@@ -43,7 +44,7 @@ import uns.sakku.ui.theme.ThemeMode
  */
 @Composable
 fun DashboardScreen(
-    viewModel: DashboardViewModel = viewModel(factory = DashboardViewModel.Factory)
+    viewModel: DashboardViewModel = koinViewModel()
 ) {
     val backStack = LocalBackStack.current
     val uiState by viewModel.uiState.collectAsState()
@@ -60,7 +61,10 @@ fun DashboardScreen(
         onSettingsClick = { viewModel.setShowSettingsDialog(true) },
         onThemeSelected = { viewModel.setThemeMode(it) },
         onNotificationToggled = { viewModel.setNotificationEnabled(it) },
-        onSettingsDismiss = { viewModel.setShowSettingsDialog(false) }
+        onSettingsDismiss = { viewModel.setShowSettingsDialog(false) },
+        onLogoutClick = {
+            viewModel.logout()
+        }
     )
 }
 
@@ -80,7 +84,8 @@ fun HalamanDashboard(
     onSettingsClick: () -> Unit,
     onThemeSelected: (ThemeMode) -> Unit,
     onNotificationToggled: (Boolean) -> Unit,
-    onSettingsDismiss: () -> Unit
+    onSettingsDismiss: () -> Unit,
+    onLogoutClick: () -> Unit
 ) {
 
     if (uiState.showSettingsDialog) {
@@ -119,6 +124,13 @@ fun HalamanDashboard(
                             Icon(
                                 imageVector = Icons.Default.Settings,
                                 contentDescription = "Pengaturan",
+                                tint = MaterialTheme.colorScheme.onPrimary
+                            )
+                        }
+                        IconButton(onClick = onLogoutClick) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ExitToApp,
+                                contentDescription = "Logout",
                                 tint = MaterialTheme.colorScheme.onPrimary
                             )
                         }
@@ -234,6 +246,8 @@ private val dummyUiState = DashboardUiState(
     )
 )
 
+// Jetpack Preview
+
 @Preview(showBackground = true, name = "Light Mode - Guest")
 @Composable
 fun DashboardPreviewLight() {
@@ -248,7 +262,8 @@ fun DashboardPreviewLight() {
             onSettingsClick = { },
             onThemeSelected = { },
             onNotificationToggled = { },
-            onSettingsDismiss = { }
+            onSettingsDismiss = { },
+            onLogoutClick = { }
         )
     }
 }
@@ -267,7 +282,8 @@ fun DashboardPreviewDark() {
             onSettingsClick = { },
             onThemeSelected = { },
             onNotificationToggled = { },
-            onSettingsDismiss = { }
+            onSettingsDismiss = { },
+            onLogoutClick = { }
         )
     }
 }
@@ -286,7 +302,8 @@ fun DashboardPreviewLoginLight() {
             onSettingsClick = { },
             onThemeSelected = { },
             onNotificationToggled = { },
-            onSettingsDismiss = { }
+            onSettingsDismiss = { },
+            onLogoutClick = { }
         )
     }
 }
@@ -305,7 +322,8 @@ fun DashboardPreviewLoginDark() {
             onSettingsClick = { },
             onThemeSelected = { },
             onNotificationToggled = { },
-            onSettingsDismiss = { }
+            onSettingsDismiss = { },
+            onLogoutClick = { }
         )
     }
 }

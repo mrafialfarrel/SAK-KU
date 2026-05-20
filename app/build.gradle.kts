@@ -57,6 +57,7 @@ dependencies {
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.ui.graphics)
+    implementation(libs.koin.androidx.compose)
     // Framework utama untuk Unit Test
     testImplementation(libs.junit)
 

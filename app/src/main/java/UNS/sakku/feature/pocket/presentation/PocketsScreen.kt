@@ -17,6 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import org.koin.androidx.compose.koinViewModel
 import uns.sakku.core.LocalBackStack
 import uns.sakku.core.Routes
 import uns.sakku.ui.theme.FinanceAppTheme
@@ -25,7 +26,7 @@ import uns.sakku.feature.pocket.presentation.components.PocketCard
 import uns.sakku.ui.theme.ThemeMode
 // UI Layer: Stateful Composable
 @Composable
-fun PocketsScreen(viewModel: PocketSavingViewModel = viewModel()) {
+fun PocketsScreen(viewModel: PocketSavingViewModel = koinViewModel()) {
     val backStack = LocalBackStack.current
 
     // Observe data pockets dari ViewModel

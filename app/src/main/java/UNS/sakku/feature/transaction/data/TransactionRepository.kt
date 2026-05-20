@@ -9,7 +9,7 @@ import uns.sakku.feature.transaction.presentation.TransactionItem
  * DATA LAYER: Repository untuk fitur Transaksi.
  * Bertindak sebagai Single Source of Truth (SSOT).
  */
-object TransactionRepository {
+class TransactionRepository {
 
     // Data dummy awal agar aplikasi tidak kosong
     private val initialData = listOf(

@@ -17,6 +17,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import org.koin.androidx.compose.koinViewModel
 import uns.sakku.ui.theme.FinanceAppTheme
 import uns.sakku.core.LocalBackStack
 import uns.sakku.ui.theme.ThemeMode
@@ -24,7 +25,7 @@ import uns.sakku.ui.theme.ThemeMode
 // --- STATEFUL COMPOSABLE ---
 @Composable
 fun ExportScreen(
-    viewModel: ExportViewModel = viewModel()
+    viewModel: ExportViewModel = koinViewModel()
 ) {
     val backStack = LocalBackStack.current
     val context = LocalContext.current // Composition-dependent (tetap di UI)

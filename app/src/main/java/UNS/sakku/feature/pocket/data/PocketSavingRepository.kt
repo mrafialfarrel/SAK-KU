@@ -19,7 +19,7 @@ data class AllocationItem(
 // --- DATA LAYER: Repository ---
 // Menggunakan object (Singleton) sebagai simulasi database agar data tetap tersinkronisasi
 // antara Main Screen dan Add Screen meskipun menggunakan ViewModel yang berbeda (jika belum pakai Hilt/Dagger).
-object PocketSavingRepository {
+class PocketSavingRepository {
 
     // Data dummy awal
     private val initialData = listOf(

@@ -22,6 +22,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import org.koin.androidx.compose.koinViewModel
 import java.util.UUID
 import uns.sakku.ui.theme.FinanceAppTheme
 import uns.sakku.ui.theme.IncomeGreen
@@ -34,7 +35,7 @@ import uns.sakku.feature.pocket.data.AllocationItem
 @Composable
 fun AddPocketSavingScreen(
     initialIsTabungan: Boolean = true,
-    viewModel: PocketSavingViewModel = viewModel()
+    viewModel: PocketSavingViewModel = koinViewModel()
 ) {
     val backStack = LocalBackStack.current
 

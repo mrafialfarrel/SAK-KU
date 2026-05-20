@@ -13,18 +13,21 @@ import uns.sakku.feature.pocket.data.SavingGoal
 import uns.sakku.feature.transaction.data.TransactionRepository
 
 // --- VM LAYER: ViewModel ---
-class PocketSavingViewModel : ViewModel() {
+class PocketSavingViewModel(
+    private val pocketSavingRepository: PocketSavingRepository,
+    private val transactionRepository: TransactionRepository,
+) : ViewModel() {
 
     // Sumber data utama dari Alokasi (Kantong/Tabungan)
-    val allocations: StateFlow<List<AllocationItem>> = PocketSavingRepository.allocations
+    val allocations: StateFlow<List<AllocationItem>> = pocketSavingRepository.allocations
 
     /**
      * STATEFLOW UNTUK TABUNGAN
      * Mengkalkulasi uang terkumpul berdasarkan history Transaksi Pemasukan
      */
     val savings: StateFlow<List<SavingGoal>> = combine(
-        PocketSavingRepository.allocations,
-        TransactionRepository.transactions
+        pocketSavingRepository.allocations,
+        transactionRepository.transactions
     ) { allocationsList, transactionsList ->
 
         // 1. Ambil data yang berupa tabungan saja
@@ -56,8 +59,8 @@ class PocketSavingViewModel : ViewModel() {
      * Mengkalkulasi uang terpakai berdasarkan history Transaksi Pengeluaran
      */
     val pockets: StateFlow<List<PocketBudget>> = combine(
-        PocketSavingRepository.allocations,
-        TransactionRepository.transactions
+        pocketSavingRepository.allocations,
+        transactionRepository.transactions
     ) { allocationsList, transactionsList ->
 
         // 1. Ambil data yang berupa kantong (batas pengeluaran) saja
@@ -86,14 +89,14 @@ class PocketSavingViewModel : ViewModel() {
     // --- EVENTS (Aksi CRUD) ---
 
     fun addAllocation(item: AllocationItem) {
-        PocketSavingRepository.addAllocation(item)
+        pocketSavingRepository.addAllocation(item)
     }
 
     fun updateAllocation(item: AllocationItem) {
-        PocketSavingRepository.updateAllocation(item)
+        pocketSavingRepository.updateAllocation(item)
     }
 
     fun deleteAllocation(item: AllocationItem) {
-        PocketSavingRepository.deleteAllocation(item)
+        pocketSavingRepository.deleteAllocation(item)
     }
 }

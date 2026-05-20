@@ -1,11 +1,7 @@
 package uns.sakku.feature.dashboard.presentation
 
-import android.app.Application
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -32,7 +28,8 @@ data class DashboardUiState(
 
 class DashboardViewModel(
     private val settingsRepository: SettingsRepository,
-    private val authRepository: AuthRepository // Tambahkan auth repository di konstruktor
+    private val authRepository: AuthRepository,
+    private val transactionRepository: TransactionRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(DashboardUiState())
@@ -48,7 +45,7 @@ class DashboardViewModel(
 
         // 2. Amati data Transaksi
         viewModelScope.launch {
-            TransactionRepository.transactions.collect { transaksiList ->
+            transactionRepository.transactions.collect { transaksiList ->
                 val totalPemasukan = transaksiList.filter { it.isPemasukan }.sumOf { it.nominal }
                 val totalPengeluaran = transaksiList.filter { !it.isPemasukan }.sumOf { it.nominal }
                 val totalSaldo = totalPemasukan - totalPengeluaran
@@ -94,19 +91,14 @@ class DashboardViewModel(
             settingsRepository.saveNotificationEnabled(enabled)
         }
     }
-
-    // Pendekatan Factory standar Android untuk membuat ViewModel yang butuh Context/Repository
-    companion object {
-        val Factory: ViewModelProvider.Factory = viewModelFactory {
-            initializer {
-                val application = (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as Application)
-
-                // Buat instance dari kedua repository
-                val settingsRepo = SettingsRepository(application)
-                val authRepo = AuthRepository(application)
-
-                DashboardViewModel(settingsRepo, authRepo)
-            }
+    /**
+     * FUNGSI BARU: Logout
+     * Berinteraksi dengan lintas-domain (Auth Domain) untuk mengakhiri sesi.
+     * Fungsi ini dipanggil oleh NotificationScreen saat ikon logout ditekan.
+     */
+    fun logout() {
+        viewModelScope.launch {
+            authRepository.logout()
         }
     }
 }

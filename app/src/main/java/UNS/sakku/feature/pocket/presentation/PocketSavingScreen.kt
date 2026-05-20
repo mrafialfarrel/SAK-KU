@@ -20,6 +20,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import org.koin.androidx.compose.koinViewModel
 import uns.sakku.ui.theme.FinanceAppTheme
 import uns.sakku.core.LocalBackStack
 import uns.sakku.core.Routes
@@ -30,7 +31,7 @@ import uns.sakku.feature.pocket.presentation.components.SavingCard
 import uns.sakku.ui.theme.ThemeMode
 // UI Layer: Stateful Composable
 @Composable
-fun PocketSavingScreen(viewModel: PocketSavingViewModel = viewModel()) {
+fun PocketSavingScreen(viewModel: PocketSavingViewModel = koinViewModel()) {
     val backStack = LocalBackStack.current
 
     // Objek UI tidak mengurus data mentah, ia observe ke ViewModel StateFlow

@@ -8,7 +8,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ExitToApp // Icon Logout
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Warning
@@ -26,7 +25,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import org.koin.androidx.compose.koinViewModel
 import uns.sakku.ui.theme.FinanceAppTheme
 import uns.sakku.ui.theme.IncomeGreen
 import uns.sakku.ui.theme.ExpenseRed
@@ -47,7 +46,7 @@ data class NotificationItem(
 
 @Composable
 fun NotificationScreen(
-    viewModel: NotificationViewModel = viewModel(factory = NotificationViewModel.Factory)
+    viewModel: NotificationViewModel = koinViewModel()
 ) {
     val backStack = LocalBackStack.current
     val notifications by viewModel.notifications.collectAsState()
@@ -55,13 +54,7 @@ fun NotificationScreen(
     HalamanNotification(
         notifications = notifications,
         onBackClick = { backStack.removeLastOrNull() },
-        onNotificationClick = { id -> viewModel.markAsRead(id) },
-        onLogoutClick = {
-            // 1. Panggil logika logout di ViewModel (mengubah global state)
-            viewModel.logout()
-            // 2. Lempar pengguna kembali ke Dashboard (Dashboard otomatis jadi mode Guest)
-            backStack.removeLastOrNull()
-        }
+        onNotificationClick = { id -> viewModel.markAsRead(id) }
     )
 }
 
@@ -71,7 +64,6 @@ fun HalamanNotification(
     notifications: List<NotificationItem>,
     onBackClick: () -> Unit = {},
     onNotificationClick: (String) -> Unit = {},
-    onLogoutClick: () -> Unit = {} // PARAMETER BARU
 ) {
     Scaffold(
         topBar = {
@@ -80,16 +72,6 @@ fun HalamanNotification(
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali", tint = MaterialTheme.colorScheme.onPrimary)
-                    }
-                },
-                actions = {
-                    // TOMBOL LOGOUT BARU
-                    IconButton(onClick = onLogoutClick) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ExitToApp,
-                            contentDescription = "Logout",
-                            tint = MaterialTheme.colorScheme.onPrimary
-                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primary)
@@ -217,8 +199,7 @@ fun NotificationPreviewLight() {
         HalamanNotification(
             notifications = listOf(
                 NotificationItem("1", "Peringatan", "Cek pengeluaran", "12:00", NotificationType.WARNING, false)
-            ),
-            onLogoutClick = {}
+            )
         )
     }
 }

@@ -7,7 +7,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import uns.sakku.feature.auth.presentation.LoginScreen
+import uns.sakku.feature.auth.presentation.AuthScreen
 import uns.sakku.feature.dashboard.presentation.DashboardScreen
 import uns.sakku.feature.export.presentation.ExportScreen
 import uns.sakku.feature.notification.presentation.NotificationScreen
@@ -34,7 +34,7 @@ fun ComposeApp() {
                 ),
                 entryProvider = entryProvider {
                     // --- Auth ---
-                    entry<Routes.AuthRoute> { LoginScreen() }
+                    entry<Routes.AuthRoute> { AuthScreen() }
 
 
                     // --- Dashboard ---

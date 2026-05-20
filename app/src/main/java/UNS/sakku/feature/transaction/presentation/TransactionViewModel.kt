@@ -16,7 +16,10 @@ data class TransactionUiState(
     val listTabungan: List<String> = emptyList()
 )
 
-class TransactionViewModel : ViewModel() {
+class TransactionViewModel(
+    private val transactionRepository: TransactionRepository,
+    private val pocketSavingRepository: PocketSavingRepository
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(TransactionUiState())
     val uiState: StateFlow<TransactionUiState> = _uiState.asStateFlow()
@@ -24,14 +27,14 @@ class TransactionViewModel : ViewModel() {
     init {
         // 1. Amati perubahan data Transaksi
         viewModelScope.launch {
-            TransactionRepository.transactions.collect { list ->
+            transactionRepository.transactions.collect { list ->
                 _uiState.update { it.copy(transactions = list) }
             }
         }
 
         // 2. Amati perubahan data Alokasi (Kantong & Tabungan)
         viewModelScope.launch {
-            PocketSavingRepository.allocations.collect { allocations ->
+            pocketSavingRepository.allocations.collect { allocations ->
                 val tabunganNames = allocations.filter { it.isTabungan }.map { it.nama }
                 val kantongNames = allocations.filter { !it.isTabungan }.map { it.nama }
 
@@ -57,7 +60,7 @@ class TransactionViewModel : ViewModel() {
             alokasi = alokasi
         )
         // Kirim ke Repository
-        TransactionRepository.addTransaction(newItem)
+        transactionRepository.addTransaction(newItem)
     }
 
     fun updateTransaction(id: String, keterangan: String, nominal: Double, isPemasukan: Boolean, kategori: String, alokasi: String) {
@@ -66,11 +69,11 @@ class TransactionViewModel : ViewModel() {
             isPemasukan = isPemasukan, kategori = kategori, alokasi = alokasi
         )
         // Kirim ke Repository
-        TransactionRepository.updateTransaction(updatedItem)
+        transactionRepository.updateTransaction(updatedItem)
     }
 
     fun deleteTransaction(item: TransactionItem) {
         // Kirim ke Repository
-        TransactionRepository.deleteTransaction(item)
+        transactionRepository.deleteTransaction(item)
     }
 }

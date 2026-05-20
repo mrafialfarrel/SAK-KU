@@ -24,7 +24,9 @@ data class ReportUiState(
 )
 
 // --- VIEWMODEL ---
-class ReportViewModel : ViewModel() {
+class ReportViewModel(
+    private val transactionRepository: TransactionRepository
+) : ViewModel() {
 
     // Internal state khusus untuk menyimpan filter yang dipilih UI
     private val _selectedFilter = MutableStateFlow("1 Bulan")
@@ -36,7 +38,7 @@ class ReportViewModel : ViewModel() {
      */
     val uiState: StateFlow<ReportUiState> = combine(
         _selectedFilter,
-        TransactionRepository.transactions
+        transactionRepository.transactions
     ) { filter, transactions ->
 
         // 1. Filter transaksi berdasarkan waktu
