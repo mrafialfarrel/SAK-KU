@@ -27,7 +27,7 @@ import uns.sakku.ui.theme.ThemeMode
  */
 @Composable
 fun LoginScreen(
-    viewModel: AuthViewModel = viewModel()
+    viewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory)
 ) {
     val backStack = LocalBackStack.current
     val context = LocalContext.current

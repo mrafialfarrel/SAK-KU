@@ -1,10 +1,11 @@
 package uns.sakku.feature.auth.presentation
 
 import app.cash.turbine.test
+import io.mockk.coVerify
+import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -16,20 +17,22 @@ import uns.sakku.feature.auth.data.AuthRepository
  */
 class AuthViewModelTest {
 
-    // Rule untuk Coroutines (Wajib untuk ViewModel)
+    // Rule untuk Coroutines (Wajib untuk ViewModel yang memakai viewModelScope)
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
+    // Deklarasi Repository (Mock) dan ViewModel
+    private lateinit var authRepository: AuthRepository
     private lateinit var viewModel: AuthViewModel
 
     @Before
     fun setUp() {
-        // Inisialisasi ulang ViewModel sebelum setiap test
-        viewModel = AuthViewModel()
+        // 1. Buat tiruan (Mock) dari AuthRepository.
+        // "relaxed = true" berarti jika dipanggil, fungsi-fungsinya tidak akan crash meskipun kosong.
+        authRepository = mockk(relaxed = true)
 
-        // Karena ViewModel memanggil Singleton AuthRepository,
-        // kita pastikan repository di-reset agar tidak bocor antar test.
-        AuthRepository.logout()
+        // 2. Inisialisasi ViewModel dengan memasukkan (inject) mock repository tadi
+        viewModel = AuthViewModel(authRepository)
     }
 
     @Test
@@ -51,7 +54,7 @@ class AuthViewModelTest {
     }
 
     @Test
-    fun `login dengan data valid mengubah isSuccess jadi true dan set global state`() = runTest {
+    fun `login dengan data valid mengubah isSuccess jadi true dan set repository`() = runTest {
         viewModel.uiState.test {
             // 1. State awal
             assertEquals(AuthUiState(), awaitItem())
@@ -64,9 +67,10 @@ class AuthViewModelTest {
             assertEquals(true, stateSetelahLogin.isSuccess)
             assertEquals(null, stateSetelahLogin.errorMessage)
 
-            // 4. Validasi Global State di AuthRepository
-            // Pastikan ViewModel benar-benar memberitahu Repository
-            assertTrue(AuthRepository.isLoggedIn.value)
+            // 4. Validasi Pemanggilan Repository
+            // Karena repository kita Mock, kita tidak memvalidasi nilai boolean-nya,
+            // melainkan memastikan bahwa ViewModel BENAR-BENAR MEMANGGIL fungsi setLoggedIn(true)
+            coVerify { authRepository.setLoggedIn(true) }
 
             cancelAndIgnoreRemainingEvents()
         }
@@ -80,6 +84,7 @@ class AuthViewModelTest {
             // Aksi: Nama kosong
             viewModel.register("", "email@test.com", "pass")
 
+            // Validasi: Harus gagal
             val state = awaitItem()
             assertEquals(false, state.isSuccess)
             assertNotNull(state.errorMessage)
@@ -95,12 +100,12 @@ class AuthViewModelTest {
 
             // Buat error state terlebih dahulu
             viewModel.login("", "")
-            awaitItem() // Skip error state
+            awaitItem() // Skip error state (state berhasil berubah jadi error)
 
             // Aksi: Panggil reset
             viewModel.resetState()
 
-            // Validasi: Harus kembali ke AuthUiState() bawaan
+            // Validasi: Harus kembali ke AuthUiState() bawaan yang bersih
             val finalState = awaitItem()
             assertEquals(false, finalState.isSuccess)
             assertEquals(null, finalState.errorMessage)

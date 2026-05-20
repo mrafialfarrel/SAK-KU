@@ -31,7 +31,8 @@ data class DashboardUiState(
 )
 
 class DashboardViewModel(
-    private val settingsRepository: SettingsRepository
+    private val settingsRepository: SettingsRepository,
+    private val authRepository: AuthRepository // Tambahkan auth repository di konstruktor
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(DashboardUiState())
@@ -40,7 +41,7 @@ class DashboardViewModel(
     init {
         // 1. Amati status Login
         viewModelScope.launch {
-            AuthRepository.isLoggedIn.collect { statusLogin ->
+            authRepository.isLoggedInFlow.collect { statusLogin ->
                 _uiState.update { it.copy(isLogin = statusLogin) }
             }
         }
@@ -98,10 +99,13 @@ class DashboardViewModel(
     companion object {
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
-                // Mengambil Application Context dari environment
                 val application = (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as Application)
-                val repository = SettingsRepository(application)
-                DashboardViewModel(repository)
+
+                // Buat instance dari kedua repository
+                val settingsRepo = SettingsRepository(application)
+                val authRepo = AuthRepository(application)
+
+                DashboardViewModel(settingsRepo, authRepo)
             }
         }
     }

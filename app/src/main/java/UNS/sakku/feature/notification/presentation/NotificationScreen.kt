@@ -47,7 +47,7 @@ data class NotificationItem(
 
 @Composable
 fun NotificationScreen(
-    viewModel: NotificationViewModel = viewModel()
+    viewModel: NotificationViewModel = viewModel(factory = NotificationViewModel.Factory)
 ) {
     val backStack = LocalBackStack.current
     val notifications by viewModel.notifications.collectAsState()

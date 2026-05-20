@@ -36,6 +36,7 @@ fun ComposeApp() {
                     // --- Auth ---
                     entry<Routes.AuthRoute> { LoginScreen() }
 
+
                     // --- Dashboard ---
                     entry<Routes.DashboardRoute> { DashboardScreen() }
 
