@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import uns.sakku.feature.report.presentation.components.ExpenseCategory
 import uns.sakku.feature.transaction.data.TransactionRepository
-import uns.sakku.feature.transaction.presentation.TransactionItem
+import uns.sakku.feature.transaction.data.TransactionItem
 
 // --- DATA CLASS UNTUK STATE ---
 data class ReportUiState(
@@ -38,7 +38,7 @@ class ReportViewModel(
      */
     val uiState: StateFlow<ReportUiState> = combine(
         _selectedFilter,
-        transactionRepository.transactions
+        transactionRepository.transaction
     ) { filter, transactions ->
 
         // 1. Filter transaksi berdasarkan waktu

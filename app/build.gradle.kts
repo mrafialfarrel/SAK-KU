@@ -3,6 +3,13 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     // Optional, provides the @Serialize annotation for autogeneration of Serializers.
     alias(libs.plugins.jetbrains.kotlin.serialization)
+    // KSP Room Database
+    id("com.google.devtools.ksp") // Tambahkan plugin KSP
+}
+
+// KSP Room Database generate Kotlin
+ksp {
+    arg("room.generateKotlin", "true")
 }
 
 android {
@@ -58,6 +65,10 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.koin.androidx.compose)
+//    Room Database
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx) // Untuk Coroutines & Flow support
+    ksp(libs.androidx.room.compiler) // KSP compiler
     // Framework utama untuk Unit Test
     testImplementation(libs.junit)
 

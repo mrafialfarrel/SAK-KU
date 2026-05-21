@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import uns.sakku.feature.pocket.data.AllocationItem
 import uns.sakku.feature.pocket.data.PocketBudget
 import uns.sakku.feature.pocket.data.PocketSavingRepository
@@ -15,19 +16,24 @@ import uns.sakku.feature.transaction.data.TransactionRepository
 // --- VM LAYER: ViewModel ---
 class PocketSavingViewModel(
     private val pocketSavingRepository: PocketSavingRepository,
-    private val transactionRepository: TransactionRepository,
+    private val transactionRepository: TransactionRepository
 ) : ViewModel() {
 
     // Sumber data utama dari Alokasi (Kantong/Tabungan)
+    // Perbaikan: Mengubah Flow biasa dari Repository menjadi StateFlow untuk UI
     val allocations: StateFlow<List<AllocationItem>> = pocketSavingRepository.allocations
-
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
     /**
      * STATEFLOW UNTUK TABUNGAN
      * Mengkalkulasi uang terkumpul berdasarkan history Transaksi Pemasukan
      */
     val savings: StateFlow<List<SavingGoal>> = combine(
         pocketSavingRepository.allocations,
-        transactionRepository.transactions
+        transactionRepository.transaction
     ) { allocationsList, transactionsList ->
 
         // 1. Ambil data yang berupa tabungan saja
@@ -60,7 +66,7 @@ class PocketSavingViewModel(
      */
     val pockets: StateFlow<List<PocketBudget>> = combine(
         pocketSavingRepository.allocations,
-        transactionRepository.transactions
+        transactionRepository.transaction
     ) { allocationsList, transactionsList ->
 
         // 1. Ambil data yang berupa kantong (batas pengeluaran) saja
@@ -89,14 +95,20 @@ class PocketSavingViewModel(
     // --- EVENTS (Aksi CRUD) ---
 
     fun addAllocation(item: AllocationItem) {
-        pocketSavingRepository.addAllocation(item)
+        viewModelScope.launch {
+            pocketSavingRepository.addAllocation(item)
+        }
     }
 
     fun updateAllocation(item: AllocationItem) {
-        pocketSavingRepository.updateAllocation(item)
+        viewModelScope.launch {
+            pocketSavingRepository.updateAllocation(item)
+        }
     }
 
     fun deleteAllocation(item: AllocationItem) {
-        pocketSavingRepository.deleteAllocation(item)
+        viewModelScope.launch {
+            pocketSavingRepository.deleteAllocation(item)
+        }
     }
 }

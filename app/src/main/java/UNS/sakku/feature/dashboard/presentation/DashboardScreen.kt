@@ -34,9 +34,10 @@ import uns.sakku.feature.dashboard.presentation.components.SummaryCard
 import uns.sakku.feature.dashboard.presentation.components.QuickMenuButton
 import uns.sakku.feature.dashboard.presentation.components.RecentTransactionsList
 import uns.sakku.feature.dashboard.presentation.components.SettingsDialog
-import uns.sakku.feature.transaction.presentation.TransactionItem // Tambahkan import TransactionItem
+import uns.sakku.feature.transaction.data.TransactionItem // Tambahkan import TransactionItem
 import uns.sakku.feature.transaction.presentation.components.TransactionCard
 import uns.sakku.ui.theme.ThemeMode
+import kotlin.collections.List
 
 /**
  * Stateful Composable:
@@ -245,6 +246,12 @@ private val dummyUiState = DashboardUiState(
         TransactionItem("2", "Gaji", 5000000.0, true, "Gaji", "Rekening Bank")
     )
 )
+private val dummyUiStateGuest = DashboardUiState(
+    totalSaldo = 0.0,
+    totalPemasukan = 0.0,
+    totalPengeluaran = 0.0,
+    recentTransactions = emptyList()
+)
 
 // Jetpack Preview
 
@@ -254,7 +261,7 @@ fun DashboardPreviewLight() {
     FinanceAppTheme(ThemeMode.LIGHT) {
         HalamanDashboard(
             isLogin = false,
-            uiState = dummyUiState,
+            uiState = dummyUiStateGuest,
             onNavigateToLogin = { },
             onNavigateToNotification = { },
             onNavigateToPocket = { },
@@ -274,7 +281,7 @@ fun DashboardPreviewDark() {
     FinanceAppTheme(ThemeMode.DARK) {
         HalamanDashboard(
             isLogin = false,
-            uiState = dummyUiState,
+            uiState = dummyUiStateGuest,
             onNavigateToLogin = { },
             onNavigateToNotification = { },
             onNavigateToPocket = { },

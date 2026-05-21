@@ -19,7 +19,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import org.koin.androidx.compose.koinViewModel
 import uns.sakku.ui.theme.FinanceAppTheme
 import uns.sakku.core.LocalBackStack
@@ -195,5 +194,138 @@ fun PocketSavingPreviewLight() {
             onNavigateToPockets = { },
             onNavigateToAddPocketSaving = {  }
         )
+    }
+}
+
+@Preview(showBackground = true, name = "Light Mode")
+@Composable
+fun PocketSavingPreviewDark() {
+    FinanceAppTheme(ThemeMode.DARK) {
+        HalamanPocketSaving(
+            savings = emptyList(),
+            pockets = emptyList(),
+            onNavigateToTransaction = { },
+            onBackClick = { },
+            onNavigateToSavings = { },
+            onNavigateToPockets = { },
+            onNavigateToAddPocketSaving = {  }
+        )
+    }
+}
+
+// --- PREVIEW DATA KARTU ---
+private val dummySavingGoalNormal = SavingGoal(
+    id = "1",
+    name = "Beli Laptop Baru",
+    target = 15000000f,
+    currentAmount = 7500000f
+)
+
+private val dummySavingGoalCompleted = SavingGoal(
+    id = "2",
+    name = "Liburan ke Bali",
+    target = 5000000f,
+    currentAmount = 5000000f
+)
+
+private val dummyPocketBudgetNormal = PocketBudget(
+    id = "1",
+    category = "Konsumsi & Makan",
+    limit = 2000000f,
+    spentAmount = 850000f
+)
+
+private val dummyPocketBudgetOver = PocketBudget(
+    id = "2",
+    category = "Hiburan & Nonton",
+    limit = 500000f,
+    spentAmount = 650000f
+)
+
+// --- PREVIEWS ---
+
+@Preview(showBackground = true, name = "Saving Card - Progress")
+@Composable
+fun SavingCardPreview() {
+    FinanceAppTheme(ThemeMode.LIGHT) {
+        Box(modifier = Modifier.padding(16.dp)) {
+            SavingCard(saving = dummySavingGoalNormal)
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "Saving Card - Completed")
+@Composable
+fun SavingCardCompletedPreview() {
+    FinanceAppTheme(ThemeMode.LIGHT) {
+        Box(modifier = Modifier.padding(16.dp)) {
+            SavingCard(saving = dummySavingGoalCompleted)
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "Pocket Card - Normal")
+@Composable
+fun PocketCardNormalPreview() {
+    FinanceAppTheme(ThemeMode.LIGHT) {
+        Box(modifier = Modifier.padding(16.dp)) {
+            PocketCard(pocket = dummyPocketBudgetNormal)
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "Pocket Card - Over Budget")
+@Composable
+fun PocketCardOverBudgetPreview() {
+    FinanceAppTheme(ThemeMode.LIGHT) {
+        Box(modifier = Modifier.padding(16.dp)) {
+            PocketCard(pocket = dummyPocketBudgetOver)
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "Group Cards - Light Mode")
+@Composable
+fun CardsGroupPreviewLight() {
+    FinanceAppTheme(ThemeMode.LIGHT) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.background)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Text(text = "Target Tabungan", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+            SavingCard(saving = dummySavingGoalNormal)
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(text = "Anggaran Kantong", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+            PocketCard(pocket = dummyPocketBudgetNormal)
+            PocketCard(pocket = dummyPocketBudgetOver)
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "Group Cards - Dark Mode")
+@Composable
+fun CardsGroupPreviewDark() {
+    FinanceAppTheme(ThemeMode.DARK){
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.background)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Text(text = "Target Tabungan", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = MaterialTheme.colorScheme.onBackground)
+            SavingCard(saving = dummySavingGoalNormal)
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(text = "Anggaran Kantong", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = MaterialTheme.colorScheme.onBackground)
+            PocketCard(pocket = dummyPocketBudgetNormal)
+            PocketCard(pocket = dummyPocketBudgetOver)
+        }
     }
 }

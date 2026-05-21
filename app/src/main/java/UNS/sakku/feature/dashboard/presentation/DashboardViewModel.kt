@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import uns.sakku.feature.transaction.data.TransactionRepository
-import uns.sakku.feature.transaction.presentation.TransactionItem
+import uns.sakku.feature.transaction.data.TransactionItem
 import uns.sakku.feature.auth.data.AuthRepository // Import Auth Repo
 import  uns.sakku.core.data.SettingsRepository
 import uns.sakku.ui.theme.ThemeMode
@@ -45,7 +45,7 @@ class DashboardViewModel(
 
         // 2. Amati data Transaksi
         viewModelScope.launch {
-            transactionRepository.transactions.collect { transaksiList ->
+            transactionRepository.transaction.collect { transaksiList ->
                 val totalPemasukan = transaksiList.filter { it.isPemasukan }.sumOf { it.nominal }
                 val totalPengeluaran = transaksiList.filter { !it.isPemasukan }.sumOf { it.nominal }
                 val totalSaldo = totalPemasukan - totalPengeluaran

@@ -22,7 +22,7 @@ import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import uns.sakku.core.utils.formatRupiah
-import uns.sakku.feature.transaction.presentation.TransactionItem
+import uns.sakku.feature.transaction.data.TransactionItem
 import uns.sakku.feature.transaction.presentation.components.TransactionCard
 import uns.sakku.ui.theme.ThemeMode
 

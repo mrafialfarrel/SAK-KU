@@ -12,7 +12,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import uns.sakku.core.utils.formatRupiah
-import uns.sakku.feature.transaction.presentation.TransactionItem // Pastikan import sesuai
+import uns.sakku.feature.transaction.data.TransactionItem
 import uns.sakku.ui.theme.ExpenseRed
 import uns.sakku.ui.theme.IncomeGreen
 import androidx.compose.ui.text.input.KeyboardType

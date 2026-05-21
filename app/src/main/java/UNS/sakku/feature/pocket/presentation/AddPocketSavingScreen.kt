@@ -21,7 +21,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import org.koin.androidx.compose.koinViewModel
 import java.util.UUID
 import uns.sakku.ui.theme.FinanceAppTheme
@@ -30,6 +29,7 @@ import uns.sakku.ui.theme.ExpenseRed
 import uns.sakku.core.LocalBackStack
 import uns.sakku.core.utils.formatRupiah
 import uns.sakku.feature.pocket.data.AllocationItem
+import uns.sakku.ui.theme.ThemeMode
 
 // UI Layer: Stateful Composable
 @Composable
@@ -342,6 +342,19 @@ fun HalamanAddPocketSaving(
 @Composable
 fun PreviewAddScreen() {
     FinanceAppTheme {
+        HalamanAddPocketSaving(
+            allocations = emptyList(),
+            onAddAllocation = {},
+            onUpdateAllocation = {},
+            onDeleteAllocation = {},
+            onNavigateBack = {}
+        )
+    }
+}
+@Preview(showBackground = true)
+@Composable
+fun PreviewAddScreenDark() {
+    FinanceAppTheme(ThemeMode.DARK) {
         HalamanAddPocketSaving(
             allocations = emptyList(),
             onAddAllocation = {},

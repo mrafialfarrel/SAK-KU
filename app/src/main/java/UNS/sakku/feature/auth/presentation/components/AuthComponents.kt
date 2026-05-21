@@ -125,9 +125,9 @@ fun HalamanAuth(
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.clickable {
-                    isLoginMode = !isLoginMode;
-                    email = "";
-                    password = "";
+                    isLoginMode = !isLoginMode
+                    email = ""
+                    password = ""
                     namaLengkap = ""
                 }
             )

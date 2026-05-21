@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import uns.sakku.feature.transaction.data.TransactionRepository // Import Transaction Repo
 import uns.sakku.feature.pocket.data.PocketSavingRepository // Import Pocket Repo
+import uns.sakku.feature.transaction.data.TransactionItem
 
 data class TransactionUiState(
     val transactions: List<TransactionItem> = emptyList(),
@@ -27,7 +28,7 @@ class TransactionViewModel(
     init {
         // 1. Amati perubahan data Transaksi
         viewModelScope.launch {
-            transactionRepository.transactions.collect { list ->
+            transactionRepository.transaction.collect { list ->
                 _uiState.update { it.copy(transactions = list) }
             }
         }
@@ -60,7 +61,9 @@ class TransactionViewModel(
             alokasi = alokasi
         )
         // Kirim ke Repository
-        transactionRepository.addTransaction(newItem)
+        viewModelScope.launch {
+            transactionRepository.addTransaction(newItem)
+        }
     }
 
     fun updateTransaction(id: String, keterangan: String, nominal: Double, isPemasukan: Boolean, kategori: String, alokasi: String) {
@@ -69,11 +72,15 @@ class TransactionViewModel(
             isPemasukan = isPemasukan, kategori = kategori, alokasi = alokasi
         )
         // Kirim ke Repository
-        transactionRepository.updateTransaction(updatedItem)
+        viewModelScope.launch {
+            transactionRepository.updateTransaction(updatedItem)
+        }
     }
 
     fun deleteTransaction(item: TransactionItem) {
-        // Kirim ke Repository
-        transactionRepository.deleteTransaction(item)
+        viewModelScope.launch {
+            // Kirim ke Repository
+            transactionRepository.deleteTransaction(item)
+        }
     }
 }

@@ -16,23 +16,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import org.koin.androidx.compose.koinViewModel
 import uns.sakku.ui.theme.FinanceAppTheme
 import uns.sakku.ui.theme.ExpenseRed
 import uns.sakku.core.LocalBackStack
+import uns.sakku.feature.transaction.data.TransactionItem
 import uns.sakku.feature.transaction.presentation.components.TransactionCard
 import uns.sakku.feature.transaction.presentation.components.TransactionSheetContent
 import uns.sakku.ui.theme.ThemeMode
-
-data class TransactionItem(
-    val id: String,
-    val keterangan: String,
-    val nominal: Double,
-    val isPemasukan: Boolean,
-    val kategori: String,
-    val alokasi: String
-)
 
 @Composable
 fun TransactionScreen(
@@ -71,8 +62,6 @@ fun HalamanTransaction(
     var isPemasukan by remember { mutableStateOf(initialIsPemasukan) }
     var selectedKategori by remember { mutableStateOf("") }
     var selectedAlokasi by remember { mutableStateOf("") }
-    var expandedKategori by remember { mutableStateOf(false) }
-    var expandedAlokasi by remember { mutableStateOf(false) }
 
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showBottomSheet by remember { mutableStateOf(false) }
