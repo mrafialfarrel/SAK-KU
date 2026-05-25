@@ -216,6 +216,34 @@ fun ExpenseCategoryBreakdownPreview_WithData() {
         )
     }
 }
+@Preview(showBackground = true, name = "Expense Breakdown (Ada Data)")
+@Composable
+fun ExpenseCategoryBreakdownPreviewDark_WithData() {
+    FinanceAppTheme(ThemeMode.DARK) {
+        // Membuat data dummy berdasarkan struktur pemakaian di komponen Anda
+        val dummyCategories = listOf(
+            ExpenseCategory(
+                name = "Makanan & Minuman",
+                amount = 1500000f,
+                color = Color(0xFFE57373) // Merah muda
+            ),
+            ExpenseCategory(
+                name = "Transportasi",
+                amount = 500000f,
+                color = Color(0xFF64B5F6) // Biru muda
+            ),
+            ExpenseCategory(
+                name = "Hiburan",
+                amount = 800000f,
+                color = Color(0xFFFFD54F) // Kuning
+            )
+        )
+
+        ExpenseCategoryBreakdown(
+            categories = dummyCategories
+        )
+    }
+}
 
 @Preview(showBackground = true, name = "Expense Breakdown (Kosong)")
 @Composable

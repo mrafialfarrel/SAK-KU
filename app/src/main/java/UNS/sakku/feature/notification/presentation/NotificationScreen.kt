@@ -203,3 +203,15 @@ fun NotificationPreviewLight() {
         )
     }
 }
+
+@Preview(showBackground = true, name = "Light Mode")
+@Composable
+fun NotificationPreviewDark() {
+    FinanceAppTheme(ThemeMode.DARK) {
+        HalamanNotification(
+            notifications = listOf(
+                NotificationItem("1", "Peringatan", "Cek pengeluaran", "12:00", NotificationType.WARNING, false)
+            )
+        )
+    }
+}

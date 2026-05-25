@@ -196,6 +196,18 @@ fun PreviewTransactionScreen() {
         )
     }
 }
+@Preview(showBackground = true)
+@Composable
+fun PreviewTransactionScreenDark() {
+    FinanceAppTheme(ThemeMode.DARK) {
+        HalamanTransaction(
+            transactions = emptyList(),
+            listKantong = listOf("Dompet", "OVO"),
+            listTabungan = listOf("Beli PS5"),
+            onNavigateBack = {}, onAddTransaction = { _, _, _, _, _ -> }, onUpdateTransaction = { _, _, _, _, _, _ -> }, onDeleteTransaction = {}
+        )
+    }
+}
 
 @Preview(showBackground = true, name = "Dengan Aksi (Menu Transaksi)")
 @Composable
