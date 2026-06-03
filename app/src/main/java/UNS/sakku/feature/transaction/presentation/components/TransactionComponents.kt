@@ -63,7 +63,7 @@ fun TransactionCard(
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
-                    text = "${transaction.kategori} • ${transaction.alokasi}",
+                    text = "${transaction.kategori} • ${transaction.alokasiId}",
                     fontSize = 12.sp,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                     modifier = Modifier.padding(bottom = 4.dp)
@@ -112,9 +112,9 @@ fun TransactionSheetContent(
     onNominalChange: (String) -> Unit,
     isPemasukan: Boolean,
     onIsPemasukanChange: (Boolean) -> Unit,
-    selectedKategori: String,
+    selectedKategori: String?,
     onKategoriChange: (String) -> Unit,
-    selectedAlokasi: String,
+    selectedAlokasi: String?,
     onAlokasiChange: (String) -> Unit,
     currentKategoriList: List<String>,
     currentAlokasiList: List<String>,
@@ -197,14 +197,14 @@ fun TransactionSheetContent(
             expanded = expandedKategori,
             onExpandedChange = { expandedKategori = !expandedKategori }
         ) {
-            OutlinedTextField(
-                value = selectedKategori,
-                onValueChange = {},
-                readOnly = true,
-                label = { Text(if (isPemasukan) "Kategori Pemasukan" else "Kategori Pengeluaran") },
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedKategori) },
-                modifier = Modifier.menuAnchor().fillMaxWidth()
-            )
+                OutlinedTextField(
+                    value = selectedKategori ?: "",
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text(if (isPemasukan) "Kategori Pemasukan" else "Kategori Pengeluaran") },
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedKategori) },
+                    modifier = Modifier.menuAnchor().fillMaxWidth()
+                )
             ExposedDropdownMenu(
                 expanded = expandedKategori,
                 onDismissRequest = { expandedKategori = false }
@@ -227,14 +227,14 @@ fun TransactionSheetContent(
             expanded = expandedAlokasi,
             onExpandedChange = { expandedAlokasi = !expandedAlokasi }
         ) {
-            OutlinedTextField(
-                value = selectedAlokasi,
-                onValueChange = {},
-                readOnly = true,
-                label = { Text(alokasiLabel) },
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedAlokasi) },
-                modifier = Modifier.menuAnchor().fillMaxWidth()
-            )
+                OutlinedTextField(
+                    value = selectedAlokasi ?: "",
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text(alokasiLabel) },
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedAlokasi) },
+                    modifier = Modifier.menuAnchor().fillMaxWidth()
+                )
             ExposedDropdownMenu(
                 expanded = expandedAlokasi,
                 onDismissRequest = { expandedAlokasi = false }

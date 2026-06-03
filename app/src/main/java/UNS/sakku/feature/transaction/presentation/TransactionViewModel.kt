@@ -51,14 +51,15 @@ class TransactionViewModel(
 
     // --- LOGIKA BISNIS (CRUD) DIKIRIM KE REPOSITORY ---
 
-    fun addTransaction(keterangan: String, nominal: Double, isPemasukan: Boolean, kategori: String, alokasi: String) {
+    fun addTransaction(keterangan: String, nominal: Double, isPemasukan: Boolean, kategori: String, alokasiId: String) {
         val newItem = TransactionItem(
             id = System.currentTimeMillis().toString(),
             keterangan = keterangan,
             nominal = nominal,
             isPemasukan = isPemasukan,
             kategori = kategori,
-            alokasi = alokasi
+            alokasiId = alokasiId,
+            tanggal = System.currentTimeMillis()
         )
         // Kirim ke Repository
         viewModelScope.launch {
@@ -66,10 +67,10 @@ class TransactionViewModel(
         }
     }
 
-    fun updateTransaction(id: String, keterangan: String, nominal: Double, isPemasukan: Boolean, kategori: String, alokasi: String) {
+    fun updateTransaction(id: String, keterangan: String, nominal: Double, isPemasukan: Boolean, kategori: String, alokasiId: String) {
         val updatedItem = TransactionItem(
             id = id, keterangan = keterangan, nominal = nominal,
-            isPemasukan = isPemasukan, kategori = kategori, alokasi = alokasi
+            isPemasukan = isPemasukan, kategori = kategori, alokasiId = alokasiId, tanggal = System.currentTimeMillis()
         )
         // Kirim ke Repository
         viewModelScope.launch {

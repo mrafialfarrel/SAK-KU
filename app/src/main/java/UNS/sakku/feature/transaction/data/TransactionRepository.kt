@@ -11,7 +11,8 @@ data class TransactionItem(
     val nominal: Double,
     val isPemasukan: Boolean,
     val kategori: String,
-    val alokasi: String
+    val alokasiId: String?,
+    val tanggal: Long
 )
 
 /**
@@ -30,7 +31,8 @@ class TransactionRepository (
                 nominal = entity.nominal,
                 isPemasukan = entity.isPemasukan,
                 kategori = entity.kategori,
-                alokasi = entity.alokasi
+                alokasiId = entity.alokasiId,
+                tanggal = entity.tanggal
             )
         }
     }
@@ -43,7 +45,8 @@ class TransactionRepository (
             item.nominal,
             item.isPemasukan,
             item.kategori,
-            item.alokasi
+            item.alokasiId,
+            item.tanggal
         )
         transactionDao.insertTransaction(entity)
     }
@@ -55,7 +58,8 @@ class TransactionRepository (
             item.nominal,
             item.isPemasukan,
             item.kategori,
-            item.alokasi
+            item.alokasiId,
+            item.tanggal
         )
         transactionDao.updateTransaction(entity)
     }
@@ -68,7 +72,8 @@ class TransactionRepository (
             item.nominal,
             item.isPemasukan,
             item.kategori,
-            item.alokasi
+            item.alokasiId,
+            item.tanggal
         )
         transactionDao.deleteTransaction(entity)
     }

@@ -242,8 +242,22 @@ private val dummyUiState = DashboardUiState(
     totalPemasukan = 2500000.0,
     totalPengeluaran = 1000000.0,
     recentTransactions = listOf(
-        TransactionItem("1", "Makan Siang", 50000.0, false, "Konsumsi", "Dompet Utama"),
-        TransactionItem("2", "Gaji", 5000000.0, true, "Gaji", "Rekening Bank")
+        TransactionItem(
+            "1",
+            "Makan Siang",
+            50000.0,
+            false,
+            "Konsumsi",
+            "Dompet Utama",
+            2062026),
+        TransactionItem(
+            "2",
+            "Gaji",
+            5000000.0,
+            true,
+            "Gaji",
+            "Rekening Bank",
+            2062026)
     )
 )
 private val dummyUiStateGuest = DashboardUiState(
@@ -373,7 +387,8 @@ fun TransactionCardPreview_Normal() {
                 nominal = 50000.0,
                 isPemasukan = false,
                 kategori = "Konsumsi",
-                alokasi = "Dompet Utama"
+                alokasiId = "Dompet Utama",
+                tanggal = System.currentTimeMillis()
             ),
             showActions = false
         )

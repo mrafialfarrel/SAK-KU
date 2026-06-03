@@ -1,12 +1,10 @@
 package uns.sakku.feature.pocket.data
 
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import uns.sakku.feature.pocket.data.local.AllocationDao
 import uns.sakku.feature.pocket.data.local.AllocationEntity
+import kotlin.Double
 
 // --- DATA LAYER: Models ---
 data class SavingGoal(val id: String, val name: String, val target: Float, val currentAmount: Float)
@@ -17,6 +15,8 @@ data class AllocationItem(
     val id: String,
     val nama: String,
     val nominal: Double,
+    val targetNominal: Double,
+    val terkumpulNominal: Double,
     val isTabungan: Boolean // true = Tabungan, false = Kantong
 )
 
@@ -32,7 +32,9 @@ class PocketSavingRepository(
             AllocationItem(
                 id = entity.id,
                 nama = entity.nama,
-                nominal = entity.nominal,
+                nominal = entity.targetNominal,
+                targetNominal = entity.targetNominal,
+                terkumpulNominal = entity.terkumpulNominal,
                 isTabungan = entity.isTabungan
             )
         }
@@ -41,17 +43,35 @@ class PocketSavingRepository(
 
     // Fungsi CRUD sekarang dipanggil menggunakan suspend (karena I/O operation)
     suspend fun addAllocation(item: AllocationItem) {
-        val entity = AllocationEntity(item.id, item.nama, item.nominal, item.isTabungan)
+        val entity = AllocationEntity(
+            item.id,
+            item.nama,
+            item.targetNominal,
+            item.terkumpulNominal,
+            item.isTabungan
+        )
         allocationDao.insertAllocation(entity)
     }
 
     suspend fun updateAllocation(item: AllocationItem) {
-        val entity = AllocationEntity(item.id, item.nama, item.nominal, item.isTabungan)
+        val entity = AllocationEntity(
+            item.id,
+            item.nama,
+            item.targetNominal,
+            item.terkumpulNominal,
+            item.isTabungan
+        )
         allocationDao.updateAllocation(entity)
     }
 
     suspend fun deleteAllocation(item: AllocationItem) {
-        val entity = AllocationEntity(item.id, item.nama, item.nominal, item.isTabungan)
+        val entity = AllocationEntity(
+            item.id,
+            item.nama,
+            item.targetNominal,
+            item.terkumpulNominal,
+            item.isTabungan
+        )
         allocationDao.deleteAllocation(entity)
     }
 }

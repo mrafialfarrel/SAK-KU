@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -61,7 +62,7 @@ fun HalamanTransaction(
     var nominal by remember { mutableStateOf("") }
     var isPemasukan by remember { mutableStateOf(initialIsPemasukan) }
     var selectedKategori by remember { mutableStateOf("") }
-    var selectedAlokasi by remember { mutableStateOf("") }
+    var selectedAlokasi: String? by remember { mutableStateOf(null) }
 
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showBottomSheet by remember { mutableStateOf(false) }
@@ -94,7 +95,7 @@ fun HalamanTransaction(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    isEditMode = false; editId = null; keterangan = ""; nominal = ""; selectedKategori = ""; selectedAlokasi = ""; showBottomSheet = true
+                    isEditMode = false; editId = null; keterangan = ""; nominal = ""; selectedKategori = ""; selectedAlokasi = null; showBottomSheet = true
                 },
                 containerColor = MaterialTheme.colorScheme.primary
             ) {
@@ -106,8 +107,10 @@ fun HalamanTransaction(
 
         Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
             if (transactions.isEmpty()) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Belum ada transaksi. Silakan tambah data via tombol +.", color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f))
+                Box(modifier = Modifier
+                    .fillMaxSize(),
+                    contentAlignment = Alignment.Center) {
+                    Text("Belum ada transaksi. Silakan tambah data via tombol +.", textAlign = TextAlign.Center, color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f))
                 }
             } else {
                 LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(16.dp)) {
@@ -117,7 +120,7 @@ fun HalamanTransaction(
                             transaction = item,
                             showActions = true,
                             onEditClick = {
-                                keterangan = item.keterangan; nominal = item.nominal.toLong().toString(); isPemasukan = item.isPemasukan; selectedKategori = item.kategori; selectedAlokasi = item.alokasi; isEditMode = true; editId = item.id; showBottomSheet = true
+                                keterangan = item.keterangan; nominal = item.nominal.toLong().toString(); isPemasukan = item.isPemasukan; selectedKategori = item.kategori; selectedAlokasi = item.alokasiId; isEditMode = true; editId = item.id; showBottomSheet = true
                             },
                             onDeleteClick = { itemToDelete = item; showDeleteAlert = true }
                         )
@@ -145,7 +148,7 @@ fun HalamanTransaction(
                     if (isPemasukan != isPemasukanBaru) {
                         isPemasukan = isPemasukanBaru
                         selectedKategori = ""
-                        selectedAlokasi = ""
+                        selectedAlokasi = null
                     }
                 },
                 selectedKategori = selectedKategori,
@@ -156,12 +159,16 @@ fun HalamanTransaction(
                 currentAlokasiList = currentAlokasiList,
                 alokasiLabel = alokasiLabel,
                 onSaveClick = {
-                    if (keterangan.isNotBlank() && nominal.isNotBlank() && selectedKategori.isNotBlank() && selectedAlokasi.isNotBlank()) {
+                    if (keterangan.isNotBlank() && nominal.isNotBlank() && selectedKategori.isNotBlank() && selectedAlokasi?.isNotBlank() == true) {
                         val nominalDouble = nominal.toDoubleOrNull() ?: 0.0
                         if (isEditMode && editId != null) {
-                            onUpdateTransaction(editId!!, keterangan, nominalDouble, isPemasukan, selectedKategori, selectedAlokasi)
+                            onUpdateTransaction(editId!!, keterangan, nominalDouble, isPemasukan, selectedKategori,
+                                selectedAlokasi!!
+                            )
                         } else {
-                            onAddTransaction(keterangan, nominalDouble, isPemasukan, selectedKategori, selectedAlokasi)
+                            onAddTransaction(keterangan, nominalDouble, isPemasukan, selectedKategori,
+                                selectedAlokasi!!
+                            )
                         }
                         showBottomSheet = false
                     } else {
@@ -220,7 +227,8 @@ fun TransactionCardPreview_WithActions() {
                 nominal = 50000.0,
                 isPemasukan = false,
                 kategori = "Konsumsi",
-                alokasi = "Dompet Utama"
+                alokasiId = "Dompet Utama",
+                tanggal = System.currentTimeMillis()
             ),
             showActions = true,
             onEditClick = {},   // Fungsi kosong untuk preview

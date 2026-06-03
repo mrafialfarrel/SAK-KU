@@ -42,7 +42,7 @@ class PocketSavingViewModel(
             // 2. Hitung jumlah pemasukan (isPemasukan = true) untuk tabungan ini.
             // Memeriksa apakah nama tabungan ada di field 'alokasi' atau 'kategori' dari transaksi
             val currentAmount = transactionsList
-                .filter { it.isPemasukan && (it.alokasi == allocation.nama || it.kategori == allocation.nama) }
+                .filter { it.isPemasukan && (it.alokasiId == allocation.nama || it.kategori == allocation.nama) }
                 .sumOf { it.nominal }
                 .toFloat()
 
@@ -74,7 +74,7 @@ class PocketSavingViewModel(
 
             // 2. Hitung jumlah pengeluaran (isPemasukan = false) untuk kantong ini
             val spentAmount = transactionsList
-                .filter { !it.isPemasukan && (it.alokasi == allocation.nama || it.kategori == allocation.nama) }
+                .filter { !it.isPemasukan && (it.alokasiId == allocation.nama || it.kategori == allocation.nama) }
                 .sumOf { it.nominal }
                 .toFloat()
 

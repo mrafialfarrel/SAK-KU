@@ -9,7 +9,8 @@ data class TransactionEntity(
     val id: String,
     val keterangan: String,
     val nominal: Double,
-    val isPemasukan: Boolean,
-    val kategori: String,
-    val alokasi: String
+    val isPemasukan: Boolean, //Tipe pemasukan atau pengeluaran
+    val kategori: String, //nama jenis
+    val alokasiId: String?,
+    val tanggal: Long
 )

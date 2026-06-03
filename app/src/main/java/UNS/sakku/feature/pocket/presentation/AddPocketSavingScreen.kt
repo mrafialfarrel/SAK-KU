@@ -177,15 +177,17 @@ fun HalamanAddPocketSaving(
                         onClick = {
                             if (nama.isNotBlank() && nominal.isNotBlank()) {
                                 val nominalDouble = nominal.toDoubleOrNull() ?: 0.0
+                                val targetNominal = nominal.toDoubleOrNull() ?: 0.0
+                                val terkumpulNominal = nominal.toDoubleOrNull() ?: 0.0
 
                                 if (isEditMode && editId != null) {
-                                    val updatedItem = AllocationItem(editId!!, nama, nominalDouble, isTabungan)
+                                    val updatedItem = AllocationItem(editId!!, nama, nominalDouble, targetNominal, terkumpulNominal, isTabungan)
                                     onUpdateAllocation(updatedItem)
                                     isEditMode = false
                                     editId = null
                                     Toast.makeText(context, "Data diperbarui", Toast.LENGTH_SHORT).show()
                                 } else {
-                                    val newItem = AllocationItem(UUID.randomUUID().toString(), nama, nominalDouble, isTabungan)
+                                    val newItem = AllocationItem(UUID.randomUUID().toString(), nama, nominalDouble, targetNominal, terkumpulNominal, isTabungan)
                                     onAddAllocation(newItem)
                                     Toast.makeText(context, "Berhasil ditambahkan", Toast.LENGTH_SHORT).show()
                                 }

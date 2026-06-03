@@ -65,6 +65,9 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.koin.androidx.compose)
+//    Koin API service
+    implementation(libs.koin.android)
+    implementation(libs.koin.androidx.compose.v353)
 //    Room Database
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx) // Untuk Coroutines & Flow support
