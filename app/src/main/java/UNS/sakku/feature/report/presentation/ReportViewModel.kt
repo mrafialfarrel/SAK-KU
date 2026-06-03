@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import uns.sakku.feature.report.presentation.components.BarData
 import uns.sakku.feature.report.presentation.components.ExpenseCategory
 import uns.sakku.feature.transaction.data.TransactionRepository
 import uns.sakku.feature.transaction.data.TransactionItem
@@ -16,7 +17,8 @@ import uns.sakku.feature.transaction.data.TransactionItem
 data class ReportUiState(
     val selectedFilter: String = "1 Bulan",
     val filters: List<String> = listOf("1 Minggu", "1 Bulan", "3 Bulan", "6 Bulan", "1 Tahun"),
-    val chartDataPoints: List<Float> = emptyList(),
+    val incomeChartData: List<BarData> = emptyList(),
+    val expenseChartData: List<BarData> = emptyList(),
     val totalIncome: Float = 0f,
     val totalExpense: Float = 0f,
     val expenseCategories: List<ExpenseCategory> = emptyList(),
@@ -31,11 +33,6 @@ class ReportViewModel(
     // Internal state khusus untuk menyimpan filter yang dipilih UI
     private val _selectedFilter = MutableStateFlow("1 Bulan")
 
-    /**
-     * STATEFLOW UTAMA
-     * Menggunakan `combine` untuk menggabungkan state filter dan aliran data dari TransactionRepository.
-     * Setiap kali user mengganti filter ATAU ada transaksi baru, blok ini akan tereksekusi otomatis.
-     */
     val uiState: StateFlow<ReportUiState> = combine(
         _selectedFilter,
         transactionRepository.transaction
@@ -72,10 +69,12 @@ class ReportViewModel(
                 )
             }.sortedByDescending { it.amount }
 
-        // 6. Buat state baru untuk dilempar ke UI
+//        Generate data list terpisah untuk pemasukan dan pengeluaran beserta jumlah datanya (count)
+        val (incomeData, expenseData) = generateChartData(filteredTransactions, filter)
         ReportUiState(
             selectedFilter = filter,
-            chartDataPoints = getDummyChartData(filter), // Grafik sementara masih dummy
+            incomeChartData = incomeData,
+            expenseChartData = expenseData,
             totalIncome = totalIncome,
             totalExpense = totalExpense,
             expenseCategories = expenseCategories,
@@ -94,13 +93,8 @@ class ReportViewModel(
 
     // --- HELPER FUNCTIONS ---
 
-    /**
-     * Karena TransactionItem menggunakan `System.currentTimeMillis().toString()` sebagai ID,
-     * kita bisa menggunakan ID tersebut untuk melakukan filtering waktu.
-     */
-    private fun filterTransactionsByTime(transactions: List<TransactionItem>, filter: String): List<TransactionItem> {
-        val currentTime = System.currentTimeMillis()
-        val timeLimit = when (filter) {
+    private fun getTimeLimit(filter: String, currentTime: Long): Long {
+        return when (filter) {
             "1 Minggu" -> currentTime - (7L * 24 * 60 * 60 * 1000)
             "1 Bulan" -> currentTime - (30L * 24 * 60 * 60 * 1000)
             "3 Bulan" -> currentTime - (90L * 24 * 60 * 60 * 1000)
@@ -108,16 +102,78 @@ class ReportViewModel(
             "1 Tahun" -> currentTime - (365L * 24 * 60 * 60 * 1000)
             else -> 0L
         }
+    }
+    /**
+     * Karena TransactionItem menggunakan `System.currentTimeMillis().toString()` sebagai ID,
+     * kita bisa menggunakan ID tersebut untuk melakukan filtering waktu.
+     */
+    private fun filterTransactionsByTime(transactions: List<TransactionItem>, filter: String): List<TransactionItem> {
+        val currentTime = System.currentTimeMillis()
+        val timeLimit = getTimeLimit(filter, currentTime)
 
+        // Menggunakan pro  perti `tanggal` dari TransactionItem
         return transactions.filter { item ->
-            val itemTime = item.id.toLongOrNull()
-            // Jika ID bukan timestamp (seperti data dummy awal "1", "2", "3"), anggap data baru agar tetap tampil di UI
-            if (itemTime == null || itemTime < 10000) {
-                true
-            } else {
-                itemTime >= timeLimit
+            item.tanggal >= timeLimit
+        }
+    }
+
+    // Mengembalikan Pair berisi List BarData (nominal total & frekuensi jumlah transaksi)
+    private fun generateChartData(transactions: List<TransactionItem>, filter: String): Pair<List<BarData>, List<BarData>> {
+        val currentTime = System.currentTimeMillis()
+        val timeLimit = getTimeLimit(filter, currentTime)
+        val range = currentTime - timeLimit
+
+        val bucketCount = when (filter) {
+            "1 Minggu" -> 7
+            "1 Bulan" -> 4
+            "3 Bulan" -> 3
+            "6 Bulan" -> 6
+            "1 Tahun" -> 12
+            else -> 7
+        }
+
+        val bucketDuration = range / bucketCount
+
+        // Memisahkan array untuk akumulasi nominal (amount) dan akumulasi frekuensi (count)
+        val incomesAmount = FloatArray(bucketCount) { 0f }
+        val incomesCount = IntArray(bucketCount) { 0 }
+
+        val expensesAmount = FloatArray(bucketCount) { 0f }
+        val expensesCount = IntArray(bucketCount) { 0 }
+
+        if (transactions.isNotEmpty()) {
+            transactions.forEach { item ->
+                if (item.tanggal in timeLimit..currentTime) {
+                    val timeDiff = item.tanggal - timeLimit
+                    var bucketIndex = (timeDiff / bucketDuration).toInt()
+
+                    if (bucketIndex >= bucketCount) bucketIndex = bucketCount - 1
+
+                    if (bucketIndex >= 0) {
+                        if (item.isPemasukan) {
+                            incomesAmount[bucketIndex] += item.nominal.toFloat()
+                            incomesCount[bucketIndex]++ // Tambah frekuensi data
+                        } else {
+                            expensesAmount[bucketIndex] += item.nominal.toFloat()
+                            expensesCount[bucketIndex]++ // Tambah frekuensi data
+                        }
+                    }
+                }
             }
         }
+        // Memetakan dua array tadi ke dalam data class BarData
+        val incomeList = incomesAmount.indices.map { i ->
+            BarData(
+                incomesAmount[i],
+                incomesCount[i]) }
+        val expenseList = expensesAmount.indices.map { i ->
+            BarData(
+                expensesAmount[i],
+                expensesCount[i]
+            )
+        }
+
+        return Pair(incomeList, expenseList)
     }
 
     private fun getChartColor(index: Int, isIncome: Boolean): Color {
@@ -128,14 +184,6 @@ class ReportViewModel(
             incomeColors[index % incomeColors.size]
         } else {
             expenseColors[index % expenseColors.size]
-        }
-    }
-
-    private fun getDummyChartData(filter: String): List<Float> {
-        return when (filter) {
-            "1 Minggu" -> listOf(40f, 60f, 30f, 80f, 50f, 90f, 40f)
-            "1 Tahun" -> listOf(50f, 60f, 70f, 40f, 80f, 90f, 60f, 70f, 50f, 40f, 80f, 100f)
-            else -> listOf(60f, 40f, 80f, 50f)
         }
     }
 }

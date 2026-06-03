@@ -21,12 +21,15 @@ import androidx.compose.ui.unit.sp
 import org.koin.androidx.compose.koinViewModel
 import uns.sakku.core.LocalBackStack
 import uns.sakku.core.Routes
+import uns.sakku.feature.report.presentation.components.BarData
 import uns.sakku.feature.report.presentation.components.ExpenseCategory
 import uns.sakku.feature.report.presentation.components.ExpenseCategoryBreakdown
 import uns.sakku.feature.report.presentation.components.FilterRow
 import uns.sakku.feature.report.presentation.components.SimpleBarChart
 import uns.sakku.feature.report.presentation.components.SummaryAndPercentage
+import uns.sakku.ui.theme.ExpenseRed
 import uns.sakku.ui.theme.FinanceAppTheme
+import uns.sakku.ui.theme.IncomeGreen
 import uns.sakku.ui.theme.ThemeMode
 
 // --- STATEFUL COMPOSABLE ---
@@ -97,10 +100,23 @@ fun HalamanReport(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            Text(text = "Grafik Arus Kas (${uiState.selectedFilter})", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = MaterialTheme.colorScheme.onBackground)
+            // 1. GRAFIK PEMASUKAN
+            Text(text = "Grafik Pemasukan (${uiState.selectedFilter})", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = MaterialTheme.colorScheme.onBackground)
             Spacer(modifier = Modifier.height(16.dp))
-            // Pass data points langsung
-            SimpleBarChart(dataPoints = uiState.chartDataPoints)
+            SimpleBarChart(
+                dataPoints = uiState.incomeChartData,
+                barColor = IncomeGreen // Menggunakan warna hijau
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // 2. GRAFIK PENGELUARAN
+            Text(text = "Grafik Pengeluaran (${uiState.selectedFilter})", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = MaterialTheme.colorScheme.onBackground)
+            Spacer(modifier = Modifier.height(16.dp))
+            SimpleBarChart(
+                dataPoints = uiState.expenseChartData,
+                barColor = ExpenseRed // Menggunakan warna merah
+            )
 
             Spacer(modifier = Modifier.height(32.dp))
 
@@ -152,13 +168,20 @@ fun ReportPreviewDark() {
 @Composable
 fun SimpleBarChartPreview() {
     FinanceAppTheme {
-        SimpleBarChart(
-            // Data dummy mewakili grafik (misal: 7 hari dalam seminggu, skala 0-100)
-            dataPoints = listOf(20f, 50f, 80f, 40f, 100f, 60f, 30f)
-        )
+        Column {
+            SimpleBarChart(
+                dataPoints = listOf(
+                    BarData(amount = 500000f, count = 2),
+                    BarData(amount = 1500000f, count = 5),
+                    BarData(amount = 250000f, count = 1),
+                    BarData(amount = 0f, count = 0), // Akan terlihat tipis sebagai penanda kosong
+                    BarData(amount = 800000f, count = 3)
+                ),
+                barColor = IncomeGreen
+            )
+        }
     }
 }
-
 // ==========================================
 // 2. Preview SummaryAndPercentage
 // ==========================================

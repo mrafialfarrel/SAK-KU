@@ -13,15 +13,31 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import uns.sakku.core.utils.formatRupiah
 import uns.sakku.ui.theme.ExpenseRed
 import uns.sakku.ui.theme.IncomeGreen
+import java.util.Locale
+import kotlin.math.max
 
 data class ExpenseCategory(val name: String, val amount: Float, val color: Color)
 
+// Model untuk menyimpan baik nominal maupun jumlah data/frekuensinya per batang
+data class BarData(val amount: Float, val count: Int)
+
+// Helper function untuk menyingkat angka (misal: 1500000 -> 1.5M)
+fun formatCompactNumber(number: Float): String {
+    return when {
+        number >= 1_000_000_000 -> String.format(Locale.US, "%.1fB", number / 1_000_000_000)
+        number >= 1_000_000 -> String.format(Locale.US, "%.1fM", number / 1_000_000)
+        number >= 1_000 -> String.format(Locale.US, "%.0fK", number / 1_000)
+        else -> number.toInt().toString()
+    }
+}
 @Composable
 fun FilterRow(filters: List<String>, selectedFilter: String, onFilterSelected: (String) -> Unit) {
     LazyRow(
@@ -47,37 +63,95 @@ fun FilterRow(filters: List<String>, selectedFilter: String, onFilterSelected: (
         }
     }
 }
-
 @Composable
-fun SimpleBarChart(dataPoints: List<Float>) {
+fun SimpleBarChart(dataPoints: List<BarData>, barColor: Color = MaterialTheme.colorScheme.primary) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(200.dp),
+            .height(280.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.Bottom
-        ) {
-            dataPoints.forEach { value ->
-                val animatedHeight by animateFloatAsState(
-                    targetValue = value,
-                    animationSpec = tween(durationMillis = 500),
-                    label = "barHeight"
+        if (dataPoints.isEmpty() || dataPoints.all { it.amount == 0f }) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "Belum ada data transaksi",
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                    fontSize = 14.sp
                 )
+            }
+        } else {
+            val maxValue = remember(dataPoints) { dataPoints.maxOfOrNull { it.amount }?.takeIf { it > 0f } ?: 1f }
 
-                Box(
-                    modifier = Modifier
-                        .width(24.dp)
-                        .fillMaxHeight(if(animatedHeight > 0) animatedHeight / 100f else 0.01f)
-                        .clip(RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp))
-                        .background(MaterialTheme.colorScheme.primary)
-                )
+            Row(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = 32.dp, bottom = 16.dp, start = 8.dp, end = 8.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.Bottom
+            ) {
+                dataPoints.forEach { point ->
+                    val fraction = (point.amount / maxValue).coerceIn(0.01f, 1f)
+
+                    val animHeight by animateFloatAsState(
+                        targetValue = if (point.amount > 0) fraction else 0.01f,
+                        animationSpec = tween(durationMillis = 500),
+                        label = "barHeight"
+                    )
+
+                    // Wadah untuk tiap batang, DIBUAT FLEKSIBEL dengan weight(1f)
+                    Box(
+                        modifier = Modifier
+                            .weight(1f) // Membuat batang menyesuaikan lebar layar & terdistribusi ke tengah secara otomatis
+                            .fillMaxHeight(),
+                        contentAlignment = Alignment.BottomCenter
+                    ) {
+                        // 1. Batang Utama
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(0.7f) // Memberikan margin 30% antar batang agar tidak berdempetan
+                                .fillMaxHeight(animHeight)
+                                .clip(RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp))
+                                // Jika tidak ada data, beri warna tipis agar terlihat slot-slot harinya
+                                .background(if (point.amount > 0) barColor else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            // Teks frekuensi (Banyaknya Data) di dalam batang
+                            // Ditampilkan horizontal (tidak diputar) karena angkanya pasti kecil (misal: "2", "5")
+                            if (point.amount > 0 && animHeight > 0.15f) {
+                                Text(
+                                    text = "${point.count}",
+                                    color = Color.White,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    maxLines = 1
+                                )
+                            }
+                        }
+
+                        // 2. Teks nilai nominal tertinggi diletakkan di atas puncaknya
+                        if (point.amount > 0 && animHeight > 0.01f) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxHeight(animHeight)
+                                    .fillMaxWidth()
+                            ) {
+                                Text(
+                                    text = formatCompactNumber(point.amount),
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    modifier = Modifier
+                                        .align(Alignment.TopCenter)
+                                        .offset(y = (-18).dp)
+                                )
+                            }
+                        }
+                    }
+                }
             }
         }
     }
