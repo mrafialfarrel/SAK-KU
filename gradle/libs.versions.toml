@@ -29,6 +29,7 @@ roomKtx = "2.8.4"
 roomRuntime = "2.8.4"
 turbine = "1.2.1"
 uiGraphics = "1.11.1"
+pdfViewer = "1.0.0-alpha18"
 
 [libraries]
 androidx-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
@@ -69,6 +70,7 @@ androidx-material3-adaptive-navigation3 = { group = "androidx.compose.material3.
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
 androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics", version.ref = "uiGraphics" }
+androidx-pdf-viewer = { group = "androidx.pdf", name = "pdf-viewer", version.ref = "pdfViewer" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

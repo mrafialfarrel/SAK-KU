@@ -70,7 +70,8 @@ dependencies {
     implementation(libs.koin.androidx.compose.v353)
 //    Room Database
     implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.room.ktx) // Untuk Coroutines & Flow support
+    implementation(libs.androidx.room.ktx)
+    // Untuk Coroutines & Flow support
     ksp(libs.androidx.room.compiler) // KSP compiler
     // Framework utama untuk Unit Test
     testImplementation(libs.junit)

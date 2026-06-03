@@ -40,7 +40,7 @@ val appModule = module {
     viewModel { AuthViewModel(get()) }
     viewModel { DashboardViewModel(get(), get(), get()) }
     viewModel { NotificationViewModel(get()) }
-    viewModel { ExportViewModel() }
+    viewModel { ExportViewModel(get()) }
     viewModel { PocketSavingViewModel(get(), get(), get()) }
     viewModel { ReportViewModel(get()) }
     viewModel { TransactionViewModel(get(), get()) }

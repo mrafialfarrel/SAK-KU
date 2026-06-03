@@ -1,6 +1,8 @@
 package uns.sakku.feature.export.presentation
 
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -16,10 +18,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import org.koin.androidx.compose.koinViewModel
 import uns.sakku.ui.theme.FinanceAppTheme
 import uns.sakku.core.LocalBackStack
 import uns.sakku.ui.theme.ThemeMode
+import androidx.activity.compose.rememberLauncherForActivityResult
+import java.io.OutputStream
 
 // --- STATEFUL COMPOSABLE ---
 @Composable
@@ -27,10 +32,30 @@ fun ExportScreen(
     viewModel: ExportViewModel = koinViewModel()
 ) {
     val backStack = LocalBackStack.current
-    val context = LocalContext.current // Composition-dependent (tetap di UI)
+    val context = LocalContext.current // Untuk ContentResolver dan Toast
 
     // Observasi StateFlow dari ViewModel
     val uiState by viewModel.uiState.collectAsState()
+
+    val exportLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument(
+            mimeType = if (uiState.formatTerpilih == "CSV") "text/csv" else "application/pdf"
+        )
+    ) { uri ->
+        // Callback saat user selesai memilih lokasi penyimpanan
+        if (uri != null) {
+            try {
+                val outputStream: OutputStream? = context.contentResolver.openOutputStream(uri)
+                // Panggil ViewModel untuk menulis data ke outputStream
+                viewModel.writeToFile(outputStream)
+                Toast.makeText(context, "Berhasil mengekspor ${uiState.formatTerpilih}", Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) {
+                Toast.makeText(context, "Gagal mengekspor: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+        } else {
+            Toast.makeText(context, "Ekspor dibatalkan", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     // Pass data dan event ke Stateless Child
     HalamanExport(
@@ -39,15 +64,12 @@ fun ExportScreen(
         onFormatSelected = viewModel::onFormatSelected,
         onRangeSelected = viewModel::onRangeSelected,
         onExportClicked = {
-            // Panggil fungsi logika di ViewModel jika ada
-            viewModel.exportData()
+            // nama file secara dinamis
+            val extension = if (uiState.formatTerpilih == "CSV") ".csv" else ".pdf"
+            val fileName = "Laporan_Sakku_${System.currentTimeMillis()}$extension"
 
-            // Tampilkan UI feedback (Toast)
-            Toast.makeText(
-                context,
-                "Mengekspor data ke ${uiState.formatTerpilih} untuk ${uiState.rentangTerpilih}...",
-                Toast.LENGTH_SHORT
-            ).show()
+            // Dialog 'Save As' bawaan Android
+            exportLauncher.launch(fileName)
         }
     )
 }
