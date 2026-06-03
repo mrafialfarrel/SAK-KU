@@ -5,8 +5,11 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import uns.sakku.feature.notification.data.AllocationProgress
+import uns.sakku.feature.notification.data.NotificationRepository
 import uns.sakku.feature.pocket.data.AllocationItem
 import uns.sakku.feature.pocket.data.PocketBudget
 import uns.sakku.feature.pocket.data.PocketSavingRepository
@@ -16,7 +19,8 @@ import uns.sakku.feature.transaction.data.TransactionRepository
 // --- VM LAYER: ViewModel ---
 class PocketSavingViewModel(
     private val pocketSavingRepository: PocketSavingRepository,
-    private val transactionRepository: TransactionRepository
+    private val transactionRepository: TransactionRepository,
+    private val notificationRepository: NotificationRepository
 ) : ViewModel() {
 
     // Sumber data utama dari Alokasi (Kantong/Tabungan)
@@ -50,7 +54,7 @@ class PocketSavingViewModel(
             SavingGoal(
                 id = allocation.id,
                 name = allocation.nama,
-                target = allocation.nominal.toFloat(),
+                target = allocation.targetNominal.toFloat(),
                 currentAmount = currentAmount
             )
         }
@@ -82,7 +86,7 @@ class PocketSavingViewModel(
             PocketBudget(
                 id = allocation.id,
                 category = allocation.nama,
-                limit = allocation.nominal.toFloat(),
+                limit = allocation.targetNominal.toFloat(),
                 spentAmount = spentAmount
             )
         }
@@ -91,6 +95,46 @@ class PocketSavingViewModel(
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = emptyList()
     )
+
+    val allocationProgress: StateFlow<List<AllocationProgress>> = combine(
+        pocketSavingRepository.allocations,
+        transactionRepository.transaction
+    ) { allocationsList, transactionsList ->
+        allocationsList.map { allocation ->
+            val currentAmount = if (allocation.isTabungan) {
+                transactionsList
+                    .filter { it.isPemasukan && (it.alokasiId == allocation.nama || it.kategori == allocation.nama) }
+                    .sumOf { it.nominal }
+            } else {
+                transactionsList
+                    .filter { !it.isPemasukan && (it.alokasiId == allocation.nama || it.kategori == allocation.nama) }
+                    .sumOf { it.nominal }
+            }
+
+            AllocationProgress(
+                id = allocation.id,
+                nama = allocation.nama,
+                targetNominal = allocation.targetNominal,
+                currentAmount = currentAmount,
+                isTabungan = allocation.isTabungan
+            )
+        }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = emptyList()
+    )
+
+    //    Cek notifikasi
+    init {
+        viewModelScope.launch {
+            allocationProgress
+                .filter {it.isNotEmpty()}
+                .collect { allocations ->
+                notificationRepository.checkAndGeneratePocketNotifications(allocations)
+            }
+        }
+    }
 
     // --- EVENTS (Aksi CRUD) ---
 

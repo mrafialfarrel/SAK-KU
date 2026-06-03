@@ -9,6 +9,5 @@ data class AllocationEntity(
     val id: String, // String UUID
     val nama: String,
     val targetNominal: Double, //Batas kantong atau target Tabungan
-    val terkumpulNominal: Double, // Nominal Tabungan atau Kantong
     val isTabungan: Boolean
 )

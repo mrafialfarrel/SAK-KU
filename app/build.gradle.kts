@@ -4,7 +4,7 @@ plugins {
     // Optional, provides the @Serialize annotation for autogeneration of Serializers.
     alias(libs.plugins.jetbrains.kotlin.serialization)
     // KSP Room Database
-    id("com.google.devtools.ksp") // Tambahkan plugin KSP
+    alias(libs.plugins.ksp)
 }
 
 // KSP Room Database generate Kotlin

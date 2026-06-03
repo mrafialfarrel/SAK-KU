@@ -25,11 +25,12 @@ val appModule = module {
 //    DAO (Data Access Object)
     single { get<SakkuDatabase>().allocationDao() }
     single { get<SakkuDatabase>().transactionDao() }
+    single { get<SakkuDatabase>().notificationDao() }
 
     // Repository (single)
     // androidContext() Koin untuk kebutuhan Context
     single { AuthRepository(androidContext()) }
-    single { NotificationRepository() }
+    single { NotificationRepository(get(), androidContext(), get()) }
     single { TransactionRepository(get()) }
     single { PocketSavingRepository(get()) }
     single { SettingsRepository(androidContext()) }
@@ -40,7 +41,7 @@ val appModule = module {
     viewModel { DashboardViewModel(get(), get(), get()) }
     viewModel { NotificationViewModel(get()) }
     viewModel { ExportViewModel() }
-    viewModel { PocketSavingViewModel(get(), get()) }
+    viewModel { PocketSavingViewModel(get(), get(), get()) }
     viewModel { ReportViewModel(get()) }
     viewModel { TransactionViewModel(get(), get()) }
 }

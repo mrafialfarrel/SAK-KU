@@ -176,18 +176,16 @@ fun HalamanAddPocketSaving(
                     Button(
                         onClick = {
                             if (nama.isNotBlank() && nominal.isNotBlank()) {
-                                val nominalDouble = nominal.toDoubleOrNull() ?: 0.0
                                 val targetNominal = nominal.toDoubleOrNull() ?: 0.0
-                                val terkumpulNominal = nominal.toDoubleOrNull() ?: 0.0
 
                                 if (isEditMode && editId != null) {
-                                    val updatedItem = AllocationItem(editId!!, nama, nominalDouble, targetNominal, terkumpulNominal, isTabungan)
+                                    val updatedItem = AllocationItem(editId!!, nama, targetNominal, isTabungan)
                                     onUpdateAllocation(updatedItem)
                                     isEditMode = false
                                     editId = null
                                     Toast.makeText(context, "Data diperbarui", Toast.LENGTH_SHORT).show()
                                 } else {
-                                    val newItem = AllocationItem(UUID.randomUUID().toString(), nama, nominalDouble, targetNominal, terkumpulNominal, isTabungan)
+                                    val newItem = AllocationItem(UUID.randomUUID().toString(), nama, targetNominal, isTabungan)
                                     onAddAllocation(newItem)
                                     Toast.makeText(context, "Berhasil ditambahkan", Toast.LENGTH_SHORT).show()
                                 }
@@ -260,7 +258,7 @@ fun HalamanAddPocketSaving(
                                         modifier = Modifier.padding(bottom = 4.dp)
                                     )
                                     Text(
-                                        text = "Target/Batas: ${formatRupiah(item.nominal)}",
+                                        text = "Target/Batas: ${formatRupiah(item.targetNominal)}",
                                         color = if (item.isTabungan) IncomeGreen else ExpenseRed,
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 14.sp
@@ -269,7 +267,7 @@ fun HalamanAddPocketSaving(
 
                                 IconButton(onClick = {
                                     nama = item.nama
-                                    nominal = item.nominal.toLong().toString()
+                                    nominal = item.targetNominal.toLong().toString()
                                     isTabungan = item.isTabungan
                                     isEditMode = true
                                     editId = item.id

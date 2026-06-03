@@ -13,7 +13,6 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,6 +24,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.androidx.compose.koinViewModel
 import uns.sakku.ui.theme.FinanceAppTheme
 import uns.sakku.ui.theme.IncomeGreen
@@ -49,7 +49,7 @@ fun NotificationScreen(
     viewModel: NotificationViewModel = koinViewModel()
 ) {
     val backStack = LocalBackStack.current
-    val notifications by viewModel.notifications.collectAsState()
+    val notifications by viewModel.notifications.collectAsStateWithLifecycle()
 
     HalamanNotification(
         notifications = notifications,
@@ -93,7 +93,7 @@ fun HalamanNotification(
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    items(notifications) { notif ->
+                    items(notifications, key = { it.id }) { notif ->
                         NotificationCard(
                             notification = notif,
                             onClick = { onNotificationClick(notif.id) }

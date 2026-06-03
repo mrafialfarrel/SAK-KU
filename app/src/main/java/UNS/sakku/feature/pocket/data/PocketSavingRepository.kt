@@ -14,9 +14,7 @@ data class PocketBudget(val id: String, val category: String, val limit: Float, 
 data class AllocationItem(
     val id: String,
     val nama: String,
-    val nominal: Double,
     val targetNominal: Double,
-    val terkumpulNominal: Double,
     val isTabungan: Boolean // true = Tabungan, false = Kantong
 )
 
@@ -32,9 +30,7 @@ class PocketSavingRepository(
             AllocationItem(
                 id = entity.id,
                 nama = entity.nama,
-                nominal = entity.targetNominal,
                 targetNominal = entity.targetNominal,
-                terkumpulNominal = entity.terkumpulNominal,
                 isTabungan = entity.isTabungan
             )
         }
@@ -47,7 +43,6 @@ class PocketSavingRepository(
             item.id,
             item.nama,
             item.targetNominal,
-            item.terkumpulNominal,
             item.isTabungan
         )
         allocationDao.insertAllocation(entity)
@@ -58,7 +53,6 @@ class PocketSavingRepository(
             item.id,
             item.nama,
             item.targetNominal,
-            item.terkumpulNominal,
             item.isTabungan
         )
         allocationDao.updateAllocation(entity)
@@ -69,7 +63,6 @@ class PocketSavingRepository(
             item.id,
             item.nama,
             item.targetNominal,
-            item.terkumpulNominal,
             item.isTabungan
         )
         allocationDao.deleteAllocation(entity)
