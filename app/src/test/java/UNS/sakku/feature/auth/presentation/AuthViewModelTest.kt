@@ -27,24 +27,24 @@ class AuthViewModelTest {
 
     @Before
     fun setUp() {
-        // 1. Buat tiruan (Mock) dari AuthRepository.
+        //  Buat tiruan (Mock) dari AuthRepository.
         // "relaxed = true" berarti jika dipanggil, fungsi-fungsinya tidak akan crash meskipun kosong.
         authRepository = mockk(relaxed = true)
 
-        // 2. Inisialisasi ViewModel dengan memasukkan (inject) mock repository tadi
+        // Inisialisasi ViewModel dengan memasukkan (inject) mock repository tadi
         viewModel = AuthViewModel(authRepository)
     }
 
     @Test
     fun `login dengan input kosong menghasilkan error`() = runTest {
         viewModel.uiState.test {
-            // 1. State awal
+            // State awal
             assertEquals(AuthUiState(), awaitItem())
 
-            // 2. Aksi: Login kosong
+            // Aksi: Login kosong
             viewModel.login("", "")
 
-            // 3. Validasi: Harusnya ada pesan error dan isSuccess tetap false
+            // Validasi: Harusnya ada pesan error dan isSuccess tetap false
             val stateSetelahLogin = awaitItem()
             assertEquals(false, stateSetelahLogin.isSuccess)
             assertNotNull(stateSetelahLogin.errorMessage) // Pastikan pesan error tidak null
@@ -56,18 +56,18 @@ class AuthViewModelTest {
     @Test
     fun `login dengan data valid mengubah isSuccess jadi true dan set repository`() = runTest {
         viewModel.uiState.test {
-            // 1. State awal
+            // State awal
             assertEquals(AuthUiState(), awaitItem())
 
-            // 2. Aksi: Login sukses
+            // Aksi: Login sukses
             viewModel.login("user@email.com", "password123")
 
-            // 3. Validasi ViewModel State
+            // Validasi ViewModel State
             val stateSetelahLogin = awaitItem()
             assertEquals(true, stateSetelahLogin.isSuccess)
             assertEquals(null, stateSetelahLogin.errorMessage)
 
-            // 4. Validasi Pemanggilan Repository
+            // Validasi Pemanggilan Repository
             // Karena repository kita Mock, kita tidak memvalidasi nilai boolean-nya,
             // melainkan memastikan bahwa ViewModel BENAR-BENAR MEMANGGIL fungsi setLoggedIn(true)
             coVerify { authRepository.setLoggedIn(true) }

@@ -37,6 +37,9 @@ fun TransactionScreen(
         transactions = uiState.transactions,
         listKantong = uiState.listKantong,   // Data dikirim dari ViewModel
         listTabungan = uiState.listTabungan, // Data dikirim dari ViewModel
+        isLoading = uiState.isLoading, // Kirim state ke komponen UI
+        errorMessage = uiState.errorMessage, // Kirim pesan error ke komponen UI
+        onClearError = { viewModel.clearErrorMessage() }, // Fungsi untuk mereset error
         onNavigateBack = { backStack.removeLastOrNull() },
         onAddTransaction = viewModel::addTransaction,
         onUpdateTransaction = viewModel::updateTransaction,
@@ -48,8 +51,11 @@ fun TransactionScreen(
 @Composable
 fun HalamanTransaction(
     transactions: List<TransactionItem>,
-    listKantong: List<String>,   // Parameter baru
-    listTabungan: List<String>,  // Parameter baru
+    listKantong: List<String>,
+    listTabungan: List<String>,
+    isLoading: Boolean,
+    errorMessage: String?,
+    onClearError: () -> Unit,
     initialIsPemasukan: Boolean = false,
     onNavigateBack: () -> Unit,
     onAddTransaction: (String, Double, Boolean, String, String) -> Unit,
@@ -72,6 +78,9 @@ fun HalamanTransaction(
     var showDeleteAlert by remember { mutableStateOf(false) }
     var itemToDelete by remember { mutableStateOf<TransactionItem?>(null) }
 
+    // State untuk menampung Snackbar (Pesan Error API)
+    val snackbarHostState = remember { SnackbarHostState() }
+
     // Kategori Pemasukan/Pengeluaran masih manual/hardcoded untuk contoh
     val listKategoriPemasukan = listOf("Gaji", "Hadiah", "Uang Saku")
     val listKategoriPengeluaran = listOf("Konsumsi", "Transportasi", "Darurat", "Hiburan" )
@@ -82,7 +91,20 @@ fun HalamanTransaction(
     val currentAlokasiList = if (isPemasukan) listTabungan else listKantong
     val alokasiLabel = if (isPemasukan) "Pilih Tabungan" else "Pilih Kantong"
 
+    // Memantau perubahan errorMessage. Jika tidak null, tampilkan Snackbar
+    LaunchedEffect(errorMessage) {
+        errorMessage?.let {
+            snackbarHostState.showSnackbar(
+                message = it,
+                duration = SnackbarDuration.Short
+            )
+            onClearError() // Reset error setelah ditampilkan agar tidak muncul terus
+        }
+    }
+
     Scaffold(
+        // Pasang SnackbarHost di Scaffold
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text("Catatan Keuangan", fontWeight = FontWeight.Bold) },
@@ -105,88 +127,137 @@ fun HalamanTransaction(
         containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
 
-        Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
-            if (transactions.isEmpty()) {
-                Box(modifier = Modifier
-                    .fillMaxSize(),
-                    contentAlignment = Alignment.Center) {
-                    Text("Belum ada transaksi. Silakan tambah data via tombol +.", textAlign = TextAlign.Center, color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f))
-                }
-            } else {
-                LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(16.dp)) {
-                    item { Text("Riwayat Transaksi Terbaru", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(bottom = 12.dp)) }
-                    items(transactions.reversed()) { item ->
-                        TransactionCard(
-                            transaction = item,
-                            showActions = true,
-                            onEditClick = {
-                                keterangan = item.keterangan; nominal = item.nominal.toLong().toString(); isPemasukan = item.isPemasukan; selectedKategori = item.kategori; selectedAlokasi = item.alokasiId; isEditMode = true; editId = item.id; showBottomSheet = true
-                            },
-                            onDeleteClick = { itemToDelete = item; showDeleteAlert = true }
+        // Gunakan Box sebagai container utama agar indikator loading bisa melayang di tengah (center)
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
+                if (transactions.isEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            "Belum ada transaksi. Silakan tambah data via tombol +.",
+                            textAlign = TextAlign.Center,
+                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
                         )
                     }
-                    item { Spacer(modifier = Modifier.height(72.dp)) }
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(16.dp)
+                    ) {
+                        item {
+                            Text(
+                                "Riwayat Transaksi Terbaru",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 16.sp,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(bottom = 12.dp)
+                            )
+                        }
+                        items(transactions.reversed()) { item ->
+                            TransactionCard(
+                                transaction = item,
+                                showActions = true,
+                                onEditClick = {
+                                    keterangan = item.keterangan; nominal =
+                                    item.nominal.toLong().toString(); isPemasukan =
+                                    item.isPemasukan; selectedKategori =
+                                    item.kategori; selectedAlokasi = item.alokasiId; isEditMode =
+                                    true; editId = item.id; showBottomSheet = true
+                                },
+                                onDeleteClick = { itemToDelete = item; showDeleteAlert = true }
+                            )
+                        }
+                        item { Spacer(modifier = Modifier.height(72.dp)) }
+                    }
+                }
+                // Menampilkan indikator loading berputar di tengah layar jika API sedang berjalan
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        color = MaterialTheme.colorScheme.primary
+                    )
                 }
             }
         }
-    }
 
-    if (showBottomSheet) {
-        ModalBottomSheet(
-            onDismissRequest = { showBottomSheet = false },
-            sheetState = sheetState,
-            containerColor = MaterialTheme.colorScheme.surface
-        ) {
-            // Panggil Komponen UI yang sudah diekstrak (Clean Code!)
-            TransactionSheetContent(
-                keterangan = keterangan,
-                onKeteranganChange = { keterangan = it },
-                nominal = nominal,
-                onNominalChange = { nominal = it },
-                isPemasukan = isPemasukan,
-                onIsPemasukanChange = { isPemasukanBaru ->
-                    if (isPemasukan != isPemasukanBaru) {
-                        isPemasukan = isPemasukanBaru
-                        selectedKategori = ""
-                        selectedAlokasi = null
-                    }
-                },
-                selectedKategori = selectedKategori,
-                onKategoriChange = { selectedKategori = it },
-                selectedAlokasi = selectedAlokasi,
-                onAlokasiChange = { selectedAlokasi = it },
-                currentKategoriList = currentKategoriList,
-                currentAlokasiList = currentAlokasiList,
-                alokasiLabel = alokasiLabel,
-                onSaveClick = {
-                    if (keterangan.isNotBlank() && nominal.isNotBlank() && selectedKategori.isNotBlank() && selectedAlokasi?.isNotBlank() == true) {
-                        val nominalDouble = nominal.toDoubleOrNull() ?: 0.0
-                        if (isEditMode && editId != null) {
-                            onUpdateTransaction(editId!!, keterangan, nominalDouble, isPemasukan, selectedKategori,
-                                selectedAlokasi!!
-                            )
-                        } else {
-                            onAddTransaction(keterangan, nominalDouble, isPemasukan, selectedKategori,
-                                selectedAlokasi!!
-                            )
+        if (showBottomSheet) {
+            ModalBottomSheet(
+                onDismissRequest = { showBottomSheet = false },
+                sheetState = sheetState,
+                containerColor = MaterialTheme.colorScheme.surface
+            ) {
+                // Panggil Komponen UI yang sudah diekstrak (Clean Code!)
+                TransactionSheetContent(
+                    keterangan = keterangan,
+                    onKeteranganChange = { keterangan = it },
+                    nominal = nominal,
+                    onNominalChange = { nominal = it },
+                    isPemasukan = isPemasukan,
+                    onIsPemasukanChange = { isPemasukanBaru ->
+                        if (isPemasukan != isPemasukanBaru) {
+                            isPemasukan = isPemasukanBaru
+                            selectedKategori = ""
+                            selectedAlokasi = null
                         }
-                        showBottomSheet = false
-                    } else {
-                        Toast.makeText(context, "Harap isi semua kolom dan pilihan", Toast.LENGTH_SHORT).show()
-                    }
+                    },
+                    selectedKategori = selectedKategori,
+                    onKategoriChange = { selectedKategori = it },
+                    selectedAlokasi = selectedAlokasi,
+                    onAlokasiChange = { selectedAlokasi = it },
+                    currentKategoriList = currentKategoriList,
+                    currentAlokasiList = currentAlokasiList,
+                    alokasiLabel = alokasiLabel,
+                    onSaveClick = {
+                        if (keterangan.isNotBlank() && nominal.isNotBlank() && selectedKategori.isNotBlank() && selectedAlokasi?.isNotBlank() == true) {
+                            val nominalDouble = nominal.toDoubleOrNull() ?: 0.0
+                            if (isEditMode && editId != null) {
+                                onUpdateTransaction(
+                                    editId!!,
+                                    keterangan,
+                                    nominalDouble,
+                                    isPemasukan,
+                                    selectedKategori,
+                                    selectedAlokasi!!
+                                )
+                            } else {
+                                onAddTransaction(
+                                    keterangan, nominalDouble, isPemasukan, selectedKategori,
+                                    selectedAlokasi!!
+                                )
+                            }
+                            showBottomSheet = false
+                        } else {
+                            Toast.makeText(
+                                context,
+                                "Harap isi semua kolom dan pilihan",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    },
+                )
+            }
+        }
+
+        if (showDeleteAlert && itemToDelete != null) {
+            AlertDialog(
+                onDismissRequest = { showDeleteAlert = false },
+                title = { Text("Hapus Transaksi", fontWeight = FontWeight.Bold) },
+                text = { Text("Apakah Anda yakin ingin menghapus transaksi '${itemToDelete?.keterangan}'?") },
+                confirmButton = {
+                    TextButton(onClick = {
+                        onDeleteTransaction(itemToDelete!!); showDeleteAlert = false; itemToDelete =
+                        null
+                    }) { Text("Hapus", color = ExpenseRed, fontWeight = FontWeight.Bold) }
                 },
+                dismissButton = {
+                    TextButton(onClick = {
+                        showDeleteAlert = false
+                    }) { Text("Batal") }
+                }
             )
         }
-    }
-
-    if (showDeleteAlert && itemToDelete != null) {
-        AlertDialog(
-            onDismissRequest = { showDeleteAlert = false },
-            title = { Text("Hapus Transaksi", fontWeight = FontWeight.Bold) },
-            text = { Text("Apakah Anda yakin ingin menghapus transaksi '${itemToDelete?.keterangan}'?") },
-            confirmButton = { TextButton(onClick = { onDeleteTransaction(itemToDelete!!); showDeleteAlert = false; itemToDelete = null }) { Text("Hapus", color = ExpenseRed, fontWeight = FontWeight.Bold) } },
-            dismissButton = { TextButton(onClick = { showDeleteAlert = false }) { Text("Batal") } }
-        )
     }
 }
 
@@ -199,7 +270,8 @@ fun PreviewTransactionScreen() {
             transactions = emptyList(),
             listKantong = listOf("Dompet", "OVO"),
             listTabungan = listOf("Beli PS5"),
-            onNavigateBack = {}, onAddTransaction = { _, _, _, _, _ -> }, onUpdateTransaction = { _, _, _, _, _, _ -> }, onDeleteTransaction = {}
+            onNavigateBack = {}, onAddTransaction = { _, _, _, _, _ -> }, onUpdateTransaction = { _, _, _, _, _, _ -> }, onDeleteTransaction = {},
+            isLoading = false, errorMessage = null, onClearError = {}
         )
     }
 }
@@ -211,7 +283,8 @@ fun PreviewTransactionScreenDark() {
             transactions = emptyList(),
             listKantong = listOf("Dompet", "OVO"),
             listTabungan = listOf("Beli PS5"),
-            onNavigateBack = {}, onAddTransaction = { _, _, _, _, _ -> }, onUpdateTransaction = { _, _, _, _, _, _ -> }, onDeleteTransaction = {}
+            onNavigateBack = {}, onAddTransaction = { _, _, _, _, _ -> }, onUpdateTransaction = { _, _, _, _, _, _ -> }, onDeleteTransaction = {},
+            isLoading = false, errorMessage = null, onClearError = {}
         )
     }
 }
@@ -232,7 +305,8 @@ fun TransactionCardPreview_WithActions() {
             ),
             showActions = true,
             onEditClick = {},   // Fungsi kosong untuk preview
-            onDeleteClick = {}  // Fungsi kosong untuk preview
+            onDeleteClick = {},  // Fungsi kosong untuk preview,
+
         )
     }
 }

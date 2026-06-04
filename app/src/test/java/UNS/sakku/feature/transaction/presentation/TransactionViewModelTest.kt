@@ -2,7 +2,6 @@ package uns.sakku.feature.transaction.presentation
 
 import app.cash.turbine.test
 import io.mockk.every
-import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkAll
 import io.mockk.verify
@@ -33,20 +32,20 @@ class TransactionViewModelTest {
 
     @Before
     fun setUp() {
-        // 1. Mock kedua Repository Singleton
+        // Mock kedua Repository Singleton
         mockkObject(TransactionRepository)
         mockkObject(PocketSavingRepository)
 
-        // 2. Alihkan data flow asli ke fake flow kita
+        // Alihkan data flow asli ke fake flow kita
         every { TransactionRepository.transactions } returns fakeTransactions
         every { PocketSavingRepository.allocations } returns fakeAllocations
 
-        // 3. Mock fungsi CRUD agar tidak benar-benar mengeksekusi kode aslinya (Unit Test murni)
+        // Mock fungsi CRUD agar tidak benar-benar mengeksekusi kode aslinya (Unit Test murni)
         every { TransactionRepository.addTransaction(any()) } answers { }
         every { TransactionRepository.updateTransaction(any()) } answers { }
         every { TransactionRepository.deleteTransaction(any()) } answers { }
 
-        // 4. Inisialisasi ViewModel
+        // Inisialisasi ViewModel
         viewModel = TransactionViewModel()
     }
 

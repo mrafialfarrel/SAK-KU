@@ -36,14 +36,14 @@ class DashboardViewModel(
     val uiState: StateFlow<DashboardUiState> = _uiState.asStateFlow()
 
     init {
-        // 1. Amati status Login
+        // Amati status Login
         viewModelScope.launch {
             authRepository.isLoggedInFlow.collect { statusLogin ->
                 _uiState.update { it.copy(isLogin = statusLogin) }
             }
         }
 
-        // 2. Amati data Transaksi
+        // Amati data Transaksi
         viewModelScope.launch {
             transactionRepository.transaction.collect { transaksiList ->
                 val totalPemasukan = transaksiList.filter { it.isPemasukan }.sumOf { it.nominal }
@@ -61,14 +61,14 @@ class DashboardViewModel(
                 }
             }
         }
-        // 3. Amati Pengaturan Tema dari DataStore (akan update UI otomatis saat app berjalan)
+        // Amati Pengaturan Tema dari DataStore (akan update UI otomatis saat app berjalan)
         viewModelScope.launch {
             settingsRepository.themeModeFlow.collect { savedTheme ->
                 _uiState.update { it.copy(selectedTheme = savedTheme) }
             }
         }
 
-        // 4. Amati Pengaturan Notifikasi dari DataStore
+        // Amati Pengaturan Notifikasi dari DataStore
         viewModelScope.launch {
             settingsRepository.notificationFlow.collect { isEnabled ->
                 _uiState.update { it.copy(isNotificationEnabled = isEnabled) }
@@ -92,7 +92,7 @@ class DashboardViewModel(
         }
     }
     /**
-     * FUNGSI BARU: Logout
+     * FUNGSI Logout
      * Berinteraksi dengan lintas-domain (Auth Domain) untuk mengakhiri sesi.
      * Fungsi ini dipanggil oleh NotificationScreen saat ikon logout ditekan.
      */

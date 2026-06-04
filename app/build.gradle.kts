@@ -65,6 +65,9 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.koin.androidx.compose)
+//    Retrofit API
+    implementation (libs.retrofit)
+    implementation (libs.converter.gson)
 //    Koin API service
     implementation(libs.koin.android)
     implementation(libs.koin.androidx.compose.v353)

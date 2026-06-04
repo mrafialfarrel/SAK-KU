@@ -52,13 +52,13 @@ class PocketSavingViewModelTest {
 
     @Test
     fun `savings mengkalkulasi currentAmount berdasarkan transaksi pemasukan`() = runTest {
-        // 1. Siapkan Alokasi Tabungan
+        // Siapkan Alokasi Tabungan
         val mockAllocations = listOf(
             AllocationItem("1", "Tabungan Laptop", 15000000.0, true)
         )
         fakeAllocations.value = mockAllocations
 
-        // 2. Siapkan riwayat Transaksi
+        // Siapkan riwayat Transaksi
         val mockTransactions = listOf(
             // Transaksi valid (Pemasukan ke "Tabungan Laptop")
             TransactionItem("t1", "Gaji", 2000000.0, true, "Gaji", "Tabungan Laptop"),
@@ -69,7 +69,7 @@ class PocketSavingViewModelTest {
         )
         fakeTransactions.value = mockTransactions
 
-        // 3. Validasi
+        // Validasi
         viewModel.savings.test {
             // Karena stateIn butuh sedikit waktu, kita tangkap nilainya
             val savingsList = awaitItem()
@@ -89,13 +89,13 @@ class PocketSavingViewModelTest {
 
     @Test
     fun `pockets mengkalkulasi spentAmount berdasarkan transaksi pengeluaran`() = runTest {
-        // 1. Siapkan Alokasi Kantong Pengeluaran
+        // Siapkan Alokasi Kantong Pengeluaran
         val mockAllocations = listOf(
             AllocationItem("2", "Makan Siang", 500000.0, false)
         )
         fakeAllocations.value = mockAllocations
 
-        // 2. Siapkan riwayat Transaksi
+        // Siapkan riwayat Transaksi
         val mockTransactions = listOf(
             // Transaksi valid (Pengeluaran ke kantong "Makan Siang")
             TransactionItem("t1", "Pecel", 15000.0, false, "Makanan", "Makan Siang"),
@@ -106,7 +106,7 @@ class PocketSavingViewModelTest {
         )
         fakeTransactions.value = mockTransactions
 
-        // 3. Validasi
+        // Validasi
         viewModel.pockets.test {
             val pocketsList = awaitItem()
             val currentPockets = if (pocketsList.isEmpty()) awaitItem() else pocketsList

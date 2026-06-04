@@ -38,18 +38,18 @@ class ReportViewModel(
         transactionRepository.transaction
     ) { filter, transactions ->
 
-        // 1. Filter transaksi berdasarkan waktu
+        // Filter transaksi berdasarkan waktu
         val filteredTransactions = filterTransactionsByTime(transactions, filter)
 
-        // 2. Pisahkan Pemasukan dan Pengeluaran
+        // Pisahkan Pemasukan dan Pengeluaran
         val incomes = filteredTransactions.filter { it.isPemasukan }
         val expenses = filteredTransactions.filter { !it.isPemasukan }
 
-        // 3. Hitung Total
+        // Hitung Total
         val totalIncome = incomes.sumOf { it.nominal }.toFloat()
         val totalExpense = expenses.sumOf { it.nominal }.toFloat()
 
-        // 4. Kelompokkan berdasarkan Kategori (Pengeluaran)
+        // Kelompokkan berdasarkan Kategori (Pengeluaran)
         val expenseCategories = expenses.groupBy { it.kategori }.entries
             .mapIndexed { index, entry ->
                 ExpenseCategory(
@@ -59,7 +59,7 @@ class ReportViewModel(
                 )
             }.sortedByDescending { it.amount } // Urutkan dari pengeluaran terbesar
 
-        // 5. Kelompokkan berdasarkan Kategori (Pemasukan)
+        // Kelompokkan berdasarkan Kategori (Pemasukan)
         val incomeCategories = incomes.groupBy { it.kategori }.entries
             .mapIndexed { index, entry ->
                 ExpenseCategory(

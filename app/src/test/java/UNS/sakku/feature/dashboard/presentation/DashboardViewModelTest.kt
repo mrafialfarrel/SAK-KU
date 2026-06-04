@@ -13,6 +13,7 @@ import org.junit.Rule
 import org.junit.Test
 import uns.sakku.feature.auth.MainDispatcherRule
 import uns.sakku.feature.auth.data.AuthRepository
+import uns.sakku.feature.transaction.data.TransactionItem
 import uns.sakku.feature.transaction.data.TransactionRepository
 import uns.sakku.feature.transaction.presentation.TransactionItem
 
@@ -29,15 +30,15 @@ class DashboardViewModelTest {
 
     @Before
     fun setUp() {
-        // 1. Mock (Tiru) objek Singleton
+        // Mock (Tiru) objek Singleton
         mockkObject(AuthRepository)
         mockkObject(TransactionRepository)
 
-        // 2. Arahkan variabel di dalam Repository ke variabel fake buatan kita
+        // Arahkan variabel di dalam Repository ke variabel fake buatan kita
         every { AuthRepository.isLoggedIn } returns fakeIsLoggedIn
         every { TransactionRepository.transactions } returns fakeTransactions
 
-        // 3. Inisialisasi ViewModel SETELAH Mocking selesai
+        // Inisialisasi ViewModel SETELAH Mocking selesai
         // Supaya saat blok `init` berjalan, ViewModel membaca data fake
         viewModel = DashboardViewModel()
     }
@@ -86,16 +87,16 @@ class DashboardViewModelTest {
             // Validasi
             val state = awaitItem()
 
-            // 1. Cek Pemasukan (5.000.000)
+            // Cek Pemasukan (5.000.000)
             assertEquals(5000000.0, state.totalPemasukan, 0.0)
 
-            // 2. Cek Pengeluaran (50.000 + 50.000)
+            // Cek Pengeluaran (50.000 + 50.000)
             assertEquals(100000.0, state.totalPengeluaran, 0.0)
 
-            // 3. Cek Saldo Akhir (5.000.000 - 100.000)
+            // Cek Saldo Akhir (5.000.000 - 100.000)
             assertEquals(4900000.0, state.totalSaldo, 0.0)
 
-            // 4. Cek Recent Transactions (Harus dibalik/reversed dan maksimal 5)
+            // Cek Recent Transactions (Harus dibalik/reversed dan maksimal 5)
             assertEquals(3, state.recentTransactions.size)
             // Data paling awal di recent harusnya ID "3" (karena di-reverse)
             assertEquals("3", state.recentTransactions[0].id)

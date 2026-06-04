@@ -23,7 +23,7 @@ class NotificationViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
-    // 1. Deklarasikan repository tiruan (mock)
+    // Deklarasikan repository tiruan (mock)
     private lateinit var mockRepository: NotificationRepository
     private lateinit var viewModel: NotificationViewModel
 
@@ -41,13 +41,13 @@ class NotificationViewModelTest {
             NotificationItem("2", "Pesan 2", "Detail 2", "Kemarin", NotificationType.SUCCESS, false)
         )
 
-        // 2. Beri tahu tiruan: "Jika getNotifications() dipanggil, kembalikan flowOf(dummyList)"
+        // Beri tahu tiruan: "Jika getNotifications() dipanggil, kembalikan flowOf(dummyList)"
         coEvery { mockRepository.getNotifications() } returns flowOf(dummyList)
 
         // Mock fungsi logout agar tidak melakukan apa-apa saat dites
         every { AuthRepository.logout() } answers { }
 
-        // 3. Masukkan mockRepository ke dalam ViewModel
+        // Masukkan mockRepository ke dalam ViewModel
         viewModel = NotificationViewModel(mockRepository)
     }
 

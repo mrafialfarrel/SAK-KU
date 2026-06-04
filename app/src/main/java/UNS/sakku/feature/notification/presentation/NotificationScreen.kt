@@ -13,7 +13,9 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -50,9 +52,15 @@ fun NotificationScreen(
 ) {
     val backStack = LocalBackStack.current
     val notifications by viewModel.notifications.collectAsStateWithLifecycle()
+    // Menangkap state jaringan dari ViewModel
+    val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
+    val errorMessage by viewModel.errorMessage.collectAsStateWithLifecycle()
 
     HalamanNotification(
         notifications = notifications,
+        isLoading = isLoading, // Teruskan state
+        errorMessage = errorMessage, // Teruskan pesan error
+        onClearError = { viewModel.clearErrorMessage() }, // Fungsi clear error
         onBackClick = { backStack.removeLastOrNull() },
         onNotificationClick = { id -> viewModel.markAsRead(id) }
     )
@@ -62,10 +70,27 @@ fun NotificationScreen(
 @Composable
 fun HalamanNotification(
     notifications: List<NotificationItem>,
+    isLoading: Boolean, 
+    errorMessage: String?, 
+    onClearError: () -> Unit, 
     onBackClick: () -> Unit = {},
     onNotificationClick: (String) -> Unit = {},
 ) {
+    // State untuk Snackbar Error
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // Pantau Error Message
+    LaunchedEffect(errorMessage) {
+        errorMessage?.let {
+            snackbarHostState.showSnackbar(
+                message = it,
+                duration = SnackbarDuration.Short
+            )
+            onClearError()
+        }
+    }
     Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }, // Pasang Snackbar
         topBar = {
             TopAppBar(
                 title = { Text("Notifikasi", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimary) },
@@ -78,28 +103,45 @@ fun HalamanNotification(
             )
         }
     ) { paddingValues ->
-        Column(
+        // Ubah Column menjadi Box agar indikator loading bisa melayang di tengah
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
-                .padding(paddingValues)
         ) {
-            if (notifications.isEmpty()) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Belum ada notifikasi saat ini.", color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f))
-                }
-            } else {
-                LazyColumn(
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    items(notifications, key = { it.id }) { notif ->
-                        NotificationCard(
-                            notification = notif,
-                            onClick = { onNotificationClick(notif.id) }
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.background)
+                    .padding(paddingValues)
+            ) {
+                if (notifications.isEmpty()) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text(
+                            "Belum ada notifikasi saat ini.",
+                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
                         )
                     }
+                } else {
+                    LazyColumn(
+                        contentPadding = PaddingValues(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        items(notifications, key = { it.id }) { notif ->
+                            NotificationCard(
+                                notification = notif,
+                                onClick = { onNotificationClick(notif.id) }
+                            )
+                        }
+                    }
                 }
+            }
+            // Menampilkan loading spinner jika sedang request ke server
+            if (isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center),
+                    color = MaterialTheme.colorScheme.primary
+                )
             }
         }
     }
@@ -199,7 +241,8 @@ fun NotificationPreviewLight() {
         HalamanNotification(
             notifications = listOf(
                 NotificationItem("1", "Peringatan", "Cek pengeluaran", "12:00", NotificationType.WARNING, false)
-            )
+            ),
+            isLoading = false, errorMessage = null, onClearError = {}
         )
     }
 }
@@ -211,7 +254,8 @@ fun NotificationPreviewDark() {
         HalamanNotification(
             notifications = listOf(
                 NotificationItem("1", "Peringatan", "Cek pengeluaran", "12:00", NotificationType.WARNING, false)
-            )
+            ),
+            isLoading = false, errorMessage = null, onClearError = {}
         )
     }
 }

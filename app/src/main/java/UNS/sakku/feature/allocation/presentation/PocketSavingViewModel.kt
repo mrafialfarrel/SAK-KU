@@ -2,8 +2,10 @@ package uns.sakku.feature.pocket.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.stateIn
@@ -23,6 +25,14 @@ class PocketSavingViewModel(
     private val notificationRepository: NotificationRepository
 ) : ViewModel() {
 
+    // --- STATE UNTUK NETWORK ---
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
+    private val _errorMessage = MutableStateFlow<String?>(null)
+    val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
+
+
     // Sumber data utama dari Alokasi (Kantong/Tabungan)
     // Perbaikan: Mengubah Flow biasa dari Repository menjadi StateFlow untuk UI
     val allocations: StateFlow<List<AllocationItem>> = pocketSavingRepository.allocations
@@ -40,17 +50,17 @@ class PocketSavingViewModel(
         transactionRepository.transaction
     ) { allocationsList, transactionsList ->
 
-        // 1. Ambil data yang berupa tabungan saja
+        // Ambil data yang berupa tabungan saja
         allocationsList.filter { it.isTabungan }.map { allocation ->
 
-            // 2. Hitung jumlah pemasukan (isPemasukan = true) untuk tabungan ini.
+            // Hitung jumlah pemasukan (isPemasukan = true) untuk tabungan ini.
             // Memeriksa apakah nama tabungan ada di field 'alokasi' atau 'kategori' dari transaksi
             val currentAmount = transactionsList
                 .filter { it.isPemasukan && (it.alokasiId == allocation.nama || it.kategori == allocation.nama) }
                 .sumOf { it.nominal }
                 .toFloat()
 
-            // 3. Kembalikan bentuk Model untuk UI
+            // Kembalikan bentuk Model untuk UI
             SavingGoal(
                 id = allocation.id,
                 name = allocation.nama,
@@ -73,16 +83,16 @@ class PocketSavingViewModel(
         transactionRepository.transaction
     ) { allocationsList, transactionsList ->
 
-        // 1. Ambil data yang berupa kantong (batas pengeluaran) saja
+        // Ambil data yang berupa kantong (batas pengeluaran) saja
         allocationsList.filter { !it.isTabungan }.map { allocation ->
 
-            // 2. Hitung jumlah pengeluaran (isPemasukan = false) untuk kantong ini
+            // Hitung jumlah pengeluaran (isPemasukan = false) untuk kantong ini
             val spentAmount = transactionsList
                 .filter { !it.isPemasukan && (it.alokasiId == allocation.nama || it.kategori == allocation.nama) }
                 .sumOf { it.nominal }
                 .toFloat()
 
-            // 3. Kembalikan bentuk Model untuk UI
+            // Kembalikan bentuk Model untuk UI
             PocketBudget(
                 id = allocation.id,
                 category = allocation.nama,
@@ -125,8 +135,8 @@ class PocketSavingViewModel(
         initialValue = emptyList()
     )
 
-    //    Cek notifikasi
     init {
+    //    Cek notifikasi
         viewModelScope.launch {
             allocationProgress
                 .filter {it.isNotEmpty()}
@@ -134,8 +144,28 @@ class PocketSavingViewModel(
                 notificationRepository.checkAndGeneratePocketNotifications(allocations)
             }
         }
+        // Tarik data dari server saat ViewModel dibuat
+        syncData()
     }
 
+    // --- FUNGSI SINKRONISASI ---
+    fun syncData() {
+        viewModelScope.launch {
+            _isLoading.value = true
+            _errorMessage.value = null
+            try {
+                pocketSavingRepository.syncAllocationsFromServer()
+            } catch (e: Exception) {
+                _errorMessage.value = "Gagal memuat data alokasi: ${e.message}"
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun clearErrorMessage() {
+        _errorMessage.value = null
+    }
     // --- EVENTS (Aksi CRUD) ---
 
     fun addAllocation(item: AllocationItem) {

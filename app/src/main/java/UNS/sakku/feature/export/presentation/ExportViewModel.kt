@@ -55,10 +55,10 @@ class ExportViewModel(
         // Menggunakan viewModelScope.launch karena pengumpulan data flow harus secara asynchronous
         viewModelScope.launch {
             try {
-                // 1. Ambil seluruh data dari Room Database satu kali saja (.first())
+                // Ambil seluruh data dari Room Database satu kali saja (.first())
                 val allTransactions = transactionRepository.transaction.first()
 
-                // 2. Filter data berdasarkan waktu
+                // Filter data berdasarkan waktu
                 val currentTime = System.currentTimeMillis()
                 val timeLimit = getTimeLimit(_uiState.value.rentangTerpilih, currentTime)
 
@@ -67,7 +67,7 @@ class ExportViewModel(
                     .filter { it.tanggal >= timeLimit }
                     .sortedByDescending { it.tanggal }
 
-                // 3. Proses penulisan file berdasarkan format
+                // Proses penulisan file berdasarkan format
                 if (_uiState.value.formatTerpilih == "CSV") {
                     val csvString = generateCsvString(filteredTransactions)
                     outputStream.write(csvString.toByteArray())

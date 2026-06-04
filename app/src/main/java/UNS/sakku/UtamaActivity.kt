@@ -102,10 +102,10 @@ fun HalamanUtama(onNavigateToProfile: () -> Unit) {
 
 
         Spacer(modifier = Modifier.height(16.dp))
-        // 1. Ambil context dari Compose (Taruh di dalam fungsi @Composable, sebelum Button)
+        // Ambil context dari Compose (Taruh di dalam fungsi @Composable, sebelum Button)
         val context = LocalContext.current
 
-        // 2. Buat Button dengan penulisan onClick yang benar
+        // Buat Button dengan penulisan onClick yang benar
         Button(
             onClick = {
                 // Logika intent ditaruh di dalam kurung kurawal onClick

@@ -11,8 +11,10 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -36,11 +38,17 @@ fun PocketSavingScreen(viewModel: PocketSavingViewModel = koinViewModel()) {
     // Objek UI tidak mengurus data mentah, ia observe ke ViewModel StateFlow
     val savings by viewModel.savings.collectAsState()
     val pockets by viewModel.pockets.collectAsState()
+    // Menangkap state jaringan dari ViewModel
+    val isLoading by viewModel.isLoading.collectAsState()
+    val errorMessage by viewModel.errorMessage.collectAsState()
 
     // Pass data dan event ke Stateless Component
     HalamanPocketSaving(
         savings = savings,
         pockets = pockets,
+        isLoading = isLoading, // Teruskan ke komponen stateless
+        errorMessage = errorMessage, // Teruskan ke komponen stateless
+        onClearError = { viewModel.clearErrorMessage() }, // Fungsi clear error
         onNavigateToTransaction = { backStack.add(Routes.TransactionRoute) },
         onNavigateToSavings = { backStack.add(Routes.SavingsRoute) },
         onNavigateToPockets = { backStack.add(Routes.PocketsRoute) },
@@ -55,13 +63,30 @@ fun PocketSavingScreen(viewModel: PocketSavingViewModel = koinViewModel()) {
 fun HalamanPocketSaving(
     savings: List<SavingGoal>,
     pockets: List<PocketBudget>,
+    isLoading: Boolean, 
+    errorMessage: String?, 
+    onClearError: () -> Unit, 
     onNavigateToTransaction: () -> Unit,
     onNavigateToSavings: () -> Unit,
     onNavigateToPockets: () -> Unit,
     onNavigateToAddPocketSaving: (Boolean) -> Unit,
     onBackClick: () -> Unit = {}
 ) {
+    // State untuk Snackbar Error
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // Pantau Error Message
+    LaunchedEffect(errorMessage) {
+        errorMessage?.let {
+            snackbarHostState.showSnackbar(
+                message = it,
+                duration = SnackbarDuration.Short
+            )
+            onClearError()
+        }
+    }
     Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }, // Pasang Snackbar
         topBar = {
             TopAppBar(
                 title = { Text("Kantong & Tabungan", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimary) },
@@ -83,99 +108,132 @@ fun HalamanPocketSaving(
             }
         }
     ) { paddingValues ->
-        LazyColumn(
+        // Bungkus dengan Box agar bisa meletakkan Loading Spinner di tengah (center)
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
-                .padding(paddingValues),
-            contentPadding = PaddingValues(16.dp)
         ) {
-            // Bagian Header Tabungan
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.background)
+                    .padding(paddingValues),
+                contentPadding = PaddingValues(16.dp)
+            ) {
+                // Bagian Header Tabungan
+                item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Progres Tabungan",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                        TextButton(onClick = onNavigateToSavings) {
+                            Text(
+                                text = ">",
+                                color = MaterialTheme.colorScheme.primary,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
                     Text(
-                        text = "Progres Tabungan",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp,
-                        color = MaterialTheme.colorScheme.onBackground
+                        text = "Pantau tujuan pemasukan Anda bulan ini.",
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
                     )
-                    TextButton(onClick = onNavigateToSavings) {
-                        Text(text = ">", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+
+                    OutlinedButton(
+                        onClick = { onNavigateToAddPocketSaving(true) },
+                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 16.dp),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Tambah Tabungan",
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(text = "Tambah/Ubah Tabungan")
                     }
                 }
-                Text(
-                    text = "Pantau tujuan pemasukan Anda bulan ini.",
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
-                )
 
-                OutlinedButton(
-                    onClick = { onNavigateToAddPocketSaving(true) },
-                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 16.dp),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Icon(imageVector = Icons.Default.Add, contentDescription = "Tambah Tabungan", modifier = Modifier.size(18.dp))
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = "Tambah/Ubah Tabungan")
+                // List Item Tabungan menggunakan data dari ViewModel
+                items(savings) { saving ->
+                    SavingCard(saving = saving)
+                    Spacer(modifier = Modifier.height(12.dp))
                 }
-            }
 
-            // List Item Tabungan menggunakan data dari ViewModel
-            items(savings) { saving ->
-                SavingCard(saving = saving)
-                Spacer(modifier = Modifier.height(12.dp))
-            }
-
-            // Bagian Header Kantong/Pengeluaran
-            item {
-                Spacer(modifier = Modifier.height(12.dp))
-                HorizontalDivider(color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.2f), thickness = 1.dp)
-                Spacer(modifier = Modifier.height(24.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Batas Pengeluaran (Kantong)",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp,
-                        color = MaterialTheme.colorScheme.onBackground
+                // Bagian Header Kantong/Pengeluaran
+                item {
+                    Spacer(modifier = Modifier.height(12.dp))
+                    HorizontalDivider(
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.2f),
+                        thickness = 1.dp
                     )
-                    TextButton(onClick = onNavigateToPockets) {
-                        Text(text = ">", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Batas Pengeluaran (Kantong)",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                        TextButton(onClick = onNavigateToPockets) {
+                            Text(
+                                text = ">",
+                                color = MaterialTheme.colorScheme.primary,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                    Text(
+                        text = "Pantau batas pengeluaran kategori Anda bulan ini.",
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+                    )
+
+                    OutlinedButton(
+                        onClick = { onNavigateToAddPocketSaving(false) },
+                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 16.dp),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Tambah Tabungan",
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(text = "Tambah/Ubah Kantong")
                     }
                 }
-                Text(
-                    text = "Pantau batas pengeluaran kategori Anda bulan ini.",
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
-                )
 
-                OutlinedButton(
-                    onClick = { onNavigateToAddPocketSaving(false) },
-                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 16.dp),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Icon(imageVector = Icons.Default.Add, contentDescription = "Tambah Tabungan", modifier = Modifier.size(18.dp))
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = "Tambah/Ubah Kantong")
+                // List Item Kantong menggunakan data dari ViewModel
+                items(pockets) { pocket ->
+                    PocketCard(pocket = pocket)
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
+
+                item {
+                    Spacer(modifier = Modifier.height(64.dp))
                 }
             }
-
-            // List Item Kantong menggunakan data dari ViewModel
-            items(pockets) { pocket ->
-                PocketCard(pocket = pocket)
-                Spacer(modifier = Modifier.height(12.dp))
-            }
-
-            item {
-                Spacer(modifier = Modifier.height(64.dp))
+            // Menampilkan loading spinner jika sedang request ke server
+            if (isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center),
+                    color = MaterialTheme.colorScheme.primary
+                )
             }
         }
     }
@@ -192,7 +250,10 @@ fun PocketSavingPreviewLight() {
             onBackClick = { },
             onNavigateToSavings = { },
             onNavigateToPockets = { },
-            onNavigateToAddPocketSaving = {  }
+            onNavigateToAddPocketSaving = {  },
+            isLoading = false,
+            errorMessage = null,
+            onClearError = {}
         )
     }
 }
@@ -208,7 +269,10 @@ fun PocketSavingPreviewDark() {
             onBackClick = { },
             onNavigateToSavings = { },
             onNavigateToPockets = { },
-            onNavigateToAddPocketSaving = {  }
+            onNavigateToAddPocketSaving = {  },
+            isLoading = false,
+            errorMessage = null,
+            onClearError = {}
         )
     }
 }

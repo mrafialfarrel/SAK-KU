@@ -1,9 +1,11 @@
 package uns.sakku.feature.pocket.data
 
+import android.util.Log
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import uns.sakku.feature.pocket.data.local.AllocationDao
 import uns.sakku.feature.pocket.data.local.AllocationEntity
+import uns.sakku.feature.pocket.data.remote.AllocationApiService
 import kotlin.Double
 
 // --- DATA LAYER: Models ---
@@ -22,7 +24,8 @@ data class AllocationItem(
 // Menggunakan object (Singleton) sebagai simulasi database agar data tetap tersinkronisasi
 // antara Main Screen dan Add Screen meskipun menggunakan ViewModel yang berbeda (jika belum pakai Hilt/Dagger).
 class PocketSavingRepository(
-    private val allocationDao: AllocationDao
+    private val allocationDao: AllocationDao,
+    private val apiService: AllocationApiService
 ) {
     // Konversi dari Flow<List<Entity>> ke Flow<List<Model UI>>
     val allocations: Flow<List<AllocationItem>> = allocationDao.getAllAllocations().map { entities ->
@@ -33,6 +36,31 @@ class PocketSavingRepository(
                 targetNominal = entity.targetNominal,
                 isTabungan = entity.isTabungan
             )
+        }
+    }
+
+    // --- FUNGSI SINKRONISASI API KE LOKAL ---
+
+    suspend fun syncAllocationsFromServer() {
+        try {
+            val response = apiService.getAllAllocations()
+
+            if (response.status == "success" && response.data != null) {
+                val entities = response.data.map { dto ->
+                    AllocationEntity(
+                        id = dto.id,
+                        nama = dto.nama,
+                        targetNominal = dto.targetNominal,
+                        isTabungan = dto.isTabungan
+                    )
+                }
+
+                entities.forEach { entity ->
+                    allocationDao.insertAllocation(entity)
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("PocketSavingRepo", "Gagal sinkronisasi data alokasi: ${e.message}")
         }
     }
 

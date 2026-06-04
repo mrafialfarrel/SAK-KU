@@ -61,7 +61,7 @@ class ReportViewModelTest {
 
     @Test
     fun `transaksi dikelompokkan dan dijumlahkan berdasarkan kategori dengan akurat`() = runTest {
-        // 1. Siapkan data transaksi dummy
+        // Siapkan data transaksi dummy
         // ID "1", "2", "3" akan bypass (melewati) pengecekan waktu berkat logika yang Anda buat di ViewModel
         val mockTransactions = listOf(
             TransactionItem("1", "Makan Siang", 50000.0, false, "Konsumsi", "Dompet"),
@@ -71,10 +71,10 @@ class ReportViewModelTest {
             TransactionItem("5", "Bonus", 1000000.0, true, "Gaji", "Bank")
         )
 
-        // 2. Pancarkan data ke repository tiruan
+        // Pancarkan data ke repository tiruan
         fakeTransactions.value = mockTransactions
 
-        // 3. Validasi perhitungan di ViewModel
+        // Validasi perhitungan di ViewModel
         viewModel.uiState.test {
             awaitItem() // Skip inisialisasi awal
 

@@ -3,6 +3,7 @@ package uns.sakku.feature.notification.data
 import UNS.sakku.R
 import android.content.Context
 import android.content.pm.PackageManager
+import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -12,6 +13,8 @@ import kotlinx.coroutines.flow.map
 import uns.sakku.core.data.SettingsRepository
 import uns.sakku.feature.notification.data.local.NotificationDao
 import uns.sakku.feature.notification.data.local.NotificationEntity
+import uns.sakku.feature.notification.data.remote.NotificationApiService
+import uns.sakku.feature.notification.data.remote.NotificationDto
 import uns.sakku.feature.notification.presentation.NotificationItem
 import uns.sakku.feature.notification.presentation.NotificationType
 import java.text.SimpleDateFormat
@@ -22,9 +25,10 @@ import java.util.Locale
 class NotificationRepository(
     private val notificationDao: NotificationDao,
     private val context: Context,
-    private val settingsRepository: SettingsRepository
+    private val settingsRepository: SettingsRepository,
+    private val apiService: NotificationApiService
 ) {
-    // 1. Membaca data secara reaktif dari Database (SSOT)
+    // Membaca data secara reaktif dari Database (SSOT)
     val notifications: Flow<List<NotificationItem>> = notificationDao.getAllNotifications().map { entities ->
         entities.map { entity ->
             NotificationItem(
@@ -38,7 +42,53 @@ class NotificationRepository(
         }
     }
 
-    // 2. Fungsi ini bisa dipanggil saat aplikasi dibuka, atau saat ada perubahan di Pocket/Transaction
+    // --- FUNGSI SINKRONISASI API ---
+
+    // Menarik notifikasi dari server (Bisa dipanggil di ViewModel saat aplikasi dibuka)
+    suspend fun syncNotificationsFromServer() {
+        try {
+            val response = apiService.getAllNotifications()
+            if (response.status == "success" && response.data != null) {
+                val entities = response.data.map { dto ->
+                    NotificationEntity(
+                        id = dto.id,
+                        title = dto.title,
+                        message = dto.message,
+                        timestamp = dto.timestamp,
+                        type = dto.type,
+                        isRead = dto.isRead
+                    )
+                }
+                // Simpan ke database lokal
+                entities.forEach { entity ->
+                    // Karena DAO menggunakan IGNORE, notifikasi yang sudah ada tidak akan me-reset isRead nya
+                    notificationDao.insertNotification(entity)
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("NotificationRepo", "Gagal mengambil notifikasi dari server: ${e.message}")
+        }
+    }
+
+    // Mem-backup notifikasi buatan lokal ke server
+    private suspend fun pushNotificationToServer(entity: NotificationEntity) {
+        try {
+            val dto = NotificationDto(
+                id = entity.id,
+                title = entity.title,
+                message = entity.message,
+                timestamp = entity.timestamp,
+                type = entity.type,
+                isRead = entity.isRead
+            )
+            apiService.pushNotification(dto)
+        } catch (e: Exception) {
+            Log.e("NotificationRepo", "Gagal mem-backup notifikasi ke server: ${e.message}")
+            // Jika gagal (misal tidak ada internet), tidak masalah karena sudah tersimpan di Room lokal.
+        }
+    }
+
+    // Fungsi ini bisa dipanggil saat aplikasi dibuka, atau saat ada perubahan di Pocket/Transaction
     suspend fun checkAndGeneratePocketNotifications(allocations: List<AllocationProgress>) {
         val isPushNotificationEnabled = settingsRepository.notificationFlow.first()
 
@@ -94,7 +144,7 @@ class NotificationRepository(
         }
     }
 
-    // 3. Fungsi untuk menandai notifikasi sudah dibaca dari UI (saat user klik)
+    // Fungsi untuk menandai notifikasi sudah dibaca dari UI (saat user klik)
     suspend fun markNotificationAsRead(notificationId: String) {
         notificationDao.markAsRead(notificationId)
     }

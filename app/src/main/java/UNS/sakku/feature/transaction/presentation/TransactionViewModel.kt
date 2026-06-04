@@ -14,7 +14,10 @@ import uns.sakku.feature.transaction.data.TransactionItem
 data class TransactionUiState(
     val transactions: List<TransactionItem> = emptyList(),
     val listKantong: List<String> = emptyList(),
-    val listTabungan: List<String> = emptyList()
+    val listTabungan: List<String> = emptyList(),
+    // State untuk network
+    val isLoading: Boolean = false,
+    val errorMessage: String? = null
 )
 
 class TransactionViewModel(
@@ -26,14 +29,14 @@ class TransactionViewModel(
     val uiState: StateFlow<TransactionUiState> = _uiState.asStateFlow()
 
     init {
-        // 1. Amati perubahan data Transaksi
+        // Amati perubahan data Transaksi
         viewModelScope.launch {
             transactionRepository.transaction.collect { list ->
                 _uiState.update { it.copy(transactions = list) }
             }
         }
 
-        // 2. Amati perubahan data Alokasi (Kantong & Tabungan)
+        // Amati perubahan data Alokasi (Kantong & Tabungan)
         viewModelScope.launch {
             pocketSavingRepository.allocations.collect { allocations ->
                 val tabunganNames = allocations.filter { it.isTabungan }.map { it.nama }
@@ -47,6 +50,27 @@ class TransactionViewModel(
                 }
             }
         }
+        // Panggil sinkronisasi API saat ViewModel pertama kali dibuat
+        syncData()
+    }
+
+    // --- FUNGSI SINKRONISASI ---
+    fun syncData() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+            try {
+                transactionRepository.syncTransactionsFromServer()
+            } catch (e: Exception) {
+                _uiState.update { it.copy(errorMessage = "Gagal memuat data: ${e.message}") }
+            } finally {
+                _uiState.update { it.copy(isLoading = false) }
+            }
+        }
+    }
+
+    // Fungsi untuk menghapus pesan error dari UI setelah ditampilkan
+    fun clearErrorMessage() {
+        _uiState.update { it.copy(errorMessage = null) }
     }
 
     // --- LOGIKA BISNIS (CRUD) DIKIRIM KE REPOSITORY ---

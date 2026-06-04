@@ -100,7 +100,7 @@ fun HalamanReport(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // 1. GRAFIK PEMASUKAN
+            // GRAFIK PEMASUKAN
             Text(text = "Grafik Pemasukan (${uiState.selectedFilter})", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = MaterialTheme.colorScheme.onBackground)
             Spacer(modifier = Modifier.height(16.dp))
             SimpleBarChart(
@@ -110,7 +110,7 @@ fun HalamanReport(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // 2. GRAFIK PENGELUARAN
+            // GRAFIK PENGELUARAN
             Text(text = "Grafik Pengeluaran (${uiState.selectedFilter})", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = MaterialTheme.colorScheme.onBackground)
             Spacer(modifier = Modifier.height(16.dp))
             SimpleBarChart(
@@ -162,7 +162,7 @@ fun ReportPreviewDark() {
 }
 
 // ==========================================
-// 1. Preview SimpleBarChart
+// Preview SimpleBarChart
 // ==========================================
 @Preview(showBackground = true, name = "Simple Bar Chart")
 @Composable
@@ -183,7 +183,7 @@ fun SimpleBarChartPreview() {
     }
 }
 // ==========================================
-// 2. Preview SummaryAndPercentage
+// Preview SummaryAndPercentage
 // ==========================================
 @Preview(showBackground = true, name = "Summary & Percentage (Normal)")
 @Composable
@@ -209,7 +209,7 @@ fun SummaryAndPercentagePreview_Empty() {
 }
 
 // ==========================================
-// 3. Preview ExpenseCategoryBreakdown
+// Preview ExpenseCategoryBreakdown
 // ==========================================
 @Preview(showBackground = true, name = "Expense Breakdown (Ada Data)")
 @Composable

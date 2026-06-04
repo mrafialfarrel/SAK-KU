@@ -109,7 +109,7 @@ fun SimpleBarChart(dataPoints: List<BarData>, barColor: Color = MaterialTheme.co
                             .fillMaxHeight(),
                         contentAlignment = Alignment.BottomCenter
                     ) {
-                        // 1. Batang Utama
+                        // Batang Utama
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth(0.7f) // Memberikan margin 30% antar batang agar tidak berdempetan
@@ -132,7 +132,7 @@ fun SimpleBarChart(dataPoints: List<BarData>, barColor: Color = MaterialTheme.co
                             }
                         }
 
-                        // 2. Teks nilai nominal tertinggi diletakkan di atas puncaknya
+                        // Teks nilai nominal tertinggi diletakkan di atas puncaknya
                         if (point.amount > 0 && animHeight > 0.01f) {
                             Box(
                                 modifier = Modifier
