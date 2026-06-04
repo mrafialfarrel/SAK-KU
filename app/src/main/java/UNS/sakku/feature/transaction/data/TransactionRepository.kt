@@ -2,11 +2,11 @@ package uns.sakku.feature.transaction.data
 
 import android.util.Log
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.forEach
 import kotlinx.coroutines.flow.map
 import uns.sakku.feature.transaction.data.local.TransactionDao
 import uns.sakku.feature.transaction.data.local.TransactionEntity
 import uns.sakku.feature.transaction.data.remote.TransactionApiService
+import uns.sakku.feature.transaction.data.remote.TransactionDto
 
 data class TransactionItem(
     val id: String,
@@ -82,43 +82,63 @@ class TransactionRepository (
     }
 
 
+    // --- IMPLEMENTASI CREATE, UPDATE, DELETE (CUD) ---
+
     suspend fun addTransaction(item: TransactionItem) {
+        // Simpan ke Lokal (Room) -> UI langsung terupdate
         val entity = TransactionEntity(
-            item.id,
-            item.keterangan,
-            item.nominal,
-            item.isPemasukan,
-            item.kategori,
-            item.alokasiId,
-            item.tanggal
+            item.id, item.keterangan, item.nominal, item.isPemasukan, item.kategori, item.alokasiId, item.tanggal
         )
         transactionDao.insertTransaction(entity)
+
+        // Kirim ke Server (Retrofit)
+        try {
+            val dto = TransactionDto(
+                id = item.id, keterangan = item.keterangan, nominal = item.nominal,
+                isPemasukan = item.isPemasukan, kategori = item.kategori, alokasiId = item.alokasiId, tanggal = item.tanggal
+            )
+            apiService.createTransaction(dto)
+        } catch (e: Exception) {
+            Log.e("TransactionRepo", "Gagal mengirim POST ke server: ${e.message}")
+        }
     }
 
     suspend fun updateTransaction(item: TransactionItem) {
+        // Update di Lokal
         val entity = TransactionEntity(
-            item.id,
-            item.keterangan,
-            item.nominal,
-            item.isPemasukan,
-            item.kategori,
-            item.alokasiId,
-            item.tanggal
+            item.id, item.keterangan, item.nominal, item.isPemasukan, item.kategori, item.alokasiId, item.tanggal
         )
         transactionDao.updateTransaction(entity)
+
+        // Update ke Server
+        try {
+            val dto = TransactionDto(
+                id = item.id,
+                keterangan = item.keterangan,
+                nominal = item.nominal,
+                isPemasukan = item.isPemasukan,
+                kategori = item.kategori,
+                alokasiId = item.alokasiId,
+                tanggal = item.tanggal
+            )
+            apiService.updateTransaction(item.id, dto) // Mengirim ID dan Body
+        } catch (e: Exception) {
+            Log.e("TransactionRepo", "Gagal mengirim PUT ke server: ${e.message}")
+        }
     }
 
-
     suspend fun deleteTransaction(item: TransactionItem) {
+        // Hapus dari Lokal
         val entity = TransactionEntity(
-            item.id,
-            item.keterangan,
-            item.nominal,
-            item.isPemasukan,
-            item.kategori,
-            item.alokasiId,
-            item.tanggal
+            item.id, item.keterangan, item.nominal, item.isPemasukan, item.kategori, item.alokasiId, item.tanggal
         )
         transactionDao.deleteTransaction(entity)
+
+        // Hapus dari Server
+        try {
+            apiService.deleteTransaction(item.id) // Cukup mengirimkan ID
+        } catch (e: Exception) {
+            Log.e("TransactionRepo", "Gagal mengirim DELETE ke server: ${e.message}")
+        }
     }
 }

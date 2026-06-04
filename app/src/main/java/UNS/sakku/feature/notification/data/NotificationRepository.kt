@@ -117,6 +117,8 @@ class NotificationRepository(
                 // Munculkan Push Notification HANYA JIKA ini data baru DAN setting notifikasi menyala
                 if (result != -1L && isPushNotificationEnabled) {
                     showSystemNotification(entity.title, entity.message, entity.id.hashCode())
+                    // Backup Notif ke Server
+                    pushNotificationToServer(entity)
                 }
             }
 
@@ -139,6 +141,8 @@ class NotificationRepository(
 
                 if (result != -1L && isPushNotificationEnabled) {
                     showSystemNotification(entity.title, entity.message, entity.id.hashCode())
+                    // Backup Notif ke Server
+                    pushNotificationToServer(entity)
                 }
             }
         }
@@ -146,7 +150,15 @@ class NotificationRepository(
 
     // Fungsi untuk menandai notifikasi sudah dibaca dari UI (saat user klik)
     suspend fun markNotificationAsRead(notificationId: String) {
+        // Update di lokal agar UI responsif (Optimistic Update)
         notificationDao.markAsRead(notificationId)
+
+        // Beri tahu server bahwa notifikasi ini sudah dibaca
+        try {
+            apiService.markAsRead(notificationId)
+        } catch (e: Exception) {
+            Log.e("NotificationRepo", "Gagal update status read ke server: ${e.message}")
+        }
     }
 
     // Helper: Mengubah timestamp (Long) dari database menjadi String yang mudah dibaca di UI

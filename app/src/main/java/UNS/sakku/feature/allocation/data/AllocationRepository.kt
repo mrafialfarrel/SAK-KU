@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.map
 import uns.sakku.feature.pocket.data.local.AllocationDao
 import uns.sakku.feature.pocket.data.local.AllocationEntity
 import uns.sakku.feature.pocket.data.remote.AllocationApiService
+import uns.sakku.feature.pocket.data.remote.AllocationDto
 import kotlin.Double
 
 // --- DATA LAYER: Models ---
@@ -65,34 +66,45 @@ class PocketSavingRepository(
     }
 
 
-    // Fungsi CRUD sekarang dipanggil menggunakan suspend (karena I/O operation)
+    // --- IMPLEMENTASI CREATE, UPDATE, DELETE (CUD) ---
+
     suspend fun addAllocation(item: AllocationItem) {
-        val entity = AllocationEntity(
-            item.id,
-            item.nama,
-            item.targetNominal,
-            item.isTabungan
-        )
+        val entity = AllocationEntity(item.id, item.nama, item.targetNominal, item.isTabungan)
         allocationDao.insertAllocation(entity)
+
+        try {
+            val dto = AllocationDto(id = item.id, nama = item.nama, targetNominal = item.targetNominal, isTabungan = item.isTabungan)
+            apiService.createAllocation(dto)
+        } catch (e: Exception) {
+            Log.e("PocketSavingRepo", "Gagal mengirim POST alokasi: ${e.message}")
+        }
     }
 
     suspend fun updateAllocation(item: AllocationItem) {
-        val entity = AllocationEntity(
-            item.id,
-            item.nama,
-            item.targetNominal,
-            item.isTabungan
-        )
+        val entity = AllocationEntity(item.id, item.nama, item.targetNominal, item.isTabungan)
         allocationDao.updateAllocation(entity)
+
+        try {
+            val dto = AllocationDto(
+                id = item.id,
+                nama = item.nama,
+                targetNominal = item.targetNominal,
+                isTabungan = item.isTabungan
+            )
+            apiService.updateAllocation(item.id, dto)
+        } catch (e: Exception) {
+            Log.e("PocketSavingRepo", "Gagal mengirim PUT alokasi: ${e.message}")
+        }
     }
 
     suspend fun deleteAllocation(item: AllocationItem) {
-        val entity = AllocationEntity(
-            item.id,
-            item.nama,
-            item.targetNominal,
-            item.isTabungan
-        )
+        val entity = AllocationEntity(item.id, item.nama, item.targetNominal, item.isTabungan)
         allocationDao.deleteAllocation(entity)
+
+        try {
+            apiService.deleteAllocation(item.id)
+        } catch (e: Exception) {
+            Log.e("PocketSavingRepo", "Gagal mengirim DELETE alokasi: ${e.message}")
+        }
     }
 }
