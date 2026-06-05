@@ -11,10 +11,10 @@ import uns.sakku.feature.auth.presentation.AuthScreen
 import uns.sakku.feature.dashboard.presentation.DashboardScreen
 import uns.sakku.feature.export.presentation.ExportScreen
 import uns.sakku.feature.notification.presentation.NotificationScreen
-import uns.sakku.feature.pocket.presentation.AddPocketSavingScreen
-import uns.sakku.feature.pocket.presentation.PocketSavingScreen
-import uns.sakku.feature.pocket.presentation.PocketsScreen
-import uns.sakku.feature.pocket.presentation.SavingsScreen
+import UNS.sakku.feature.allocation.presentation.AddAllocationScreen
+import UNS.sakku.feature.allocation.presentation.AllocationScreen
+import UNS.sakku.feature.allocation.presentation.PocketsScreen
+import UNS.sakku.feature.allocation.presentation.SavingsScreen
 import uns.sakku.feature.report.presentation.ReportScreen
 import uns.sakku.feature.transaction.presentation.TransactionScreen
 
@@ -45,12 +45,12 @@ fun ComposeApp() {
                     entry<Routes.ReportRoute> { ReportScreen() }
                     entry<Routes.NotificationRoute> { NotificationScreen() }
                     entry<Routes.ExportRoute> { ExportScreen() }
-                    entry<Routes.PocketSavingRoute> { PocketSavingScreen() }
-//                    Rute PocketSavingScreen
+                    entry<Routes.AllocationRoute> { AllocationScreen() }
+//                    Rute AllocationScreen
                     entry<Routes.SavingsRoute> { SavingsScreen() }
                     entry<Routes.PocketsRoute> { PocketsScreen() }
-                    entry<Routes.AddPocketSavingRoute> { route ->
-                        AddPocketSavingScreen(initialIsTabungan = route.initialIsTabungan)
+                    entry<Routes.AddAllocationRoute> { route ->
+                        AddAllocationScreen(initialIsTabungan = route.initialIsTabungan)
                     }
                 }
             )

@@ -13,9 +13,9 @@ import uns.sakku.feature.dashboard.presentation.DashboardViewModel
 import uns.sakku.feature.export.presentation.ExportViewModel
 import uns.sakku.feature.notification.data.NotificationRepository
 import uns.sakku.feature.notification.presentation.NotificationViewModel
-import uns.sakku.feature.pocket.data.PocketSavingRepository
-import uns.sakku.feature.pocket.data.remote.AllocationApiService
-import uns.sakku.feature.pocket.presentation.PocketSavingViewModel
+import UNS.sakku.feature.allocation.data.AllocationRepository
+import UNS.sakku.feature.allocation.data.remote.AllocationApiService
+import UNS.sakku.feature.allocation.presentation.AllocationViewModel
 import uns.sakku.feature.report.presentation.ReportViewModel
 import uns.sakku.feature.transaction.data.TransactionRepository
 import uns.sakku.feature.transaction.data.remote.TransactionApiService
@@ -51,7 +51,7 @@ val appModule = module {
     single { AuthRepository(androidContext()) }
     single { NotificationRepository(get(), androidContext(), get(),get()) }
     single { TransactionRepository(get(),get()) }
-    single { PocketSavingRepository(get(),get()) }
+    single { AllocationRepository(get(),get()) }
     single { SettingsRepository(androidContext()) }
 
     // ViewModel
@@ -60,7 +60,7 @@ val appModule = module {
     viewModel { DashboardViewModel(get(), get(), get()) }
     viewModel { NotificationViewModel(get()) }
     viewModel { ExportViewModel(get()) }
-    viewModel { PocketSavingViewModel(get(), get(), get()) }
+    viewModel { AllocationViewModel(get(), get(), get()) }
     viewModel { ReportViewModel(get()) }
     viewModel { TransactionViewModel(get(), get()) }
 }

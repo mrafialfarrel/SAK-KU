@@ -23,7 +23,7 @@ object Routes {
     data object NotificationRoute : NavKey
 
     @Serializable
-    data object PocketSavingRoute : NavKey
+    data object AllocationRoute : NavKey
 
     @Serializable
     data object SavingsRoute : NavKey
@@ -31,7 +31,7 @@ object Routes {
     @Serializable
     data object PocketsRoute : NavKey
     @Serializable
-    data class AddPocketSavingRoute(val initialIsTabungan: Boolean) : NavKey
+    data class AddAllocationRoute(val initialIsTabungan: Boolean) : NavKey
     @Serializable
     data object ExportRoute : NavKey
 

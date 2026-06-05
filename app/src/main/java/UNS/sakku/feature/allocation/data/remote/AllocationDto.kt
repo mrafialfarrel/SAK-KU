@@ -1,4 +1,4 @@
-package uns.sakku.feature.pocket.data.remote
+package UNS.sakku.feature.allocation.data.remote
 
 import com.google.gson.annotations.SerializedName
 

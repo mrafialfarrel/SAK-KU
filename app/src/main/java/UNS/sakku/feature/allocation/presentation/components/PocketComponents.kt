@@ -1,4 +1,4 @@
-package uns.sakku.feature.pocket.presentation.components
+package UNS.sakku.feature.allocation.presentation.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -15,8 +15,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import uns.sakku.ui.theme.ExpenseRed
 import uns.sakku.ui.theme.IncomeGreen
-import uns.sakku.feature.pocket.data.SavingGoal
-import uns.sakku.feature.pocket.data.PocketBudget
+import UNS.sakku.feature.allocation.data.SavingGoal
+import UNS.sakku.feature.allocation.data.PocketBudget
 
 // UI Layer: Stateless Components
 @Composable

@@ -13,8 +13,8 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import uns.sakku.feature.auth.MainDispatcherRule
-import uns.sakku.feature.pocket.data.AllocationItem
-import uns.sakku.feature.pocket.data.PocketSavingRepository
+import UNS.sakku.feature.allocation.data.AllocationItem
+import UNS.sakku.feature.allocation.data.AllocationRepository
 import uns.sakku.feature.transaction.data.TransactionRepository
 
 class TransactionViewModelTest {
@@ -34,11 +34,11 @@ class TransactionViewModelTest {
     fun setUp() {
         // Mock kedua Repository Singleton
         mockkObject(TransactionRepository)
-        mockkObject(PocketSavingRepository)
+        mockkObject(AllocationRepository)
 
         // Alihkan data flow asli ke fake flow kita
         every { TransactionRepository.transactions } returns fakeTransactions
-        every { PocketSavingRepository.allocations } returns fakeAllocations
+        every { AllocationRepository.allocations } returns fakeAllocations
 
         // Mock fungsi CRUD agar tidak benar-benar mengeksekusi kode aslinya (Unit Test murni)
         every { TransactionRepository.addTransaction(any()) } answers { }

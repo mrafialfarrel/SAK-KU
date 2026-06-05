@@ -1,4 +1,4 @@
-package uns.sakku.feature.pocket.presentation
+package UNS.sakku.feature.pocket.presentation
 
 import app.cash.turbine.test
 import io.mockk.every
@@ -13,17 +13,19 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import uns.sakku.feature.auth.MainDispatcherRule // Sesuaikan package jika berbeda
-import uns.sakku.feature.pocket.data.AllocationItem
-import uns.sakku.feature.pocket.data.PocketSavingRepository
+import UNS.sakku.feature.allocation.data.AllocationItem
+import UNS.sakku.feature.allocation.data.AllocationRepository
+import UNS.sakku.feature.allocation.presentation.AllocationViewModel
+import uns.sakku.feature.transaction.data.TransactionItem
 import uns.sakku.feature.transaction.data.TransactionRepository
 import uns.sakku.feature.transaction.presentation.TransactionItem
 
-class PocketSavingViewModelTest {
+class AllocationViewModelTest {
 
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
-    private lateinit var viewModel: PocketSavingViewModel
+    private lateinit var viewModel: AllocationViewModel
 
     // StateFlow tiruan (dummy)
     private val fakeAllocations = MutableStateFlow<List<AllocationItem>>(emptyList())
@@ -31,18 +33,18 @@ class PocketSavingViewModelTest {
 
     @Before
     fun setUp() {
-        mockkObject(PocketSavingRepository)
+        mockkObject(AllocationRepository)
         mockkObject(TransactionRepository)
 
-        every { PocketSavingRepository.allocations } returns fakeAllocations
+        every { AllocationRepository.allocations } returns fakeAllocations
         every { TransactionRepository.transactions } returns fakeTransactions
 
         // Mock fungsi CRUD delegasi
-        every { PocketSavingRepository.addAllocation(any()) } answers { }
-        every { PocketSavingRepository.updateAllocation(any()) } answers { }
-        every { PocketSavingRepository.deleteAllocation(any()) } answers { }
+        every { AllocationRepository.addAllocation(any()) } answers { }
+        every { AllocationRepository.updateAllocation(any()) } answers { }
+        every { AllocationRepository.deleteAllocation(any()) } answers { }
 
-        viewModel = PocketSavingViewModel()
+        viewModel = AllocationViewModel()
     }
 
     @After
@@ -122,11 +124,11 @@ class PocketSavingViewModelTest {
     }
 
     @Test
-    fun `addAllocation mendelegasikan ke PocketSavingRepository`() {
+    fun `addAllocation mendelegasikan ke AllocationRepository`() {
         val item = AllocationItem("1", "Test", 100.0, true)
 
         viewModel.addAllocation(item)
 
-        verify(exactly = 1) { PocketSavingRepository.addAllocation(item) }
+        verify(exactly = 1) { AllocationRepository.addAllocation(item) }
     }
 }

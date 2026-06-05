@@ -1,4 +1,4 @@
-package uns.sakku.feature.pocket.data.local
+package UNS.sakku.feature.allocation.data.local
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

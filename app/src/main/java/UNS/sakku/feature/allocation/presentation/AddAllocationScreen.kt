@@ -1,4 +1,4 @@
-package uns.sakku.feature.pocket.presentation
+package UNS.sakku.feature.allocation.presentation
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
@@ -28,14 +28,14 @@ import uns.sakku.ui.theme.IncomeGreen
 import uns.sakku.ui.theme.ExpenseRed
 import uns.sakku.core.LocalBackStack
 import uns.sakku.core.utils.formatRupiah
-import uns.sakku.feature.pocket.data.AllocationItem
+import UNS.sakku.feature.allocation.data.AllocationItem
 import uns.sakku.ui.theme.ThemeMode
 
 // UI Layer: Stateful Composable
 @Composable
-fun AddPocketSavingScreen(
+fun AddAllocationScreen(
     initialIsTabungan: Boolean = true,
-    viewModel: PocketSavingViewModel = koinViewModel()
+    viewModel: AllocationViewModel = koinViewModel()
 ) {
     val backStack = LocalBackStack.current
 
@@ -43,7 +43,7 @@ fun AddPocketSavingScreen(
     val allocations by viewModel.allocations.collectAsState()
 
     // Pass data dan handler logic ke Stateless Component
-    HalamanAddPocketSaving(
+    HalamanAddAllocation(
         initialIsTabungan = initialIsTabungan,
         allocations = allocations,
         onAddAllocation = { viewModel.addAllocation(it) },
@@ -56,7 +56,7 @@ fun AddPocketSavingScreen(
 // UI Layer: Stateless Composable
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HalamanAddPocketSaving(
+fun HalamanAddAllocation(
     initialIsTabungan: Boolean = true,
     allocations: List<AllocationItem>,
     onAddAllocation: (AllocationItem) -> Unit,
@@ -342,7 +342,7 @@ fun HalamanAddPocketSaving(
 @Composable
 fun PreviewAddScreen() {
     FinanceAppTheme {
-        HalamanAddPocketSaving(
+        HalamanAddAllocation(
             allocations = emptyList(),
             onAddAllocation = {},
             onUpdateAllocation = {},
@@ -355,7 +355,7 @@ fun PreviewAddScreen() {
 @Composable
 fun PreviewAddScreenDark() {
     FinanceAppTheme(ThemeMode.DARK) {
-        HalamanAddPocketSaving(
+        HalamanAddAllocation(
             allocations = emptyList(),
             onAddAllocation = {},
             onUpdateAllocation = {},

@@ -1,4 +1,4 @@
-package uns.sakku.feature.pocket.presentation
+package UNS.sakku.feature.allocation.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,15 +12,15 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import uns.sakku.feature.notification.data.AllocationProgress
 import uns.sakku.feature.notification.data.NotificationRepository
-import uns.sakku.feature.pocket.data.AllocationItem
-import uns.sakku.feature.pocket.data.PocketBudget
-import uns.sakku.feature.pocket.data.PocketSavingRepository
-import uns.sakku.feature.pocket.data.SavingGoal
+import UNS.sakku.feature.allocation.data.AllocationItem
+import UNS.sakku.feature.allocation.data.PocketBudget
+import UNS.sakku.feature.allocation.data.AllocationRepository
+import UNS.sakku.feature.allocation.data.SavingGoal
 import uns.sakku.feature.transaction.data.TransactionRepository
 
 // --- VM LAYER: ViewModel ---
-class PocketSavingViewModel(
-    private val pocketSavingRepository: PocketSavingRepository,
+class AllocationViewModel(
+    private val allocationRepository: AllocationRepository,
     private val transactionRepository: TransactionRepository,
     private val notificationRepository: NotificationRepository
 ) : ViewModel() {
@@ -35,7 +35,7 @@ class PocketSavingViewModel(
 
     // Sumber data utama dari Alokasi (Kantong/Tabungan)
     // Perbaikan: Mengubah Flow biasa dari Repository menjadi StateFlow untuk UI
-    val allocations: StateFlow<List<AllocationItem>> = pocketSavingRepository.allocations
+    val allocations: StateFlow<List<AllocationItem>> = allocationRepository.allocations
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
@@ -46,7 +46,7 @@ class PocketSavingViewModel(
      * Mengkalkulasi uang terkumpul berdasarkan history Transaksi Pemasukan
      */
     val savings: StateFlow<List<SavingGoal>> = combine(
-        pocketSavingRepository.allocations,
+        allocationRepository.allocations,
         transactionRepository.transaction
     ) { allocationsList, transactionsList ->
 
@@ -79,7 +79,7 @@ class PocketSavingViewModel(
      * Mengkalkulasi uang terpakai berdasarkan history Transaksi Pengeluaran
      */
     val pockets: StateFlow<List<PocketBudget>> = combine(
-        pocketSavingRepository.allocations,
+        allocationRepository.allocations,
         transactionRepository.transaction
     ) { allocationsList, transactionsList ->
 
@@ -107,7 +107,7 @@ class PocketSavingViewModel(
     )
 
     val allocationProgress: StateFlow<List<AllocationProgress>> = combine(
-        pocketSavingRepository.allocations,
+        allocationRepository.allocations,
         transactionRepository.transaction
     ) { allocationsList, transactionsList ->
         allocationsList.map { allocation ->
@@ -154,7 +154,7 @@ class PocketSavingViewModel(
             _isLoading.value = true
             _errorMessage.value = null
             try {
-                pocketSavingRepository.syncAllocationsFromServer()
+                allocationRepository.syncAllocationsFromServer()
             } catch (e: Exception) {
                 _errorMessage.value = "Gagal memuat data alokasi: ${e.message}"
             } finally {
@@ -170,19 +170,19 @@ class PocketSavingViewModel(
 
     fun addAllocation(item: AllocationItem) {
         viewModelScope.launch {
-            pocketSavingRepository.addAllocation(item)
+            allocationRepository.addAllocation(item)
         }
     }
 
     fun updateAllocation(item: AllocationItem) {
         viewModelScope.launch {
-            pocketSavingRepository.updateAllocation(item)
+            allocationRepository.updateAllocation(item)
         }
     }
 
     fun deleteAllocation(item: AllocationItem) {
         viewModelScope.launch {
-            pocketSavingRepository.deleteAllocation(item)
+            allocationRepository.deleteAllocation(item)
         }
     }
 }

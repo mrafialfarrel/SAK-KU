@@ -1,4 +1,4 @@
-package uns.sakku.feature.pocket.presentation
+package UNS.sakku.feature.allocation.presentation
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -25,14 +25,14 @@ import org.koin.androidx.compose.koinViewModel
 import uns.sakku.ui.theme.FinanceAppTheme
 import uns.sakku.core.LocalBackStack
 import uns.sakku.core.Routes
-import uns.sakku.feature.pocket.data.PocketBudget
-import uns.sakku.feature.pocket.data.SavingGoal
-import uns.sakku.feature.pocket.presentation.components.PocketCard
-import uns.sakku.feature.pocket.presentation.components.SavingCard
+import UNS.sakku.feature.allocation.data.PocketBudget
+import UNS.sakku.feature.allocation.data.SavingGoal
+import UNS.sakku.feature.allocation.presentation.components.PocketCard
+import UNS.sakku.feature.allocation.presentation.components.SavingCard
 import uns.sakku.ui.theme.ThemeMode
 // UI Layer: Stateful Composable
 @Composable
-fun PocketSavingScreen(viewModel: PocketSavingViewModel = koinViewModel()) {
+fun AllocationScreen(viewModel: AllocationViewModel = koinViewModel()) {
     val backStack = LocalBackStack.current
 
     // Objek UI tidak mengurus data mentah, ia observe ke ViewModel StateFlow
@@ -43,7 +43,7 @@ fun PocketSavingScreen(viewModel: PocketSavingViewModel = koinViewModel()) {
     val errorMessage by viewModel.errorMessage.collectAsState()
 
     // Pass data dan event ke Stateless Component
-    HalamanPocketSaving(
+    HalamanAllocation(
         savings = savings,
         pockets = pockets,
         isLoading = isLoading, // Teruskan ke komponen stateless
@@ -52,7 +52,7 @@ fun PocketSavingScreen(viewModel: PocketSavingViewModel = koinViewModel()) {
         onNavigateToTransaction = { backStack.add(Routes.TransactionRoute) },
         onNavigateToSavings = { backStack.add(Routes.SavingsRoute) },
         onNavigateToPockets = { backStack.add(Routes.PocketsRoute) },
-        onNavigateToAddPocketSaving = { isTabungan -> backStack.add(Routes.AddPocketSavingRoute(initialIsTabungan = isTabungan)) },
+        onNavigateToAddAllocation = { isTabungan -> backStack.add(Routes.AddAllocationRoute(initialIsTabungan = isTabungan)) },
         onBackClick = { backStack.removeLastOrNull() }
     )
 }
@@ -60,16 +60,16 @@ fun PocketSavingScreen(viewModel: PocketSavingViewModel = koinViewModel()) {
 // UI Layer: Stateless Composable
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HalamanPocketSaving(
+fun HalamanAllocation(
     savings: List<SavingGoal>,
     pockets: List<PocketBudget>,
-    isLoading: Boolean, 
-    errorMessage: String?, 
-    onClearError: () -> Unit, 
+    isLoading: Boolean,
+    errorMessage: String?,
+    onClearError: () -> Unit,
     onNavigateToTransaction: () -> Unit,
     onNavigateToSavings: () -> Unit,
     onNavigateToPockets: () -> Unit,
-    onNavigateToAddPocketSaving: (Boolean) -> Unit,
+    onNavigateToAddAllocation: (Boolean) -> Unit,
     onBackClick: () -> Unit = {}
 ) {
     // State untuk Snackbar Error
@@ -149,7 +149,7 @@ fun HalamanPocketSaving(
                     )
 
                     OutlinedButton(
-                        onClick = { onNavigateToAddPocketSaving(true) },
+                        onClick = { onNavigateToAddAllocation(true) },
                         modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 16.dp),
                         shape = RoundedCornerShape(12.dp)
                     ) {
@@ -204,7 +204,7 @@ fun HalamanPocketSaving(
                     )
 
                     OutlinedButton(
-                        onClick = { onNavigateToAddPocketSaving(false) },
+                        onClick = { onNavigateToAddAllocation(false) },
                         modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 16.dp),
                         shape = RoundedCornerShape(12.dp)
                     ) {
@@ -241,16 +241,16 @@ fun HalamanPocketSaving(
 
 @Preview(showBackground = true, name = "Light Mode")
 @Composable
-fun PocketSavingPreviewLight() {
+fun AllocationPreviewLight() {
     FinanceAppTheme(ThemeMode.LIGHT) {
-        HalamanPocketSaving(
+        HalamanAllocation(
             savings = emptyList(),
             pockets = emptyList(),
             onNavigateToTransaction = { },
             onBackClick = { },
             onNavigateToSavings = { },
             onNavigateToPockets = { },
-            onNavigateToAddPocketSaving = {  },
+            onNavigateToAddAllocation = {  },
             isLoading = false,
             errorMessage = null,
             onClearError = {}
@@ -260,16 +260,16 @@ fun PocketSavingPreviewLight() {
 
 @Preview(showBackground = true, name = "Light Mode")
 @Composable
-fun PocketSavingPreviewDark() {
+fun AllocationPreviewDark() {
     FinanceAppTheme(ThemeMode.DARK) {
-        HalamanPocketSaving(
+        HalamanAllocation(
             savings = emptyList(),
             pockets = emptyList(),
             onNavigateToTransaction = { },
             onBackClick = { },
             onNavigateToSavings = { },
             onNavigateToPockets = { },
-            onNavigateToAddPocketSaving = {  },
+            onNavigateToAddAllocation = {  },
             isLoading = false,
             errorMessage = null,
             onClearError = {}

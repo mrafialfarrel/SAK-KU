@@ -6,8 +6,8 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import uns.sakku.feature.notification.data.local.NotificationDao
 import uns.sakku.feature.notification.data.local.NotificationEntity
-import uns.sakku.feature.pocket.data.local.AllocationDao
-import uns.sakku.feature.pocket.data.local.AllocationEntity
+import UNS.sakku.feature.allocation.data.local.AllocationDao
+import UNS.sakku.feature.allocation.data.local.AllocationEntity
 import uns.sakku.feature.transaction.data.local.TransactionDao
 import uns.sakku.feature.transaction.data.local.TransactionEntity
 

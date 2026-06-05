@@ -1,12 +1,12 @@
-package uns.sakku.feature.pocket.data
+package UNS.sakku.feature.allocation.data
 
 import android.util.Log
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import uns.sakku.feature.pocket.data.local.AllocationDao
-import uns.sakku.feature.pocket.data.local.AllocationEntity
-import uns.sakku.feature.pocket.data.remote.AllocationApiService
-import uns.sakku.feature.pocket.data.remote.AllocationDto
+import UNS.sakku.feature.allocation.data.local.AllocationDao
+import UNS.sakku.feature.allocation.data.local.AllocationEntity
+import UNS.sakku.feature.allocation.data.remote.AllocationApiService
+import UNS.sakku.feature.allocation.data.remote.AllocationDto
 import kotlin.Double
 
 // --- DATA LAYER: Models ---
@@ -24,7 +24,7 @@ data class AllocationItem(
 // --- DATA LAYER: Repository ---
 // Menggunakan object (Singleton) sebagai simulasi database agar data tetap tersinkronisasi
 // antara Main Screen dan Add Screen meskipun menggunakan ViewModel yang berbeda (jika belum pakai Hilt/Dagger).
-class PocketSavingRepository(
+class AllocationRepository(
     private val allocationDao: AllocationDao,
     private val apiService: AllocationApiService
 ) {
@@ -61,7 +61,7 @@ class PocketSavingRepository(
                 }
             }
         } catch (e: Exception) {
-            Log.e("PocketSavingRepo", "Gagal sinkronisasi data alokasi: ${e.message}")
+            Log.e("AllocationRepo", "Gagal sinkronisasi data alokasi: ${e.message}")
         }
     }
 
@@ -76,7 +76,7 @@ class PocketSavingRepository(
             val dto = AllocationDto(id = item.id, nama = item.nama, targetNominal = item.targetNominal, isTabungan = item.isTabungan)
             apiService.createAllocation(dto)
         } catch (e: Exception) {
-            Log.e("PocketSavingRepo", "Gagal mengirim POST alokasi: ${e.message}")
+            Log.e("AllocationRepo", "Gagal mengirim POST alokasi: ${e.message}")
         }
     }
 
@@ -93,7 +93,7 @@ class PocketSavingRepository(
             )
             apiService.updateAllocation(item.id, dto)
         } catch (e: Exception) {
-            Log.e("PocketSavingRepo", "Gagal mengirim PUT alokasi: ${e.message}")
+            Log.e("AllocationRepo", "Gagal mengirim PUT alokasi: ${e.message}")
         }
     }
 
@@ -104,7 +104,7 @@ class PocketSavingRepository(
         try {
             apiService.deleteAllocation(item.id)
         } catch (e: Exception) {
-            Log.e("PocketSavingRepo", "Gagal mengirim DELETE alokasi: ${e.message}")
+            Log.e("AllocationRepo", "Gagal mengirim DELETE alokasi: ${e.message}")
         }
     }
 }

@@ -37,7 +37,6 @@ import uns.sakku.feature.dashboard.presentation.components.SettingsDialog
 import uns.sakku.feature.transaction.data.TransactionItem // Tambahkan import TransactionItem
 import uns.sakku.feature.transaction.presentation.components.TransactionCard
 import uns.sakku.ui.theme.ThemeMode
-import kotlin.collections.List
 
 /**
  * Stateful Composable:
@@ -57,7 +56,7 @@ fun DashboardScreen(
         uiState = uiState,
         onNavigateToLogin = { backStack.add(Routes.AuthRoute) },
         onNavigateToNotification = { backStack.add(Routes.NotificationRoute) },
-        onNavigateToPocket = { backStack.add(Routes.PocketSavingRoute) },
+        onNavigateToPocket = { backStack.add(Routes.AllocationRoute) },
         onNavigateToReport = { backStack.add(Routes.ReportRoute) },
         onSettingsClick = { viewModel.setShowSettingsDialog(true) },
         onThemeSelected = { viewModel.setThemeMode(it) },
@@ -209,7 +208,7 @@ fun HalamanDashboard(
             ) {
                 QuickMenuButton(
                     icon = Icons.Default.AccountBalanceWallet,
-                    title = "Kantong",
+                    title = "Alokasi",
                     onClick = onNavigateToPocket
                 )
                 QuickMenuButton(

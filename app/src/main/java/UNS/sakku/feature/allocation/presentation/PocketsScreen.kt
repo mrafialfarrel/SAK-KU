@@ -1,4 +1,4 @@
-package uns.sakku.feature.pocket.presentation
+package UNS.sakku.feature.allocation.presentation
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -20,12 +20,12 @@ import org.koin.androidx.compose.koinViewModel
 import uns.sakku.core.LocalBackStack
 import uns.sakku.core.Routes
 import uns.sakku.ui.theme.FinanceAppTheme
-import uns.sakku.feature.pocket.data.PocketBudget
-import uns.sakku.feature.pocket.presentation.components.PocketCard
+import UNS.sakku.feature.allocation.data.PocketBudget
+import UNS.sakku.feature.allocation.presentation.components.PocketCard
 import uns.sakku.ui.theme.ThemeMode
 // UI Layer: Stateful Composable
 @Composable
-fun PocketsScreen(viewModel: PocketSavingViewModel = koinViewModel()) {
+fun PocketsScreen(viewModel: AllocationViewModel = koinViewModel()) {
     val backStack = LocalBackStack.current
 
     // Observe data pockets dari ViewModel
@@ -35,7 +35,7 @@ fun PocketsScreen(viewModel: PocketSavingViewModel = koinViewModel()) {
     HalamanPockets(
         pockets = pockets,
         onNavigateBack = { backStack.removeLastOrNull() },
-        onNavigateToAdd = { backStack.add(Routes.AddPocketSavingRoute(initialIsTabungan = false)) }
+        onNavigateToAdd = { backStack.add(Routes.AddAllocationRoute(initialIsTabungan = false)) }
     )
 }
 

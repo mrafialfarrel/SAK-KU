@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import uns.sakku.feature.transaction.data.TransactionRepository // Import Transaction Repo
-import uns.sakku.feature.pocket.data.PocketSavingRepository // Import Pocket Repo
+import UNS.sakku.feature.allocation.data.AllocationRepository // Import Pocket Repo
 import uns.sakku.feature.transaction.data.TransactionItem
 
 data class TransactionUiState(
@@ -22,7 +22,7 @@ data class TransactionUiState(
 
 class TransactionViewModel(
     private val transactionRepository: TransactionRepository,
-    private val pocketSavingRepository: PocketSavingRepository
+    private val allocationRepository: AllocationRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(TransactionUiState())
@@ -38,7 +38,7 @@ class TransactionViewModel(
 
         // Amati perubahan data Alokasi (Kantong & Tabungan)
         viewModelScope.launch {
-            pocketSavingRepository.allocations.collect { allocations ->
+            allocationRepository.allocations.collect { allocations ->
                 val tabunganNames = allocations.filter { it.isTabungan }.map { it.nama }
                 val kantongNames = allocations.filter { !it.isTabungan }.map { it.nama }
 

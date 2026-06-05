@@ -1,4 +1,4 @@
-package uns.sakku.feature.pocket.data.local
+package UNS.sakku.feature.allocation.data.local
 
 import androidx.room.Dao
 import androidx.room.Delete

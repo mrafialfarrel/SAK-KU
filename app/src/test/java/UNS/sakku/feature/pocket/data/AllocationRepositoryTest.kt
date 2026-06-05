@@ -1,5 +1,7 @@
 package uns.sakku.feature.pocket.data
 
+import UNS.sakku.feature.allocation.data.AllocationItem
+import UNS.sakku.feature.allocation.data.AllocationRepository
 import app.cash.turbine.test
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -7,26 +9,26 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
-class PocketSavingRepositoryTest {
+class AllocationRepositoryTest {
 
     @Before
     fun setUp() {
         // Bersihkan data inisial sebelum setiap tes
-        val currentData = PocketSavingRepository.allocations.value
+        val currentData = AllocationRepository.allocations.value
         currentData.forEach {
-            PocketSavingRepository.deleteAllocation(it)
+            AllocationRepository.deleteAllocation(it)
         }
     }
 
     @Test
     fun `addAllocation berhasil menambah data ke list`() = runTest {
-        PocketSavingRepository.allocations.test {
+        AllocationRepository.allocations.test {
             awaitItem() // Skip state kosong/awal
 
             val newItem = AllocationItem("99", "Beli Mobil", 50000000.0, true)
 
             // Aksi
-            PocketSavingRepository.addAllocation(newItem)
+            AllocationRepository.addAllocation(newItem)
 
             // Validasi
             val stateBaru = awaitItem()
@@ -41,14 +43,14 @@ class PocketSavingRepositoryTest {
     fun `updateAllocation berhasil mengubah limit atau nominal`() = runTest {
         // Persiapan
         val itemAwal = AllocationItem("1", "Jajan", 100000.0, false)
-        PocketSavingRepository.addAllocation(itemAwal)
+        AllocationRepository.addAllocation(itemAwal)
 
-        PocketSavingRepository.allocations.test {
+        AllocationRepository.allocations.test {
             awaitItem()
 
             // Aksi: Update nominal menjadi 150000
             val itemUpdate = itemAwal.copy(nominal = 150000.0)
-            PocketSavingRepository.updateAllocation(itemUpdate)
+            AllocationRepository.updateAllocation(itemUpdate)
 
             // Validasi
             val stateSetelahUpdate = awaitItem()
@@ -62,13 +64,13 @@ class PocketSavingRepositoryTest {
     @Test
     fun `deleteAllocation menghapus item dari list`() = runTest {
         val item = AllocationItem("1", "Jajan", 100000.0, false)
-        PocketSavingRepository.addAllocation(item)
+        AllocationRepository.addAllocation(item)
 
-        PocketSavingRepository.allocations.test {
+        AllocationRepository.allocations.test {
             awaitItem()
 
             // Aksi
-            PocketSavingRepository.deleteAllocation(item)
+            AllocationRepository.deleteAllocation(item)
 
             // Validasi
             val stateSetelahDihapus = awaitItem()
