@@ -13,7 +13,7 @@ ksp {
 }
 
 android {
-    namespace = "UNS.sakku"
+    namespace = "uns.sakku"
     compileSdk {
         version = release(36) {
             minorApiLevel = 1
@@ -87,6 +87,10 @@ dependencies {
 
     // Turbine: Library ringan dari CashApp untuk menguji StateFlow/SharedFlow dengan sangat mudah
     testImplementation(libs.turbine)
+//    Test AuthRepository
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.core)
+
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
