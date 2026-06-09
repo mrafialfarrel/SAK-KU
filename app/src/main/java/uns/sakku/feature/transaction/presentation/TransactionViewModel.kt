@@ -3,12 +3,15 @@ package uns.sakku.feature.transaction.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import uns.sakku.feature.transaction.data.TransactionRepository // Import Transaction Repo
 import uns.sakku.feature.allocation.data.AllocationRepository // Import Pocket Repo
+import uns.sakku.feature.auth.data.AuthRepository
 import uns.sakku.feature.transaction.data.TransactionItem
 
 data class TransactionUiState(
@@ -22,9 +25,15 @@ data class TransactionUiState(
 
 class TransactionViewModel(
     private val transactionRepository: TransactionRepository,
-    private val allocationRepository: AllocationRepository
+    private val allocationRepository: AllocationRepository,
+    private val authRepository: AuthRepository
 ) : ViewModel() {
 
+    val isLoggedIn: StateFlow<Boolean> = authRepository.isLoggedInFlow.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = false
+    )
     private val _uiState = MutableStateFlow(TransactionUiState())
     val uiState: StateFlow<TransactionUiState> = _uiState.asStateFlow()
 

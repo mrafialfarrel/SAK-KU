@@ -4,18 +4,21 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import uns.sakku.ui.theme.FinanceAppTheme
-import uns.sakku.ui.theme.ThemeMode
 
 /**
  * Stateless Composable: Form input UI yang buta terhadap logika validasi.
@@ -32,6 +35,8 @@ fun HalamanAuth(
     var namaLengkap by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    // State untuk mengatur visibilitas password
+    var passwordVisible by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -82,10 +87,26 @@ fun HalamanAuth(
             value = password,
             onValueChange = { password = it },
             label = { Text("Password") },
-            visualTransformation = PasswordVisualTransformation(),
+            // Mengubah visual transformation berdasarkan state passwordVisible
+            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
-            singleLine = true
+            singleLine = true,
+            // Menambahkan ikon mata di bagian akhir text field
+            trailingIcon = {
+                val image = if (passwordVisible) {
+                    Icons.Filled.Visibility
+                } else {
+                    Icons.Filled.VisibilityOff
+                }
+
+                val description = if (passwordVisible) "Sembunyikan password" else "Tampilkan password"
+
+                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                    Icon(imageVector = image, contentDescription = description)
+                }
+            }
         )
         Spacer(modifier = Modifier.height(32.dp))
 
@@ -99,7 +120,9 @@ fun HalamanAuth(
                     onRegisterClick(namaLengkap, email, password)
                 }
             },
-            modifier = Modifier.fillMaxWidth().height(50.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp),
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
             shape = RoundedCornerShape(25.dp)
         ) {
@@ -132,38 +155,5 @@ fun HalamanAuth(
                 }
             )
         }
-    }
-}
-
-// --- PREVIEW ---
-@Preview(showBackground = true, name = "Light Mode - Login")
-@Composable
-fun PreviewAuthScreenLight() {
-    FinanceAppTheme(ThemeMode.LIGHT) {
-        HalamanAuth(onLoginClick = { _, _ -> }, onRegisterClick = { _, _, _ -> })
-    }
-}
-
-@Preview(showBackground = true, name = "Dark Mode - Login")
-@Composable
-fun PreviewAuthScreenDark() {
-    FinanceAppTheme(ThemeMode.DARK) {
-        HalamanAuth(onLoginClick = { _, _ -> }, onRegisterClick = { _, _, _ -> })
-    }
-}
-
-@Preview(showBackground = true, name = "Light Mode - Register")
-@Composable
-fun PreviewAuthScreenRegisterLight() {
-    FinanceAppTheme(ThemeMode.LIGHT) {
-        HalamanAuth(composeIsLoginMode = false, onLoginClick = { _, _ -> }, onRegisterClick = { _, _, _ -> })
-    }
-}
-
-@Preview(showBackground = true, name = "Dark Mode - Register")
-@Composable
-fun PreviewAuthScreenRegisterDark() {
-    FinanceAppTheme(ThemeMode.DARK) {
-        HalamanAuth(composeIsLoginMode = false, onLoginClick = { _, _ -> }, onRegisterClick = { _, _, _ -> })
     }
 }

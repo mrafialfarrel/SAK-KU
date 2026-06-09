@@ -40,7 +40,7 @@ fun AuthScreen(
 
     HalamanAuth(
         onLoginClick = viewModel::login,
-        onRegisterClick = viewModel::register
+        onRegisterClick = viewModel::register,
     )
 }
 // --- PREVIEW ---
@@ -48,7 +48,10 @@ fun AuthScreen(
 @Composable
 fun PreviewAuthScreenLight() {
     FinanceAppTheme(ThemeMode.LIGHT) {
-        HalamanAuth(onLoginClick = { _, _ -> }, onRegisterClick = { _, _, _ -> })
+        HalamanAuth(
+            onLoginClick = { _, _ -> }, onRegisterClick = { _, _, _ -> },
+            composeIsLoginMode = true
+        )
     }
 }
 
@@ -56,7 +59,8 @@ fun PreviewAuthScreenLight() {
 @Composable
 fun PreviewAuthScreenDark() {
     FinanceAppTheme(ThemeMode.DARK) {
-        HalamanAuth(onLoginClick = { _, _ -> }, onRegisterClick = { _, _, _ -> })
+        HalamanAuth(onLoginClick = { _, _ -> }, onRegisterClick = { _, _, _ -> },
+            composeIsLoginMode = true)
     }
 }
 
@@ -64,7 +68,8 @@ fun PreviewAuthScreenDark() {
 @Composable
 fun PreviewAuthScreenRegisterLight() {
     FinanceAppTheme(ThemeMode.LIGHT) {
-        HalamanAuth(composeIsLoginMode = false, onLoginClick = { _, _ -> }, onRegisterClick = { _, _, _ -> })
+        HalamanAuth(composeIsLoginMode = false, onLoginClick = { _, _ -> }, onRegisterClick = { _, _, _ -> },
+            )
     }
 }
 
@@ -72,6 +77,7 @@ fun PreviewAuthScreenRegisterLight() {
 @Composable
 fun PreviewAuthScreenRegisterDark() {
     FinanceAppTheme(ThemeMode.DARK) {
-        HalamanAuth(composeIsLoginMode = false, onLoginClick = { _, _ -> }, onRegisterClick = { _, _, _ -> })
+        HalamanAuth(composeIsLoginMode = false, onLoginClick = { _, _ -> }, onRegisterClick = { _, _, _ -> },
+            )
     }
 }

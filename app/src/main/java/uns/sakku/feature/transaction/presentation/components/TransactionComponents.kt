@@ -1,5 +1,6 @@
 package uns.sakku.feature.transaction.presentation.components
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
@@ -25,6 +26,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 
 /**
  * Komponen Card yang dapat di-reuse di berbagai Screen (Dashboard, Transaction, dll).
@@ -106,6 +108,7 @@ fun TransactionCard(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TransactionSheetContent(
+    isLoggedIn: Boolean,
     keterangan: String,
     onKeteranganChange: (String) -> Unit,
     nominal: String,
@@ -121,6 +124,7 @@ fun TransactionSheetContent(
     alokasiLabel: String,
     onSaveClick: () -> Unit,
 ) {
+    val context = LocalContext.current
     // State lokal untuk mengatur buka/tutup dropdown
     var expandedKategori by remember { mutableStateOf(false) }
     var expandedAlokasi by remember { mutableStateOf(false) }
@@ -265,7 +269,17 @@ fun TransactionSheetContent(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Button(
-                onClick = onSaveClick,
+                onClick = {
+                    if (!isLoggedIn) {
+                        Toast.makeText(
+                            context,
+                            "Login untuk menyimpan transaksi",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        return@Button // Batalkan aksi klik
+                    }
+                    onSaveClick() // Lanjutkan aksi asli jika sudah login
+                },
                 modifier = Modifier.weight(1f).height(50.dp),
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)

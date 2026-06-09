@@ -59,8 +59,8 @@ val appModule = module {
     viewModel { AuthViewModel(get()) }
     viewModel { DashboardViewModel(get(), get(), get()) }
     viewModel { NotificationViewModel(get()) }
-    viewModel { ExportViewModel(get()) }
-    viewModel { AllocationViewModel(get(), get(), get()) }
+    viewModel { ExportViewModel(get(), get()) }
+    viewModel { AllocationViewModel(get(), get(), get(),get()) }
     viewModel { ReportViewModel(get()) }
-    viewModel { TransactionViewModel(get(), get()) }
+    viewModel { TransactionViewModel(get(), get(),get()) }
 }

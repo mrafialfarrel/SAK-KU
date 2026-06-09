@@ -8,9 +8,11 @@ import android.graphics.pdf.PdfDocument
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import uns.sakku.feature.transaction.data.TransactionItem
@@ -20,20 +22,28 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import uns.sakku.core.utils.formatRupiah
+import uns.sakku.feature.auth.data.AuthRepository
+import androidx.core.graphics.toColorInt
 
 // --- DATA CLASS UNTUK STATE ---
 data class ExportUiState(
     val formatTerpilih: String = "PDF",
     val opsiFormat: List<String> = listOf("PDF", "CSV"),
     val rentangTerpilih: String = "1 Bulan Terakhir",
-    val opsiRentang: List<String> = listOf("1 Minggu Terakhir", "1 Bulan Terakhir", "3 Bulan Terakhir", "6 Bulan Terakhir", "1 tahun terakhir")
+    val opsiRentang: List<String> = listOf("1 Minggu Terakhir", "1 Bulan Terakhir", "3 Bulan Terakhir", "6 Bulan Terakhir", "1 tahun terakhir"),
 )
 
 // --- VIEWMODEL ---
 class ExportViewModel(
-    private val transactionRepository: TransactionRepository
+    private val transactionRepository: TransactionRepository,
+    private val authRepository: AuthRepository
 ) : ViewModel() {
 
+    val isLoggedIn: StateFlow<Boolean> = authRepository.isLoggedInFlow.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = false
+    )
     // Internal mutable state
     private val _uiState = MutableStateFlow(ExportUiState())
     // Exposed immutable stateflow untuk UI
@@ -154,10 +164,10 @@ private fun getTimeLimit(filter: String, currentTime: Long): Long {
 
             // Beri warna Hijau untuk Pemasukan, Merah untuk Pengeluaran
             if (item.isPemasukan) {
-                paint.color = Color.parseColor("#4CAF50")
+                paint.color = "#4CAF50".toColorInt()
                 canvas.drawText("Pemasukan", 300f, yPosition, paint)
             } else {
-                paint.color = Color.parseColor("#E53935")
+                paint.color = "#E53935".toColorInt()
                 canvas.drawText("Pengeluaran", 300f, yPosition, paint)
             }
 

@@ -37,6 +37,7 @@ fun AddAllocationScreen(
     initialIsTabungan: Boolean = true,
     viewModel: AllocationViewModel = koinViewModel()
 ) {
+    val isLoggedIn by viewModel.isLoggedIn.collectAsState()
     val backStack = LocalBackStack.current
 
     // UI Observe data
@@ -44,6 +45,7 @@ fun AddAllocationScreen(
 
     // Pass data dan handler logic ke Stateless Component
     HalamanAddAllocation(
+        isLoggedIn = isLoggedIn,
         initialIsTabungan = initialIsTabungan,
         allocations = allocations,
         onAddAllocation = { viewModel.addAllocation(it) },
@@ -57,6 +59,7 @@ fun AddAllocationScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HalamanAddAllocation(
+    isLoggedIn: Boolean,
     initialIsTabungan: Boolean = true,
     allocations: List<AllocationItem>,
     onAddAllocation: (AllocationItem) -> Unit,
@@ -175,6 +178,10 @@ fun HalamanAddAllocation(
                     // TOMBOL SIMPAN
                     Button(
                         onClick = {
+                            if (!isLoggedIn) {
+                                Toast.makeText(context, " Login untuk membuat/mengubah Alokasi", Toast.LENGTH_SHORT).show()
+                                return@Button // Batalkan aksi klik, kode di bawahnya tidak akan dieksekusi
+                            }
                             if (nama.isNotBlank() && nominal.isNotBlank()) {
                                 val targetNominal = nominal.toDoubleOrNull() ?: 0.0
 
@@ -347,7 +354,8 @@ fun PreviewAddScreen() {
             onAddAllocation = {},
             onUpdateAllocation = {},
             onDeleteAllocation = {},
-            onNavigateBack = {}
+            onNavigateBack = {},
+            isLoggedIn = true
         )
     }
 }
@@ -360,7 +368,8 @@ fun PreviewAddScreenDark() {
             onAddAllocation = {},
             onUpdateAllocation = {},
             onDeleteAllocation = {},
-            onNavigateBack = {}
+            onNavigateBack = {},
+            isLoggedIn = true
         )
     }
 }

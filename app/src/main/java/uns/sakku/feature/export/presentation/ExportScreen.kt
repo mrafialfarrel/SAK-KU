@@ -18,12 +18,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import org.koin.androidx.compose.koinViewModel
 import uns.sakku.ui.theme.FinanceAppTheme
 import uns.sakku.core.LocalBackStack
 import uns.sakku.ui.theme.ThemeMode
-import androidx.activity.compose.rememberLauncherForActivityResult
 import java.io.OutputStream
 
 // --- STATEFUL COMPOSABLE ---
@@ -31,6 +29,7 @@ import java.io.OutputStream
 fun ExportScreen(
     viewModel: ExportViewModel = koinViewModel()
 ) {
+    val isLoggedIn by viewModel.isLoggedIn.collectAsState()
     val backStack = LocalBackStack.current
     val context = LocalContext.current // Untuk ContentResolver dan Toast
 
@@ -60,6 +59,7 @@ fun ExportScreen(
     // Pass data dan event ke Stateless Child
     HalamanExport(
         uiState = uiState,
+        isLoggedIn = isLoggedIn,
         onNavigateBack = { backStack.removeLastOrNull() },
         onFormatSelected = viewModel::onFormatSelected,
         onRangeSelected = viewModel::onRangeSelected,
@@ -78,12 +78,15 @@ fun ExportScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HalamanExport(
+    isLoggedIn: Boolean,
     uiState: ExportUiState,
     onNavigateBack: () -> Unit,
     onFormatSelected: (String) -> Unit,
     onRangeSelected: (String) -> Unit,
-    onExportClicked: () -> Unit
+    onExportClicked: () -> Unit,
+
 ) {
+    val context = LocalContext.current // Untuk Toast
     Scaffold(
         topBar = {
             TopAppBar(
@@ -201,7 +204,13 @@ fun HalamanExport(
 
             // Tombol Ekspor
             Button(
-                onClick = onExportClicked, // <-- Event Trigger
+                onClick = {
+                    if (!isLoggedIn) {
+                        Toast.makeText(context, "Fitur Ekspor hanya untuk pengguna login", Toast.LENGTH_SHORT).show()
+                        return@Button // Batalkan aksi klik
+                    }
+                    onExportClicked() // Lanjutkan aksi asli jika sudah login
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
@@ -222,6 +231,8 @@ fun HalamanExport(
                     color = MaterialTheme.colorScheme.onPrimary
                 )
             }
+
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
@@ -236,7 +247,8 @@ fun PreviewHalamanExportLight() {
             onNavigateBack = {},
             onFormatSelected = {},
             onRangeSelected = {},
-            onExportClicked = {}
+            onExportClicked = {},
+            isLoggedIn = true
         )
     }
 }
@@ -250,7 +262,8 @@ fun PreviewHalamanExportDark() {
             onNavigateBack = {},
             onFormatSelected = {},
             onRangeSelected = {},
-            onExportClicked = {}
+            onExportClicked = {},
+            isLoggedIn = true
         )
     }
 }

@@ -32,8 +32,10 @@ fun TransactionScreen(
 ) {
     val backStack = LocalBackStack.current
     val uiState by viewModel.uiState.collectAsState()
+    val isLoggedIn by viewModel.isLoggedIn.collectAsState()
 
     HalamanTransaction(
+        isLoggedIn = isLoggedIn,
         transactions = uiState.transactions,
         listKantong = uiState.listKantong,   // Data dikirim dari ViewModel
         listTabungan = uiState.listTabungan, // Data dikirim dari ViewModel
@@ -50,6 +52,7 @@ fun TransactionScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HalamanTransaction(
+    isLoggedIn: Boolean,
     transactions: List<TransactionItem>,
     listKantong: List<String>,
     listTabungan: List<String>,
@@ -116,9 +119,7 @@ fun HalamanTransaction(
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = {
-                    isEditMode = false; editId = null; keterangan = ""; nominal = ""; selectedKategori = ""; selectedAlokasi = null; showBottomSheet = true
-                },
+                onClick = {showBottomSheet = true},
                 containerColor = MaterialTheme.colorScheme.primary
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Tambah Transaksi", tint = MaterialTheme.colorScheme.onPrimary)
@@ -190,6 +191,7 @@ fun HalamanTransaction(
             ) {
                 // Panggil Komponen UI yang sudah diekstrak (Clean Code!)
                 TransactionSheetContent(
+                    isLoggedIn = isLoggedIn,
                     keterangan = keterangan,
                     onKeteranganChange = { keterangan = it },
                     nominal = nominal,
@@ -271,7 +273,7 @@ fun PreviewTransactionScreen() {
             listKantong = listOf("Dompet", "OVO"),
             listTabungan = listOf("Beli PS5"),
             onNavigateBack = {}, onAddTransaction = { _, _, _, _, _ -> }, onUpdateTransaction = { _, _, _, _, _, _ -> }, onDeleteTransaction = {},
-            isLoading = false, errorMessage = null, onClearError = {}
+            isLoading = false, errorMessage = null, onClearError = {}, isLoggedIn = true
         )
     }
 }
@@ -284,7 +286,7 @@ fun PreviewTransactionScreenDark() {
             listKantong = listOf("Dompet", "OVO"),
             listTabungan = listOf("Beli PS5"),
             onNavigateBack = {}, onAddTransaction = { _, _, _, _, _ -> }, onUpdateTransaction = { _, _, _, _, _, _ -> }, onDeleteTransaction = {},
-            isLoading = false, errorMessage = null, onClearError = {}
+            isLoading = false, errorMessage = null, onClearError = {}, isLoggedIn = true
         )
     }
 }
@@ -335,6 +337,7 @@ fun TransactionSheetContentPreview_Add() {
                 currentAlokasiList = listOf("Tabungan Utama", "Investasi"),
                 alokasiLabel = "Pilih Tabungan",
                 onSaveClick = {},
+                isLoggedIn = true
             )
         }
     }
@@ -360,6 +363,7 @@ fun TransactionSheetContentPreview_EditDark() {
                 currentAlokasiList = listOf("Dompet Utama"),
                 alokasiLabel = "Pilih Kantong",
                 onSaveClick = {},
+                isLoggedIn = true
             )
         }
     }

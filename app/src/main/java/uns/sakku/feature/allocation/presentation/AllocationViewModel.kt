@@ -16,15 +16,22 @@ import uns.sakku.feature.allocation.data.AllocationItem
 import uns.sakku.feature.allocation.data.PocketBudget
 import uns.sakku.feature.allocation.data.AllocationRepository
 import uns.sakku.feature.allocation.data.SavingGoal
+import uns.sakku.feature.auth.data.AuthRepository
 import uns.sakku.feature.transaction.data.TransactionRepository
 
 // --- VM LAYER: ViewModel ---
 class AllocationViewModel(
     private val allocationRepository: AllocationRepository,
     private val transactionRepository: TransactionRepository,
-    private val notificationRepository: NotificationRepository
+    private val notificationRepository: NotificationRepository,
+    private val authRepository: AuthRepository
 ) : ViewModel() {
 
+    val isLoggedIn: StateFlow<Boolean> = authRepository.isLoggedInFlow.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = false
+    )
     // --- STATE UNTUK NETWORK ---
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
