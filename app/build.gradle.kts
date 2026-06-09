@@ -91,6 +91,16 @@ dependencies {
     testImplementation(libs.robolectric)
     testImplementation(libs.androidx.core)
 
+    // AndroidX Test Core
+    androidTestImplementation(libs.androidx.junit.v115)
+    androidTestImplementation(libs.androidx.espresso.core.v351)
+
+    // Testing untuk Jetpack Compose
+    androidTestImplementation(libs.androidx.ui.test.junit4)
+    debugImplementation(libs.androidx.ui.test.manifest)
+
+    // Testing untuk Room (Opsional, tapi sangat disarankan jika mengetes DAO)
+    androidTestImplementation(libs.androidx.room.testing)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
