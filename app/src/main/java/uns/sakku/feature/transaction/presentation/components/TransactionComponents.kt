@@ -201,14 +201,14 @@ fun TransactionSheetContent(
             expanded = expandedKategori,
             onExpandedChange = { expandedKategori = !expandedKategori }
         ) {
-                OutlinedTextField(
-                    value = selectedKategori ?: "",
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text(if (isPemasukan) "Kategori Pemasukan" else "Kategori Pengeluaran") },
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedKategori) },
-                    modifier = Modifier.menuAnchor().fillMaxWidth()
-                )
+            OutlinedTextField(
+                value = selectedKategori ?: "",
+                onValueChange = {},
+                readOnly = true,
+                label = { Text(if (isPemasukan) "Kategori Pemasukan" else "Kategori Pengeluaran") },
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedKategori) },
+                modifier = Modifier.menuAnchor().fillMaxWidth()
+            )
             ExposedDropdownMenu(
                 expanded = expandedKategori,
                 onDismissRequest = { expandedKategori = false }
@@ -231,14 +231,14 @@ fun TransactionSheetContent(
             expanded = expandedAlokasi,
             onExpandedChange = { expandedAlokasi = !expandedAlokasi }
         ) {
-                OutlinedTextField(
-                    value = selectedAlokasi ?: "",
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text(alokasiLabel) },
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedAlokasi) },
-                    modifier = Modifier.menuAnchor().fillMaxWidth()
-                )
+            OutlinedTextField(
+                value = selectedAlokasi ?: "",
+                onValueChange = {},
+                readOnly = true,
+                label = { Text(alokasiLabel) },
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedAlokasi) },
+                modifier = Modifier.menuAnchor().fillMaxWidth()
+            )
             ExposedDropdownMenu(
                 expanded = expandedAlokasi,
                 onDismissRequest = { expandedAlokasi = false }
