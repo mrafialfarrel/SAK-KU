@@ -13,6 +13,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import uns.sakku.core.utils.formatRupiah
 import uns.sakku.ui.theme.ExpenseRed
 import uns.sakku.ui.theme.IncomeGreen
 import uns.sakku.feature.allocation.data.SavingGoal
@@ -35,8 +36,7 @@ fun SavingCard(saving: SavingGoal) {
             }
 
             Spacer(modifier = Modifier.height(8.dp))
-
-            Text(text = "Terkumpul: Rp ${saving.currentAmount.toInt()} / Rp ${saving.target.toInt()}", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
+            Text(text = "Terkumpul: ${formatRupiah(saving.currentAmount.toDouble())} / ${formatRupiah(saving.target.toDouble())}", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
 
             Spacer(modifier = Modifier.height(12.dp))
 
@@ -88,8 +88,8 @@ fun PocketCard(pocket: PocketBudget) {
             Spacer(modifier = Modifier.height(8.dp))
 
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text(text = "Terpakai: Rp ${pocket.spentAmount.toInt()}", fontSize = 12.sp, color = textColor, fontWeight = if(isOverBudget) FontWeight.Bold else FontWeight.Normal)
-                Text(text = "Batas: Rp ${pocket.limit.toInt()}", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+                Text(text = "Terpakai: ${formatRupiah(pocket.spentAmount.toDouble())}", fontSize = 12.sp, color = textColor, fontWeight = if(isOverBudget) FontWeight.Bold else FontWeight.Normal)
+                Text(text = "Batas: ${formatRupiah(pocket.limit.toDouble())}", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
             }
 
             Spacer(modifier = Modifier.height(12.dp))

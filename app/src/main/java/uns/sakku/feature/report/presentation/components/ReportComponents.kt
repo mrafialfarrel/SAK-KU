@@ -237,7 +237,7 @@ fun ExpenseCategoryBreakdown(categories: List<ExpenseCategory>) {
 
                     Column(horizontalAlignment = Alignment.End) {
                         Text(
-                            text = "Rp ${category.amount.toInt()}",
+                            text = "${formatRupiah(category.amount.toDouble())}",
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface,
                             fontSize = 14.sp

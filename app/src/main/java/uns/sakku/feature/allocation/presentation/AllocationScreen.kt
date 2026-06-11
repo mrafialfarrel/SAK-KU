@@ -114,118 +114,134 @@ fun HalamanAllocation(
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
         ) {
-            LazyColumn(
+            // PERUBAHAN UTAMA: Gunakan Column biasa, bukan LazyColumn
+            Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background)
-                    .padding(paddingValues),
-                contentPadding = PaddingValues(16.dp)
+                    .padding(paddingValues)
+                    .padding(horizontal = 16.dp) // Padding kiri-kanan untuk seluruh elemen
             ) {
                 // Bagian Header Tabungan
-                item {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "Progres Tabungan",
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp,
-                            color = MaterialTheme.colorScheme.onBackground
-                        )
-                        TextButton(onClick = onNavigateToSavings) {
-                            Text(
-                                text = ">",
-                                color = MaterialTheme.colorScheme.primary,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                    }
+                Spacer(modifier = Modifier.height(16.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Text(
-                        text = "Pantau tujuan pemasukan Anda bulan ini.",
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+                        text = "Progres Tabungan",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp,
+                        color = MaterialTheme.colorScheme.onBackground
                     )
-
-                    OutlinedButton(
-                        onClick = { onNavigateToAddAllocation(true) },
-                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 16.dp),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = "Tambah Tabungan",
-                            modifier = Modifier.size(18.dp)
+                    TextButton(onClick = onNavigateToSavings) {
+                        Text(
+                            text = ">",
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Bold
                         )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(text = "Tambah/Ubah Tabungan")
                     }
                 }
+                Text(
+                    text = "Pantau tujuan pemasukan Anda bulan ini.",
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+                )
+
+                OutlinedButton(
+                    onClick = { onNavigateToAddAllocation(true) },
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 16.dp),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Tambah Tabungan",
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(text = "Tambah/Ubah Tabungan")
+                }
+
 
                 // List Item Tabungan menggunakan data dari ViewModel
-                items(savings) { saving ->
-                    SavingCard(saving = saving)
-                    Spacer(modifier = Modifier.height(12.dp))
-                }
-
-                // Bagian Header Kantong/Pengeluaran
-                item {
-                    Spacer(modifier = Modifier.height(12.dp))
-                    HorizontalDivider(
-                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.2f),
-                        thickness = 1.dp
-                    )
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                if (savings.isEmpty()) {
+                    Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
+                        Text("Belum ada tabungan.", color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f))
+                    }
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.weight(1f), // Ambil 50% sisa ruang vertikal
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        contentPadding = PaddingValues(bottom = 8.dp)
                     ) {
-                        Text(
-                            text = "Batas Pengeluaran (Kantong)",
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp,
-                            color = MaterialTheme.colorScheme.onBackground
-                        )
-                        TextButton(onClick = onNavigateToPockets) {
-                            Text(
-                                text = ">",
-                                color = MaterialTheme.colorScheme.primary,
-                                fontWeight = FontWeight.Bold
-                            )
+                        items(savings) { saving ->
+                            SavingCard(saving = saving)
                         }
                     }
+                }
+//                Pemisah
+                Spacer(modifier = Modifier.height(8.dp))
+                HorizontalDivider(
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.2f),
+                    thickness = 1.dp
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                // Bagian Header Kantong/Pengeluaran
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Text(
-                        text = "Pantau batas pengeluaran kategori Anda bulan ini.",
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+                        text = "Batas Pengeluaran (Kantong)",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp,
+                        color = MaterialTheme.colorScheme.onBackground
                     )
-
-                    OutlinedButton(
-                        onClick = { onNavigateToAddAllocation(false) },
-                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 16.dp),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = "Tambah Tabungan",
-                            modifier = Modifier.size(18.dp)
+                    TextButton(onClick = onNavigateToPockets) {
+                        Text(
+                            text = ">",
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Bold
                         )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(text = "Tambah/Ubah Kantong")
                     }
                 }
+                Text(
+                    text = "Pantau batas pengeluaran kategori Anda bulan ini.",
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+                )
 
-                // List Item Kantong menggunakan data dari ViewModel
-                items(pockets) { pocket ->
-                    PocketCard(pocket = pocket)
-                    Spacer(modifier = Modifier.height(12.dp))
+                OutlinedButton(
+                    onClick = { onNavigateToAddAllocation(false) },
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 16.dp),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Tambah Tabungan",
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(text = "Tambah/Ubah Kantong")
                 }
 
-                item {
-                    Spacer(modifier = Modifier.height(64.dp))
+
+                // List Item Kantong menggunakan data dari ViewModel
+                if (pockets.isEmpty()) {
+                    Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
+                        Text("Belum ada kantong.", color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f))
+                    }
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.weight(1f), // Ambil 50% sisa ruang vertikal lainnya
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        contentPadding = PaddingValues(bottom = 16.dp)
+                    ) {
+                        items(pockets) { pocket ->
+                            PocketCard(pocket = pocket)
+                        }
+                    }
                 }
             }
             // Menampilkan loading spinner jika sedang request ke server
