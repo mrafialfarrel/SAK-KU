@@ -51,6 +51,7 @@ fun DashboardScreen(
 
 
     HalamanDashboard(
+        onGenerateData = viewModel::generateDemoData,
         // PERUBAHAN DI SINI: Gunakan uiState.isLogin, bukan false lagi!
         isLogin = uiState.isLogin,
         uiState = uiState,
@@ -85,7 +86,8 @@ fun HalamanDashboard(
     onThemeSelected: (ThemeMode) -> Unit,
     onNotificationToggled: (Boolean) -> Unit,
     onSettingsDismiss: () -> Unit,
-    onLogoutClick: () -> Unit
+    onLogoutClick: () -> Unit,
+    onGenerateData: () -> Unit
 ) {
 
     if (uiState.showSettingsDialog) {
@@ -158,6 +160,13 @@ fun HalamanDashboard(
                 .padding(paddingValues)
                 .padding(16.dp)
         ) {
+            Button(
+                onClick = onGenerateData,
+                modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+            ) {
+                Text("GENERATE 1000 DATA DEMO")
+            }
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -234,6 +243,7 @@ fun HalamanDashboard(
     }
 }
 
+
 // --- PREVIEW ---
 // Mengisi data preview agar layout transaksi tidak terlihat kosong
 private val dummyUiState = DashboardUiState(
@@ -259,6 +269,7 @@ private val dummyUiState = DashboardUiState(
             2062026)
     )
 )
+
 private val dummyUiStateGuest = DashboardUiState(
     totalSaldo = 0.0,
     totalPemasukan = 0.0,
@@ -283,7 +294,8 @@ fun DashboardPreviewLight() {
             onThemeSelected = { },
             onNotificationToggled = { },
             onSettingsDismiss = { },
-            onLogoutClick = { }
+            onLogoutClick = { },
+            onGenerateData = {}
         )
     }
 }
@@ -303,7 +315,8 @@ fun DashboardPreviewDark() {
             onThemeSelected = { },
             onNotificationToggled = { },
             onSettingsDismiss = { },
-            onLogoutClick = { }
+            onLogoutClick = { },
+            onGenerateData = {}
         )
     }
 }
@@ -323,7 +336,8 @@ fun DashboardPreviewLoginLight() {
             onThemeSelected = { },
             onNotificationToggled = { },
             onSettingsDismiss = { },
-            onLogoutClick = { }
+            onLogoutClick = { },
+            onGenerateData = {}
         )
     }
 }
@@ -343,7 +357,8 @@ fun DashboardPreviewLoginDark() {
             onThemeSelected = { },
             onNotificationToggled = { },
             onSettingsDismiss = { },
-            onLogoutClick = { }
+            onLogoutClick = { },
+            onGenerateData = {}
         )
     }
 }

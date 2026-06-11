@@ -57,7 +57,7 @@ val appModule = module {
     // ViewModel
     // get() membuat Koin mencari repository
     viewModel { AuthViewModel(get()) }
-    viewModel { DashboardViewModel(get(), get(), get()) }
+    viewModel { DashboardViewModel(get(), get(), get(),get()) }
     viewModel { NotificationViewModel(get()) }
     viewModel { ExportViewModel(get(), get()) }
     viewModel { AllocationViewModel(get(), get(), get(),get()) }
