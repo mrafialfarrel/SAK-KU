@@ -52,6 +52,7 @@ fun DashboardScreen(
 
     HalamanDashboard(
         onGenerateData = viewModel::generateDemoData,
+        onDeleteAllData = viewModel::deleteAllDemoData,
         // PERUBAHAN DI SINI: Gunakan uiState.isLogin, bukan false lagi!
         isLogin = uiState.isLogin,
         uiState = uiState,
@@ -87,7 +88,8 @@ fun HalamanDashboard(
     onNotificationToggled: (Boolean) -> Unit,
     onSettingsDismiss: () -> Unit,
     onLogoutClick: () -> Unit,
-    onGenerateData: () -> Unit
+    onGenerateData: () -> Unit,
+    onDeleteAllData: () -> Unit
 ) {
 
     if (uiState.showSettingsDialog) {
@@ -160,12 +162,25 @@ fun HalamanDashboard(
                 .padding(paddingValues)
                 .padding(16.dp)
         ) {
-            Button(
-                onClick = onGenerateData,
+            Row(
                 modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Text("GENERATE 1000 DATA DEMO")
+                Button(
+                    onClick = onGenerateData,
+                    modifier = Modifier.weight(1f).height(48.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                ) {
+                    Text("🔥 GENERATE", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                }
+
+                Button(
+                    onClick = onDeleteAllData,
+                    modifier = Modifier.weight(1f).height(48.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = ExpenseRed) // Gunakan warna merah dari theme Anda
+                ) {
+                    Text("🗑 HAPUS SEMUA", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                }
             }
             Row(
                 modifier = Modifier
@@ -240,171 +255,5 @@ fun HalamanDashboard(
             // Berikan list transaksi dari UI State ke komponen
             RecentTransactionsList(transaksiList = uiState.recentTransactions)
         }
-    }
-}
-
-
-// --- PREVIEW ---
-// Mengisi data preview agar layout transaksi tidak terlihat kosong
-private val dummyUiState = DashboardUiState(
-    totalSaldo = 1500000.0,
-    totalPemasukan = 2500000.0,
-    totalPengeluaran = 1000000.0,
-    recentTransactions = listOf(
-        TransactionItem(
-            "1",
-            "Makan Siang",
-            50000.0,
-            false,
-            "Konsumsi",
-            "Dompet Utama",
-            2062026),
-        TransactionItem(
-            "2",
-            "Gaji",
-            5000000.0,
-            true,
-            "Gaji",
-            "Rekening Bank",
-            2062026)
-    )
-)
-
-private val dummyUiStateGuest = DashboardUiState(
-    totalSaldo = 0.0,
-    totalPemasukan = 0.0,
-    totalPengeluaran = 0.0,
-    recentTransactions = emptyList()
-)
-
-// Jetpack Preview
-
-@Preview(showBackground = true, name = "Light Mode - Guest")
-@Composable
-fun DashboardPreviewLight() {
-    FinanceAppTheme(ThemeMode.LIGHT) {
-        HalamanDashboard(
-            isLogin = false,
-            uiState = dummyUiStateGuest,
-            onNavigateToLogin = { },
-            onNavigateToNotification = { },
-            onNavigateToPocket = { },
-            onNavigateToReport = { },
-            onSettingsClick = { },
-            onThemeSelected = { },
-            onNotificationToggled = { },
-            onSettingsDismiss = { },
-            onLogoutClick = { },
-            onGenerateData = {}
-        )
-    }
-}
-
-@Preview(showBackground = true, name = "Dark Mode - Guest")
-@Composable
-fun DashboardPreviewDark() {
-    FinanceAppTheme(ThemeMode.DARK) {
-        HalamanDashboard(
-            isLogin = false,
-            uiState = dummyUiStateGuest,
-            onNavigateToLogin = { },
-            onNavigateToNotification = { },
-            onNavigateToPocket = { },
-            onNavigateToReport = { },
-            onSettingsClick = { },
-            onThemeSelected = { },
-            onNotificationToggled = { },
-            onSettingsDismiss = { },
-            onLogoutClick = { },
-            onGenerateData = {}
-        )
-    }
-}
-
-@Preview(showBackground = true, name = "Light Mode - Login")
-@Composable
-fun DashboardPreviewLoginLight() {
-    FinanceAppTheme(ThemeMode.LIGHT) {
-        HalamanDashboard(
-            isLogin = true,
-            uiState = dummyUiState,
-            onNavigateToLogin = { },
-            onNavigateToNotification = { },
-            onNavigateToPocket = { },
-            onNavigateToReport = { },
-            onSettingsClick = { },
-            onThemeSelected = { },
-            onNotificationToggled = { },
-            onSettingsDismiss = { },
-            onLogoutClick = { },
-            onGenerateData = {}
-        )
-    }
-}
-
-@Preview(showBackground = true, name = "Dark Mode - Login")
-@Composable
-fun DashboardPreviewLoginDark() {
-    FinanceAppTheme(ThemeMode.DARK) {
-        HalamanDashboard(
-            isLogin = true,
-            uiState = dummyUiState,
-            onNavigateToLogin = { },
-            onNavigateToNotification = { },
-            onNavigateToPocket = { },
-            onNavigateToReport = { },
-            onSettingsClick = { },
-            onThemeSelected = { },
-            onNotificationToggled = { },
-            onSettingsDismiss = { },
-            onLogoutClick = { },
-            onGenerateData = {}
-        )
-    }
-}
-
-@Preview(showBackground = true, name = "Settings Dialog Preview")
-@Composable
-fun SettingsDialogPreview() {
-    FinanceAppTheme {
-        SettingsDialog(
-            selectedTheme = ThemeMode.LIGHT,
-            isNotificationEnabled = true,
-            onThemeSelected = {},
-            onNotificationToggled = {},
-            onDismiss = {}
-        )
-    }
-}
-@Preview(showBackground = true, name = "Settings Dialog Preview")
-@Composable
-fun SettingsDialogPreviewDark() {
-    FinanceAppTheme(ThemeMode.DARK) {
-        SettingsDialog(
-            selectedTheme = ThemeMode.DARK,
-            isNotificationEnabled = true,
-            onThemeSelected = {},
-            onNotificationToggled = {},
-            onDismiss = {}
-        )
-    }
-}
-
-@Preview(showBackground = true, name = "Tanpa Aksi (Dashboard)")
-@Composable
-fun TransactionCardPreview_Normal() {
-    FinanceAppTheme {
-        TransactionCard(
-            transaction = TransactionItem(
-                id = "1",
-                keterangan = "Makan Siang",
-                nominal = 50000.0,
-                isPemasukan = false,
-                kategori = "Konsumsi",
-                alokasiId = "Dompet Utama",
-                tanggal = System.currentTimeMillis()
-            ),
-            showActions = false
-        )
     }
 }

@@ -122,7 +122,7 @@ class DashboardViewModel(
                 val id = UUID.randomUUID().toString() // UUID tetap dipakai sebagai primary key internal jika diperlukan
                 val isTabungan = i % 2 == 0
                 val nama = if (isTabungan) "Tabungan Demo $i" else "Kantong Demo $i"
-                val target = Random.nextDouble(500000.0, 10000000.0)
+                val target = (Random.nextLong(500, 10001) * 1000).toDouble()
 
                 val alokasi = AllocationItem(id, nama, target, isTabungan)
                 allocationRepository.addAllocation(alokasi)
@@ -131,19 +131,21 @@ class DashboardViewModel(
                 listNamaAlokasi.add(nama)
             }
 
-            // 2. Buat 1000 Transaksi secara acak (Mundur hingga 6 bulan terakhir)
+            // 2. Buat 1000 Transaksi secara acak (Mundur hingga setahun terakhir)
             val satuHariMs = 172800000L
             val waktuSekarang = System.currentTimeMillis()
 
             for (i in 1..1000) {
                 val id = UUID.randomUUID().toString()
-                val isPemasukan = Random.nextFloat() > 0.8f // 20% probabilitas pemasukan
+                val isPemasukan = Random.nextFloat() > 0.90f // 10% probabilitas pemasukan
 
                 val keterangan = if (isPemasukan) "Pendapatan Demo $i" else "Pengeluaran Demo $i"
                 val nominal = if (isPemasukan) {
-                    Random.nextDouble(1000000.0, 2000000.0) // Nominal pemasukan lebih besar
+                    // Pemasukan 50 Ribu - 2 Juta
+                    (Random.nextLong(50, 3001) * 1000).toDouble()
                 } else {
-                    Random.nextDouble(15000.0, 500000.0)   // Nominal pengeluaran lebih kecil
+                    // Pengeluaran 15 Ribu - 500 Ribu
+                    (Random.nextLong(15, 301) * 1000).toDouble()
                 }
 
                 // Pilih kategori secara acak sesuai dengan tipe transaksi
@@ -171,6 +173,13 @@ class DashboardViewModel(
                 )
                 transactionRepository.addTransaction(transaksi)
             }
+        }
+    }
+    fun deleteAllDemoData() {
+        viewModelScope.launch(Dispatchers.IO) {
+            // Urutan disarankan: Hapus transaksi dulu, baru kantong/tabungannya
+            transactionRepository.deleteAllTransactions()
+            allocationRepository.deleteAllAllocations()
         }
     }
 }

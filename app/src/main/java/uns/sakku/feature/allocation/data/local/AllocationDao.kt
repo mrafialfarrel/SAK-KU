@@ -22,4 +22,6 @@ interface AllocationDao {
 
     @Delete
     suspend fun deleteAllocation(allocation: AllocationEntity): Int
+    @Query("DELETE FROM allocations")
+    suspend fun deleteAllAllocations()
 }

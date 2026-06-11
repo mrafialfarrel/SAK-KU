@@ -107,4 +107,7 @@ class AllocationRepository(
             Log.e("AllocationRepo", "Gagal mengirim DELETE alokasi: ${e.message}")
         }
     }
+    suspend fun deleteAllAllocations() {
+        allocationDao.deleteAllAllocations()
+    }
 }

@@ -141,4 +141,7 @@ class TransactionRepository (
             Log.e("TransactionRepo", "Gagal mengirim DELETE ke server: ${e.message}")
         }
     }
+    suspend fun deleteAllTransactions() {
+        transactionDao.deleteAllTransactions()
+    }
 }
