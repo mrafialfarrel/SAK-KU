@@ -70,13 +70,12 @@ class ReportViewModelTest {
             TransactionItem("5", "Bonus", 1000000.0, true, "Gaji", "Bank", currentTime)
         )
 
+
         // Pancarkan data ke repository tiruan
         fakeTransactions.value = mockTransactions
 
         // Validasi perhitungan di ViewModel
         viewModel.uiState.test {
-            awaitItem() // Skip inisialisasi awal
-
             // Ambil state hasil kalkulasi
             val state = awaitItem()
 

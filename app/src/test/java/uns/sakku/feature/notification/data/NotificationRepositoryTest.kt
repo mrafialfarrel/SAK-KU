@@ -7,6 +7,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -63,7 +64,8 @@ class NotificationRepositoryTest {
             )
         )
         // Saat repository membaca dari database, keluarkan data dummy di atas
-        every { mockDao.getAllNotifications() } returns flowOf(dummyEntities)
+        every { mockDao.getAllNotifications() } returns MutableStateFlow(dummyEntities)
+        repository = NotificationRepository(mockDao, context, mockSettingsRepo, mockApi)
 
         // Validasi menggunakan Turbine
         repository.notifications.test {
@@ -75,7 +77,7 @@ class NotificationRepositoryTest {
             assertEquals(NotificationType.WARNING, items[0].type) // Harus kembali jadi Enum
             assertEquals(false, items[0].isRead)
 
-            awaitComplete()
+            cancelAndIgnoreRemainingEvents()
         }
     }
 

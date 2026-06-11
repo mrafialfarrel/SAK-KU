@@ -1,11 +1,10 @@
 package uns.sakku.feature.transaction.data
 
 import app.cash.turbine.test
-import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -36,8 +35,9 @@ class TransactionRepositoryTest {
             TransactionEntity("2", "Gaji", 5000000.0, true, "Gaji", "Bank", 1680000000000L)
         )
         // Saat repository meminta data dari DAO, kembalikan flow dummy ini
-        every { mockDao.getAllTransactions() } returns flowOf(mockEntities)
+        every { mockDao.getAllTransactions() } returns MutableStateFlow(mockEntities)
 
+        repository = TransactionRepository(mockDao, mockApi)
         // Aksi & Validasi menggunakan Turbine
         repository.transaction.test {
             val items = awaitItem()
@@ -53,7 +53,7 @@ class TransactionRepositoryTest {
             assertEquals("Dompet", items[0].alokasiId)
             assertEquals(1680000000000L, items[0].tanggal)
 
-            awaitComplete()
+            cancelAndIgnoreRemainingEvents()
         }
     }
 

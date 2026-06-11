@@ -119,7 +119,7 @@ fun HalamanTransaction(
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = {showBottomSheet = true},
+                onClick = {showBottomSheet = true; keterangan = ""; nominal = ""; selectedAlokasi= ""; selectedKategori = ""  },
                 containerColor = MaterialTheme.colorScheme.primary
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Tambah Transaksi", tint = MaterialTheme.colorScheme.onPrimary)

@@ -27,7 +27,8 @@ class ExportScreenTest {
                 onNavigateBack = {},
                 onFormatSelected = {},
                 onRangeSelected = {},
-                onExportClicked = {}
+                onExportClicked = {},
+                isLoggedIn = true
             )
         }
 
@@ -53,7 +54,8 @@ class ExportScreenTest {
                 onNavigateBack = {},
                 onFormatSelected = { formatTerpilih = it }, // Tangkap hasil klik
                 onRangeSelected = {},
-                onExportClicked = {}
+                onExportClicked = {},
+                isLoggedIn = true
             )
         }
 
@@ -74,7 +76,8 @@ class ExportScreenTest {
                 onNavigateBack = {},
                 onFormatSelected = {},
                 onRangeSelected = { rentangTerpilih = it }, // Tangkap hasil klik
-                onExportClicked = {}
+                onExportClicked = {},
+                isLoggedIn = true
             )
         }
 
@@ -95,7 +98,8 @@ class ExportScreenTest {
                 onNavigateBack = {},
                 onFormatSelected = {},
                 onRangeSelected = {},
-                onExportClicked = { isExportClicked = true } // Tandai jika diklik
+                onExportClicked = { isExportClicked = true }, // Tandai jika diklik,
+                isLoggedIn = true
             )
         }
 

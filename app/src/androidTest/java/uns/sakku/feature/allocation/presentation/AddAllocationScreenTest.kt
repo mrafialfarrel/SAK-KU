@@ -2,6 +2,7 @@ package uns.sakku.feature.allocation.presentation
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
@@ -28,7 +29,8 @@ class AddAllocationScreenTest {
                 onAddAllocation = {},
                 onUpdateAllocation = {},
                 onDeleteAllocation = {},
-                onNavigateBack = {}
+                onNavigateBack = {},
+                isLoggedIn = true
             )
         }
 
@@ -53,7 +55,8 @@ class AddAllocationScreenTest {
                 },
                 onUpdateAllocation = {},
                 onDeleteAllocation = {},
-                onNavigateBack = {}
+                onNavigateBack = {},
+                isLoggedIn = true
             )
         }
 
@@ -88,7 +91,8 @@ class AddAllocationScreenTest {
                 onAddAllocation = {},
                 onUpdateAllocation = {},
                 onDeleteAllocation = {},
-                onNavigateBack = {}
+                onNavigateBack = {},
+                isLoggedIn = true
             )
         }
 
@@ -96,7 +100,7 @@ class AddAllocationScreenTest {
         composeTestRule.onNodeWithText("Dana Darurat").assertIsDisplayed()
 
         // Klik tombol Hapus (berdasarkan ikon/Content Description "Hapus" yang Anda buat)
-        composeTestRule.onNodeWithText("Hapus", useUnmergedTree = true).performClick()
+        composeTestRule.onNodeWithContentDescription("Hapus").performClick()
 
         // Validasi: Dialog konfirmasi penghapusan harus muncul
         composeTestRule.onNodeWithText("Konfirmasi Hapus").assertIsDisplayed()

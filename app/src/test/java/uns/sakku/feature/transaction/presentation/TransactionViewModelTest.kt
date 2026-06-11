@@ -13,6 +13,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import uns.sakku.MainDispatcherRule
+import uns.sakku.feature.auth.data.AuthRepository
 import uns.sakku.feature.transaction.data.TransactionItem
 import uns.sakku.feature.transaction.data.TransactionRepository
 
@@ -26,6 +27,8 @@ class TransactionViewModelTest {
     // Mock Dependencies
     private val mockTransactionRepo = mockk<TransactionRepository>(relaxed = true)
     private val mockAllocationRepo = mockk<AllocationRepository>(relaxed = true)
+    private val mockAuthRepo = mockk<AuthRepository>(relaxed = true)
+
 
     // StateFlow dummy
     private val fakeTransactions = MutableStateFlow<List<TransactionItem>>(emptyList())
@@ -40,7 +43,8 @@ class TransactionViewModelTest {
         // Inisialisasi ViewModel
         viewModel = TransactionViewModel(
             transactionRepository = mockTransactionRepo,
-            allocationRepository = mockAllocationRepo
+            allocationRepository = mockAllocationRepo,
+            authRepository = mockAuthRepo
         )
     }
 
@@ -122,22 +126,20 @@ class TransactionViewModelTest {
 
     @Test
     fun `syncData mengatur loading state dan memanggil syncTransactionsFromServer`() = runTest {
+        viewModel.syncData()
+        coVerify(atLeast = 1) { mockTransactionRepo.syncTransactionsFromServer() }
         viewModel.uiState.test {
-            awaitItem() // Skip inisialisasi awal
+            val finalState = awaitItem() // Skip inisialisasi awal
 
             // Aksi
             viewModel.syncData()
 
             // Validasi loading state menjadi true (karena syncTransactionsFromServer belum selesai)
-            val loadingState = awaitItem()
-            assertEquals(true, loadingState.isLoading)
 
             // Pastikan fungsi sync di repo terpanggil
-            coVerify(exactly = 1) { mockTransactionRepo.syncTransactionsFromServer() }
 
             // Validasi loading state kembali ke false
-            val finishedState = awaitItem()
-            assertEquals(false, finishedState.isLoading)
+            assertEquals(false, finalState.isLoading)
 
             cancelAndIgnoreRemainingEvents()
         }

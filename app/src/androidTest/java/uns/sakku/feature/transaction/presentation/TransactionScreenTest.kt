@@ -5,7 +5,6 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -34,7 +33,8 @@ class TransactionScreenTest {
                 onNavigateBack = {},
                 onAddTransaction = { _, _, _, _, _ -> },
                 onUpdateTransaction = { _, _, _, _, _, _ -> },
-                onDeleteTransaction = {}
+                onDeleteTransaction = {},
+                isLoggedIn = true
             )
         }
 
@@ -70,7 +70,8 @@ class TransactionScreenTest {
                 onNavigateBack = {},
                 onAddTransaction = { _, _, _, _, _ -> },
                 onUpdateTransaction = { _, _, _, _, _, _ -> },
-                onDeleteTransaction = {}
+                onDeleteTransaction = {},
+                isLoggedIn = true
             )
         }
 
@@ -100,7 +101,8 @@ class TransactionScreenTest {
                 currentKategoriList = listOf("Elektronik"),
                 currentAlokasiList = listOf("Tabungan Barang"),
                 alokasiLabel = "Pilih Kantong",
-                onSaveClick = { isSaved = true } // Tandai jika diklik
+                onSaveClick = { isSaved = true }, // Tandai jika diklik
+                isLoggedIn = true
             )
         }
 
@@ -131,7 +133,8 @@ class TransactionScreenTest {
                 currentKategoriList = listOf("Elektronik"),
                 currentAlokasiList = listOf("Tabungan Barang"),
                 alokasiLabel = "Pilih Kantong",
-                onSaveClick = { isSaved = true }
+                onSaveClick = { isSaved = true },
+                isLoggedIn = true
             )
         }
 
@@ -163,7 +166,8 @@ class TransactionScreenTest {
                 onNavigateBack = {},
                 onAddTransaction = { _, _, _, _, _ -> callbackCalled = true },
                 onUpdateTransaction = { _, _, _, _, _, _ -> },
-                onDeleteTransaction = {}
+                onDeleteTransaction = {},
+                isLoggedIn = true
             )
         }
 

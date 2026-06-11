@@ -12,6 +12,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import uns.sakku.MainDispatcherRule
+import uns.sakku.feature.auth.data.AuthRepository
 import uns.sakku.feature.transaction.data.TransactionItem
 import uns.sakku.feature.transaction.data.TransactionRepository
 import java.io.ByteArrayOutputStream
@@ -24,13 +25,15 @@ class ExportViewModelTest {
 
     // Mock Repository
     private val mockTransactionRepo = mockk<TransactionRepository>(relaxed = true)
+    private val mockAuthRepo = mockk<AuthRepository>(relaxed = true)
+
 
     private lateinit var viewModel: ExportViewModel
 
     @Before
     fun setUp() {
         // Inisialisasi ViewModel dengan memasukkan (inject) mock repository
-        viewModel = ExportViewModel(transactionRepository = mockTransactionRepo)
+        viewModel = ExportViewModel(transactionRepository = mockTransactionRepo, authRepository = mockAuthRepo)
     }
 
     @Test

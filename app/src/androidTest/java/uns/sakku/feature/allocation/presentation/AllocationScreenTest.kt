@@ -2,6 +2,7 @@ package uns.sakku.feature.allocation.presentation
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -71,7 +72,7 @@ class AllocationScreenTest {
         }
 
         // Karena FloatingActionButton untuk tambah transaksi menggunakan ikon "Tambah"
-        composeTestRule.onNodeWithText("Tambah", useUnmergedTree = true).performClick()
+        composeTestRule.onNodeWithContentDescription("Tambah").performClick()
 
         // Validasi
         assertTrue(isTransactionClicked)

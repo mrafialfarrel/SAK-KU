@@ -8,6 +8,7 @@ import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -42,16 +43,15 @@ class ReportScreenTest {
         composeTestRule.onAllNodesWithText("Belum ada data transaksi").onFirst().assertIsDisplayed()
 
         // Pastikan pesan rincian kategori kosong muncul (ada 2 rincian, kita cek node pertama)
-        composeTestRule.onAllNodesWithText("Belum ada data").onFirst().assertIsDisplayed()
+        composeTestRule.onAllNodesWithText("Belum ada data").onFirst().performScrollTo().assertIsDisplayed()
     }
 
     @Test
     fun tampilanDataMerenderRingkasanDanKategoriDenganBenar() {
-        // Siapkan state dummy dengan data
         val dummyState = ReportUiState(
             selectedFilter = "1 Bulan",
             filters = listOf("1 Minggu", "1 Bulan", "3 Bulan"),
-            incomeChartData = listOf(BarData(1000000f, 2)), // 1 Juta (1M di formatCompactNumber)
+            incomeChartData = listOf(BarData(1000000f, 2)),
             expenseChartData = emptyList(),
             totalIncome = 1000000f,
             totalExpense = 250000f,
@@ -69,15 +69,25 @@ class ReportScreenTest {
         }
 
         // Cek bagian Ringkasan (SummaryAndPercentage)
-        composeTestRule.onNodeWithText("Rp 1000000").assertIsDisplayed() // Total Pemasukan
-        composeTestRule.onNodeWithText("Rp 250000").assertIsDisplayed() // Total Pengeluaran
+        composeTestRule.onAllNodesWithText("Rp 1000000").onFirst()
+            .performScrollTo()
+            .assertIsDisplayed()//pemasukan
+        composeTestRule.onAllNodesWithText("Rp 250000").onFirst()
+            .performScrollTo()
+            .assertIsDisplayed() //pengeluaran
 
         // Cek bagian Rincian Kategori (ExpenseCategoryBreakdown)
-        composeTestRule.onNodeWithText("Makanan").assertIsDisplayed()
-        composeTestRule.onNodeWithText("Gaji").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Makanan")
+            .performScrollTo()
+            .assertIsDisplayed()
+        composeTestRule.onNodeWithText("Gaji")
+            .performScrollTo()
+            .assertIsDisplayed()
 
         // Cek apakah helper function formatCompactNumber bekerja di Chart (1 Juta = 1.0M)
-        composeTestRule.onNodeWithText("1.0M").assertIsDisplayed()
+        composeTestRule.onAllNodesWithText("1.0M").onFirst()
+            .performScrollTo()
+            .assertIsDisplayed()
     }
 
     @Test

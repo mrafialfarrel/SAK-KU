@@ -7,7 +7,7 @@ import app.cash.turbine.test
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -37,7 +37,9 @@ class AllocationRepositoryTest {
             AllocationEntity("2", "Makan", 500000.0, false)
         )
         // Saat repository meminta data dari DAO, kembalikan flow dummy ini
-        every { mockDao.getAllAllocations() } returns flowOf(mockEntities)
+        val fakeDbFlow = MutableStateFlow(mockEntities)
+        every { mockDao.getAllAllocations() } returns fakeDbFlow
+        repository = AllocationRepository(mockDao, mockApi)
 
         // Aksi & Validasi menggunakan Turbine
         repository.allocations.test {
@@ -51,7 +53,7 @@ class AllocationRepositoryTest {
             assertEquals(15000000.0, items[0].targetNominal, 0.0)
             assertEquals(true, items[0].isTabungan)
 
-            awaitComplete()
+            cancelAndIgnoreRemainingEvents()
         }
     }
 

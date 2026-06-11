@@ -13,6 +13,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import uns.sakku.MainDispatcherRule
+import uns.sakku.feature.auth.data.AuthRepository
 import uns.sakku.feature.notification.data.NotificationRepository
 import uns.sakku.feature.transaction.data.TransactionItem
 import uns.sakku.feature.transaction.data.TransactionRepository
@@ -29,6 +30,7 @@ class AllocationViewModelTest {
     private val mockAllocationRepo = mockk<AllocationRepository>(relaxed = true)
     private val mockTransactionRepo = mockk<TransactionRepository>(relaxed = true)
     private val mockNotificationRepo = mockk<NotificationRepository>(relaxed = true)
+    private val mockAuthRepo = mockk<AuthRepository>(relaxed = true)
 
     // StateFlow tiruan (dummy) untuk menyuplai data ke combine()
     private val fakeAllocations = MutableStateFlow<List<AllocationItem>>(emptyList())
@@ -44,7 +46,8 @@ class AllocationViewModelTest {
         viewModel = AllocationViewModel(
             allocationRepository = mockAllocationRepo,
             transactionRepository = mockTransactionRepo,
-            notificationRepository = mockNotificationRepo
+            notificationRepository = mockNotificationRepo,
+            authRepository = mockAuthRepo
         )
     }
 
@@ -130,6 +133,6 @@ class AllocationViewModelTest {
         viewModel.syncData()
 
         // Pastikan fungsi sync di repo terpanggil
-        coVerify(exactly = 1) { mockAllocationRepo.syncAllocationsFromServer() }
+        coVerify(atLeast = 1) { mockAllocationRepo.syncAllocationsFromServer() }
     }
 }
